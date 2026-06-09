@@ -1,0 +1,9 @@
+blank_issues_enabled: false
+
+contact_links:
+  - name: IRC RFC 1459
+    url: https://www.rfc-editor.org/rfc/rfc1459
+    about: Original IRC protocol specification
+  - name: IRC RFC 2812
+    url: https://www.rfc-editor.org/rfc/rfc2812
+    about: Internet Relay Chat — client protocol (updated)
