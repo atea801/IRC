@@ -18,8 +18,10 @@
 
 class server {
     private:
+    std::vector<pollfd> fds;
     std::string port;
     std::string password;
+    int server_fd;
     public:
     server(std::string port, std::string password);
     ~server();
@@ -30,6 +32,9 @@ class server {
     void setPort(const std::string &port);
     void setPassword(const std::string &password);
     int run();
+    int accept_new_client();
+    int create_socket();
+    int client_actions(size_t i);
     const std::string &getPort() const;
     const std::string &getPassword() const;
 };
