@@ -2,7 +2,7 @@
 
 const std::string &message::get_command() const
 {
-  return command;
+    return command;
 }
 
 const std::vector<std::string> &message::get_args() const

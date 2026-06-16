@@ -1,25 +1,21 @@
 #include "server.hpp"
 
-const std::string &
-server::getPort () const
+const std::string &server::getPort() const
 {
-  return this->port;
+    return this->port;
 }
 
-void
-server::setPort (const std::string &port)
+void server::setPort(const std::string &port)
 {
-  this->port = port;
+    this->port = port;
 }
 
-void
-server::setPassword (const std::string &password)
+void server::setPassword(const std::string &password)
 {
-  this->password = password;
+    this->password = password;
 }
 
-const std::string &
-server::getPassword () const
+const std::string &server::getPassword() const
 {
-  return this->password;
+    return this->password;
 }
