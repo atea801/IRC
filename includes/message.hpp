@@ -12,8 +12,8 @@ class message
 
   public:
     void extract_and_clean(Client &c);
-    int parser_cmd(std::string cmd);
-    int parser_arg(std::vector<std::string> args);
+    // int parser_cmd(std::string cmd);
+    // int parser_arg(std::vector<std::string> args);
     void fill_cmd_and_args(size_t pos, std::string data);
     const std::string &get_command() const;
     const std::vector<std::string> &get_args() const;

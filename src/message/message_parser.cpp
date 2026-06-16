@@ -48,8 +48,6 @@ void message::extract_and_clean(Client &c)
     std::string data = c.getBuffer();
     size_t pos = data.find("\r\n");
     bool is_space = (data.find(' ') != std::string::npos);
-    int flag_com = 0;
-    int j = 0;
     if (is_space == true)
         fill_cmd_and_args(pos, data);
     else

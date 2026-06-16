@@ -15,6 +15,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <vector>
+#include "Client.hpp"
+#include "message.hpp"
 
 class server
 {
