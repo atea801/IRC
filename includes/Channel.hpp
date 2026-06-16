@@ -6,7 +6,7 @@
 /*   By: bkaras-g <bkaras-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/16 14:57:26 by bkaras-g          #+#    #+#             */
-/*   Updated: 2026/06/16 15:49:43 by bkaras-g         ###   ########.fr       */
+/*   Updated: 2026/06/16 16:07:37 by bkaras-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ private:
     std::vector<Client *>   _chanOps;
     std::vector<Client *>   _invited;
     std::string             _topic;
-    bool                    _topic_restricted;  // mode +t : only ops can set topic
+    bool                    _topic_restricted;  // mode +t : seuls les chanOps peuvent changer le topic
     bool                    _is_invite_only;    // mode +i
     bool                    _has_a_password;    // mode +k
     std::string             _password;
@@ -44,7 +44,10 @@ public:
     Channel& operator=(const Channel& copy);
 
     // ---------- Getter and Setter Methods ------------
-
+    // certains getter return par valeur et pas par reference car ils 
+    // ne pesent pas lourd donc peuvent etre copies. Quand on return par ref
+    //imperatif de return un const pour eviter que la variable retournee soit
+    //modifiee par des petits hackers en herbe
     const std::string&              getName() const;
     const std::vector<Client *>&    getMembers() const;
     const std::vector<Client *>&    getChanOps() const;
