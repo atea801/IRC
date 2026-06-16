@@ -1,24 +1,28 @@
 #include "../includes/server.hpp"
+#include "../includes/Client.hpp"
 #include "../includes/message.hpp"
 
-server::server (std::string port, std::string password)
-    : port (port), password (password)
+server::server(std::string port, std::string password) : port(port), password(password)
 {
 }
 
-server::~server () {}
-
-server::server (const server &copy) { *this = copy; }
-
-server &
-server::operator= (const server &other)
+server::~server()
 {
-  if (this != &other)
+}
+
+server::server(const server &copy)
+{
+    *this = copy;
+}
+
+server &server::operator=(const server &other)
+{
+    if (this != &other)
     {
-      this->port = other.port;
-      this->password = other.password;
+        this->port = other.port;
+        this->password = other.password;
     }
-  return *this;
+    return *this;
 }
 
 /**
@@ -27,24 +31,23 @@ server::operator= (const server &other)
  * @param port_cstr
  * @return int
  */
-int
-server::check_port (char *port_cstr)
+int server::check_port(char *port_cstr)
 {
-  if (!port_cstr)
-    return -1;
-  std::string port_str = port_cstr;
-  if (port_str.empty () || port_str.size () > 5)
-    return -1;
-  for (long unsigned i = 0; i < port_str.size (); i++)
-    {
-      unsigned char c = port_str[i];
-      if (!std::isdigit (c))
+    if (!port_cstr)
         return -1;
+    std::string port_str = port_cstr;
+    if (port_str.empty() || port_str.size() > 5)
+        return -1;
+    for (long unsigned i = 0; i < port_str.size(); i++)
+    {
+        unsigned char c = port_str[i];
+        if (!std::isdigit(c))
+            return -1;
     }
-  long p = std::strtol (port_str.c_str (), NULL, 10);
-  if (p < 1 || p > 65535)
-    return -1;
-  return 0;
+    long p = std::strtol(port_str.c_str(), NULL, 10);
+    if (p < 1 || p > 65535)
+        return -1;
+    return 0;
 }
 
 /**
@@ -54,16 +57,15 @@ server::check_port (char *port_cstr)
  * @param av
  * @return int (-1 erreur)
  */
-int
-server::init_server (char **av)
+int server::init_server(char **av)
 {
-  if (!av || !av[1] || !av[2])
-    return -1;
-  if (check_port (av[1]) != 0)
-    return -1;
-  setPort (av[1]);
-  setPassword (av[2]);
-  return 0;
+    if (!av || !av[1] || !av[2])
+        return -1;
+    if (check_port(av[1]) != 0)
+        return -1;
+    setPort(av[1]);
+    setPassword(av[2]);
+    return 0;
 }
 
 /**
@@ -73,29 +75,28 @@ server::init_server (char **av)
  * actions a venir
  * @return int (-1 erreur)
  */
-int
-server::create_socket ()
+int server::create_socket()
 {
-  server_fd = socket (AF_INET, SOCK_STREAM, 0);
-  if (server_fd < 0)
-    return (-1);
-  int opt = 1;
-  setsockopt (server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof (opt));
-  sockaddr_in addr;
-  std::memset (&addr, 0, sizeof (addr));
-  addr.sin_family = AF_INET;
-  addr.sin_port = htons (std::atoi (port.c_str ()));
-  addr.sin_addr.s_addr = INADDR_ANY;
-  if (bind (server_fd, (sockaddr *)&addr, sizeof (addr)) < 0)
-    return (-1);
-  if (listen (server_fd, SOMAXCONN) < 0)
-    return (-1);
-  pollfd listen_p;
-  listen_p.fd = server_fd;
-  listen_p.events = POLLIN;
-  listen_p.revents = 0;
-  fds.push_back (listen_p);
-  return 0;
+    server_fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (server_fd < 0)
+        return (-1);
+    int opt = 1;
+    setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+    sockaddr_in addr;
+    std::memset(&addr, 0, sizeof(addr));
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(std::atoi(port.c_str()));
+    addr.sin_addr.s_addr = INADDR_ANY;
+    if (bind(server_fd, (sockaddr *)&addr, sizeof(addr)) < 0)
+        return (-1);
+    if (listen(server_fd, SOMAXCONN) < 0)
+        return (-1);
+    pollfd listen_p;
+    listen_p.fd = server_fd;
+    listen_p.events = POLLIN;
+    listen_p.revents = 0;
+    fds.push_back(listen_p);
+    return 0;
 }
 
 /**
@@ -103,30 +104,43 @@ server::create_socket ()
  * un nouvel utilisateur
  * @return int (-1 erreur)
  */
-int
-server::accept_new_client ()
+int server::accept_new_client()
 {
-  sockaddr_in cli_addr;
-  socklen_t cli_len = sizeof (cli_addr);
-  int client_fd = accept (server_fd, (sockaddr *)&cli_addr, &cli_len);
-  if (client_fd < 0)
-    perror ("accept");
-  else if (fcntl (client_fd, F_SETFL, O_NONBLOCK) < 0)
+    sockaddr_in cli_addr;
+    socklen_t cli_len = sizeof(cli_addr);
+    int client_fd = accept(server_fd, (sockaddr *)&cli_addr, &cli_len);
+    // si value reurn accept < 0 => erreur
+    if (client_fd < 0)
+        perror("accept");
+    // si le retour du flux continu est < 0 => ERREUR
+    else if (fcntl(client_fd, F_SETFL, O_NONBLOCK) < 0)
     {
-      perror ("fctnl");
-      close (client_fd);
-      return (-1);
+        perror("fctnl");
+        close(client_fd);
+        return (-1);
     }
-  else
+    else
     {
-      std::cerr << "New client: " << client_fd << "\n";
-      pollfd client_p;
-      client_p.fd = client_fd;
-      client_p.events = POLLIN;
-      client_p.revents = 0;
-      fds.push_back (client_p);
+        std::cerr << "New client: " << client_fd << "\n";
+        pollfd client_p;
+        client_p.fd = client_fd;
+        client_p.events = POLLIN;
+        client_p.revents = 0;
+        fds.push_back(client_p);
+        Client c(client_p.fd);
+        vec_clients.push_back(c);
     }
-  return (0);
+    return (0);
+}
+
+Client *server::find_client(std::vector<pollfd> fds, size_t i)
+{
+    for (size_t j = 0; j < vec_clients.size(); j++)
+    {
+        if (vec_clients[j].getFdClient() == fds[i].fd)
+            return &vec_clients[j];
+    }
+    return NULL;
 }
 
 /**
@@ -136,33 +150,53 @@ server::accept_new_client ()
  * @param i
  * @return int (-1 erreur)
  */
-int
-server::client_actions (size_t i)
+int server::client_actions(size_t i)
 {
-  char buf[4096];
-  ssize_t n = recv (fds[i].fd, buf, sizeof (buf), 0);
-  message parser;
-  if (n < 0)
+    // 1. recv dépose dans buf temporaire
+    char buf[4096];
+    ssize_t n = recv(fds[i].fd, buf, sizeof(buf), 0);
+    if (n < 0)
     {
-      perror ("recv");
-      return (-1);
+        perror("recv");
+        return (-1);
     }
-  std::string data (buf, n);
-  parser.message_objects(data);
-  if (n == 0)
-    return (1);
-  ssize_t sent = 0;
-  while (sent < n)
+    if (n == 0)
+        return (1);
+    // 2. trouve le bon client par fd
+    Client *c = find_client(fds, i);
+    if (!c)
     {
-      ssize_t ret = send (fds[i].fd, buf + sent, n - sent, 0);
-      if (ret < 0)
+        perror("find client");
+        return (-1);
+    }
+    // 3. ajoute les donnees recues au buffer du client
+    c->setBuffer(c->getBuffer() + std::string(buf, n));
+
+    // 4. boucle clean du buffer
+    message message;
+    while (c->getBuffer().find("\r\n") != std::string::npos)
+    {
+        // a. extraire la premiere commande + nettoyer
+        message.extract_and_clean(*c);
+        // b. on parse la lign extraire en focniton de commande parisng 2
+        message.parser_cmd(message.get_command());
+        message.parser_arg(message.get_args());
+        // c. execute
+    }
+
+    // 5. Reponse su serveur aux clients
+    ssize_t sent = 0;
+    while (sent < n)
+    {
+        ssize_t ret = send(fds[i].fd, buf + sent, n - sent, 0);
+        if (ret < 0)
         {
-          perror ("send");
-          return (-1);
+            perror("send");
+            return (-1);
         }
-      sent += ret;
+        sent += ret;
     }
-  return (0);
+    return (0);
 }
 
 /**
@@ -171,52 +205,51 @@ server::client_actions (size_t i)
  *
  * @return int
  */
-int
-server::run ()
+int server::run()
 {
-  if (create_socket () < 0)
-    return (-1);
-  while (true)
+    if (create_socket() < 0)
+        return (-1);
+    while (true)
     {
-      if (!fds.empty ())
+        if (!fds.empty())
         {
-          int ready = poll (&fds[0], static_cast<int> (fds.size ()), -1);
-          if (fcntl (server_fd, F_SETFL, O_NONBLOCK) < 0)
-            return (-1);
-          if (ready < 0)
+            int ready = poll(&fds[0], static_cast<int>(fds.size()), -1);
+            if (fcntl(server_fd, F_SETFL, O_NONBLOCK) < 0)
+                return (-1);
+            if (ready < 0)
             {
-              perror ("poll");
-              return -1;
+                perror("poll");
+                return -1;
             }
-          for (size_t i = 0; i < fds.size () && ready > 0; i++)
+            for (size_t i = 0; i < fds.size() && ready > 0; i++)
             {
-              if (fds[i].revents == 0)
-                continue;
-              if (fds[i].revents & POLLIN)
+                if (fds[i].revents == 0)
+                    continue;
+                if (fds[i].revents & POLLIN)
                 {
-                  if (fds[i].fd == server_fd)
+                    if (fds[i].fd == server_fd)
                     {
-                      if (accept_new_client () < 0)
-                        return (-1);
-                      continue;
+                        if (accept_new_client() < 0)
+                            return (-1);
+                        continue;
                     }
-                  int status = client_actions (i);
-                  if (status < 0)
-                    return (-1);
-                  if (status > 0)
+                    int status = client_actions(i);
+                    if (status < 0)
+                        return (-1);
+                    if (status > 0)
                     {
-                      close (fds[i].fd);
-                      std::cerr << "Client closed: " << fds[i].fd << "\n";
-                      fds.erase (fds.begin () + i);
-                      --i;
-                      continue;
+                        close(fds[i].fd);
+                        std::cerr << "Client closed: " << fds[i].fd << "\n";
+                        fds.erase(fds.begin() + i);
+                        --i;
+                        continue;
                     }
                 }
-              if (fds[i].revents & (POLLHUP | POLLERR | POLLNVAL))
+                if (fds[i].revents & (POLLHUP | POLLERR | POLLNVAL))
                 {
-                  close (fds[i].fd);
-                  fds.erase (fds.begin () + i);
-                  --i;
+                    close(fds[i].fd);
+                    fds.erase(fds.begin() + i);
+                    --i;
                 }
             }
         }

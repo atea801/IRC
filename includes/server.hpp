@@ -1,28 +1,31 @@
 #pragma once
 
-#include <string>
-#include <sys/types.h>
-#include <iostream>
-#include <cstdlib>
-#include <cctype>
-#include <cstring>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <vector>
-#include <poll.h>
 #include <arpa/inet.h>
+#include <cctype>
 #include <cerrno>
 #include <cstdio>
-#include <unistd.h>
+#include <cstdlib>
+#include <cstring>
 #include <fcntl.h>
+#include <iostream>
+#include <netinet/in.h>
+#include <poll.h>
+#include <string>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <vector>
 
-class server {
-    private:
+class server
+{
+  private:
     std::vector<pollfd> fds;
+    std::vector<Client> vec_clients;
     std::string port;
     std::string password;
     int server_fd;
-    public:
+
+  public:
     server(std::string port, std::string password);
     ~server();
     server(const server &copy);
@@ -35,6 +38,7 @@ class server {
     int accept_new_client();
     int create_socket();
     int client_actions(size_t i);
+    Client *find_client(std::vector<pollfd> fds, size_t i);
     const std::string &getPort() const;
     const std::string &getPassword() const;
 };
