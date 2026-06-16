@@ -1,27 +1,5 @@
-#include "server.hpp"
+#include "Server.hpp"
 
-server::server(std::string port, std::string password) : port(port), password(password)
-{
-}
-
-server::~server()
-{
-}
-
-server::server(const server &copy)
-{
-    *this = copy;
-}
-
-server &server::operator=(const server &other)
-{
-    if (this != &other)
-    {
-        this->port = other.port;
-        this->password = other.password;
-    }
-    return *this;
-}
 
 /**
  * @brief fonction de parsing du format du port
@@ -29,7 +7,7 @@ server &server::operator=(const server &other)
  * @param port_cstr
  * @return int
  */
-int server::check_port(char *port_cstr)
+int Server::check_port(char *port_cstr)
 {
     if (!port_cstr)
         return -1;
@@ -55,7 +33,7 @@ int server::check_port(char *port_cstr)
  * @param av
  * @return int (-1 erreur)
  */
-int server::init_server(char **av)
+int Server::init_server(char **av)
 {
     if (!av || !av[1] || !av[2])
         return -1;
@@ -73,7 +51,7 @@ int server::init_server(char **av)
  * actions a venir
  * @return int (-1 erreur)
  */
-int server::create_socket()
+int Server::create_socket()
 {
     server_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (server_fd < 0)
@@ -102,7 +80,7 @@ int server::create_socket()
  * un nouvel utilisateur
  * @return int (-1 erreur)
  */
-int server::accept_new_client()
+int Server::accept_new_client()
 {
     sockaddr_in cli_addr;
     socklen_t cli_len = sizeof(cli_addr);
@@ -131,7 +109,7 @@ int server::accept_new_client()
     return (0);
 }
 
-Client *server::find_client(std::vector<pollfd> fds, size_t i)
+Client *Server::find_client(std::vector<pollfd> fds, size_t i)
 {
     for (size_t j = 0; j < vec_clients.size(); j++)
     {
@@ -148,7 +126,7 @@ Client *server::find_client(std::vector<pollfd> fds, size_t i)
  * @param i
  * @return int (-1 erreur)
  */
-int server::client_actions(size_t i)
+int Server::client_actions(size_t i)
 {
     // 1. recv dépose dans buf temporaire
     char buf[4096];
@@ -171,7 +149,7 @@ int server::client_actions(size_t i)
     c->setBuffer(c->getBuffer() + std::string(buf, n));
 
     // 4. boucle clean du buffer
-    message message;
+    Message message;
     while (c->getBuffer().find("\r\n") != std::string::npos)
     {
         // a. extraire la premiere commande + nettoyer
@@ -203,7 +181,7 @@ int server::client_actions(size_t i)
  *
  * @return int
  */
-int server::run()
+int Server::run()
 {
     if (create_socket() < 0)
         return (-1);

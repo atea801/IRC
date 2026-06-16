@@ -1,7 +1,7 @@
-#include "message.hpp"
-#include "server.hpp"
+#include "Message.hpp"
 
-void message::fill_cmd_and_args(size_t pos, std::string data)
+
+void Message::fill_cmd_and_args(size_t pos, std::string data)
 {
     int j = 0;
     int flag_com = 0;
@@ -42,7 +42,7 @@ void message::fill_cmd_and_args(size_t pos, std::string data)
  * @param data (buffer remplie par recv)
  * @return int
  */
-void message::extract_and_clean(Client &c)
+void Message::extract_and_clean(Client &c)
 {
     // 1. extraire la premiere commande
     std::string data = c.getBuffer();

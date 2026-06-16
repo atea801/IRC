@@ -1,4 +1,4 @@
-#include "../includes/server.hpp"
+#include "Server.hpp"
 #include <iostream>
 
 int main(int argc, char **argv)
@@ -9,7 +9,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    server srv("", "");
+    Server srv("", "");
     if (srv.init_server(argv) != 0)
     {
         std::cerr << "Invalid arguments: port/password\n";

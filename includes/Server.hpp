@@ -16,9 +16,9 @@
 #include <unistd.h>
 #include <vector>
 #include "Client.hpp"
-#include "message.hpp"
+#include "Message.hpp"
 
-class server
+class Server
 {
   private:
     std::vector<pollfd> fds;
@@ -28,10 +28,10 @@ class server
     int server_fd;
 
   public:
-    server(std::string port, std::string password);
-    ~server();
-    server(const server &copy);
-    server &operator=(const server &other);
+    Server(std::string port, std::string password);
+    ~Server();
+    Server(const Server &copy);
+    Server &operator=(const Server &other);
     int check_port(char *port);
     int init_server(char **av);
     void setPort(const std::string &port);

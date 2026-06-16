@@ -1,4 +1,4 @@
-#include "../includes/Client.hpp"
+#include "Client.hpp"
 
 Client::Client()
     : _fdclient(-1), _nickname(""), _realname(""), _username(""), _hostname(""), _buffer(""), _status(HANDSHAKE)
