@@ -6,7 +6,7 @@
 /*   By: bkaras-g <bkaras-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/16 14:57:26 by bkaras-g          #+#    #+#             */
-/*   Updated: 2026/06/16 15:38:31 by bkaras-g         ###   ########.fr       */
+/*   Updated: 2026/06/16 15:49:03 by bkaras-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,14 @@
 class Channel {
 private:
     // ---------- Private Data members -------------------------
-    std::vector<Client *> _clientsList;
+    std::vector<Client *>   _members;
+    std::vector<Client *>   _chanOps;
+    std::string             _topic;
+    bool                    _is_invite_only;
+    bool                    _has_a_password;
+    std::string             _password;
+    bool                    _has_a_user_limit;
+    size_t                  _user_limit;
 
 public:
     // ---------- Constructors / Destructor ----------
