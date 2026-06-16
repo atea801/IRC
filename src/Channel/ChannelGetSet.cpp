@@ -6,7 +6,7 @@
 /*   By: bkaras-g <bkaras-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/16 16:11:40 by bkaras-g          #+#    #+#             */
-/*   Updated: 2026/06/16 16:18:24 by bkaras-g         ###   ########.fr       */
+/*   Updated: 2026/06/16 18:00:49 by bkaras-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,4 +85,20 @@ void    Channel::setTopicRestricted(bool restricted)
 void    Channel::setInviteOnly(bool inviteOnly)
 {
     this->_is_invite_only = inviteOnly;
+}
+
+/*
+@param password: le password a mettre en place. Il a deja ete 
+parse donc il est conforme aux exigences du protocole IRC
+*/
+void    Channel::setPassword(const std::string& password)
+{
+    this->_has_a_password = true;
+    this->_password = password;
+}
+
+void    Channel::removePassword()
+{
+    this->_has_a_password = false;
+    this->_password = "";
 }
