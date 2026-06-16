@@ -6,7 +6,7 @@
 /*   By: bkaras-g <bkaras-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/16 16:11:40 by bkaras-g          #+#    #+#             */
-/*   Updated: 2026/06/16 18:00:49 by bkaras-g         ###   ########.fr       */
+/*   Updated: 2026/06/16 18:05:19 by bkaras-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,7 +88,7 @@ void    Channel::setInviteOnly(bool inviteOnly)
 }
 
 /*
-@param password: le password a mettre en place. Il a deja ete 
+@param password le password a mettre en place. Il a deja ete 
 parse donc il est conforme aux exigences du protocole IRC
 */
 void    Channel::setPassword(const std::string& password)
@@ -102,3 +102,20 @@ void    Channel::removePassword()
     this->_has_a_password = false;
     this->_password = "";
 }
+
+/*
+@param limit le user limit a mettre en place. Il a deja ete 
+parse donc il est conforme aux exigences du protocole IRC
+*/
+void    Channel::setUserLimit(size_t limit)
+{
+    this->_has_a_user_limit = true;
+    this->_user_limit = limit;
+}
+
+void    Channel::removeUserLimit()
+{
+    this->_has_a_user_limit = false;
+    this->_user_limit = 0;
+}
+
