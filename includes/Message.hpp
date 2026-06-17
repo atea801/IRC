@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Client.hpp"
-#include "irc_errors.hpp"
+#include "irc_error.hpp"
 #include <string>
 #include <vector>
 
@@ -24,5 +24,5 @@ class Message
     void fill_cmd_and_args(size_t pos, std::string data);
     const std::string &get_command() const;
     const std::vector<std::string> &get_args() const;
-	NickError parsing_nick();
+	IrcError parsing_nick();
 };
