@@ -162,7 +162,6 @@ int Server::client_actions(size_t i)
         // a. extraire la premiere commande + nettoyer
         message.extract_and_clean(*c);
         // b. on parse la lign extraire en focniton de commande parisng 2
-        // message.parser_cmd(message.get_command());
         // message.parser_arg(message.get_args());
         // c. execute
     }

@@ -62,23 +62,14 @@ void Message::extract_and_clean(Client &c)
     c.setBuffer(data.substr(pos + 2));
 }
 
-/**
- * @brief parsing de l attribut prive command de la class message
- *
- * @param cmd
- * @return int
- */
-int Message::parser_cmd(std::string cmd)
+int Message::parser_arg()
 {
-    if (cmd == "NICK" || cmd == "QUIT" || cmd == "JOIN" || cmd == "PASS" || cmd == "USER" || cmd == "PART" ||
-        cmd == "TOPIC" || cmd == "MODE" || cmd == "INVITE" || cmd == "KICK" || cmd == "PRIVMSG" || cmd == "PING" ||
-        cmd == "PONG" || cmd == "CAP")
-        return (0);
-    return (-1);
+    
 }
 
 int Message::handle_quit(std::vector<std::string> args)
 {
+
     if (args.size() == 0)
         return (0);
     else if (args.size() == 1 && this->trailing_arg == true)

@@ -18,9 +18,7 @@ class Message
     Message &operator=(const Message &other);
     void clear();
     void extract_and_clean(Client &c);
-    int parser_cmd(std::string cmd);
-    //pas la bonne approche je pense 
-    // int parser_arg(std::vector<std::string> args);
+    int parser_arg();
     int handle_quit(std::vector<std::string> args);
     void fill_cmd_and_args(size_t pos, std::string data);
     const std::string &get_command() const;
