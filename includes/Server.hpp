@@ -40,6 +40,8 @@ class Server
     int accept_new_client();
     int create_socket();
     int client_actions(size_t i);
+    void execute(Message &msg, Client &c);
+    void handle_nick(Message &msg, Client &c);
     Client *find_client(std::vector<pollfd> fds, size_t i);
     const std::string &getPort() const;
     const std::string &getPassword() const;

@@ -72,11 +72,9 @@ int Message::handle_quit(std::vector<std::string> args)
         std::string arg = args[0];
         for (int i = 0; i < arg.size(); i++)
         {
-            
         }
         return (1);
     }
     else
         return (-1);
 }
-
