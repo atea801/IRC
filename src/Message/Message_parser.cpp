@@ -62,11 +62,6 @@ void Message::extract_and_clean(Client &c)
     c.setBuffer(data.substr(pos + 2));
 }
 
-int Message::parser_arg()
-{
-    
-}
-
 int Message::handle_quit(std::vector<std::string> args)
 {
 

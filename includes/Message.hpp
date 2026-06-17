@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Client.hpp"
+#include "irc_errors.hpp"
 #include <string>
 #include <vector>
 
@@ -18,9 +19,10 @@ class Message
     Message &operator=(const Message &other);
     void clear();
     void extract_and_clean(Client &c);
-    int parser_arg();
+    int parser_arg(Client &c);
     int handle_quit(std::vector<std::string> args);
     void fill_cmd_and_args(size_t pos, std::string data);
     const std::string &get_command() const;
     const std::vector<std::string> &get_args() const;
+	NickError parsing_nick();
 };
