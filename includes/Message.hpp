@@ -9,11 +9,19 @@ class Message
   private:
     std::string command;
     std::vector<std::string> args;
+    bool trailing_arg;
 
   public:
+    Message();
+    ~Message();
+    Message(const Message &copy);
+    Message &operator=(const Message &other);
+    void clear();
     void extract_and_clean(Client &c);
-    // int parser_cmd(std::string cmd);
+    int parser_cmd(std::string cmd);
+    //pas la bonne approche je pense 
     // int parser_arg(std::vector<std::string> args);
+    int handle_quit(std::vector<std::string> args);
     void fill_cmd_and_args(size_t pos, std::string data);
     const std::string &get_command() const;
     const std::vector<std::string> &get_args() const;

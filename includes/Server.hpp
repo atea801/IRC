@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Client.hpp"
+#include "Message.hpp"
 #include <arpa/inet.h>
 #include <cctype>
 #include <cerrno>
@@ -15,8 +17,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <vector>
-#include "Client.hpp"
-#include "Message.hpp"
 
 class Server
 {

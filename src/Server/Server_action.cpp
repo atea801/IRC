@@ -1,6 +1,5 @@
 #include "Server.hpp"
 
-
 /**
  * @brief fonction de parsing du format du port
  *
@@ -109,6 +108,14 @@ int Server::accept_new_client()
     return (0);
 }
 
+/**
+ * @brief localise le client auquel appartient le buffer qui s apprete
+ * a etre parser/executer.
+ *
+ * @param fds
+ * @param i
+ * @return Client*
+ */
 Client *Server::find_client(std::vector<pollfd> fds, size_t i)
 {
     for (size_t j = 0; j < vec_clients.size(); j++)
