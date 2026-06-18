@@ -24,6 +24,6 @@ class Message
     void fill_cmd_and_args(size_t pos, std::string data);
     const std::string &get_command() const;
     const std::vector<std::string> &get_args() const;
-	IrcError parsing_nick();
-	IrcError parsing_user();
+    IrcError parsing_nick();
+    IrcError parsing_user();
 };

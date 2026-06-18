@@ -40,7 +40,7 @@ class Client
     const std::string &getHostname() const;
     const std::string &getBuffer() const;
     const e_CLientState &getStatus() const;
-    const bool &getAuthenticated() const ;
+    const bool &getAuthenticated() const;
 
     /*--Setters--*/
     void setNickname(std::string const nickname_input);

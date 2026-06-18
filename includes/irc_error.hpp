@@ -1,13 +1,20 @@
 #pragma once
 
-enum IrcError {
-    IRC_OK                  = 0,
-    ERR_EMPTY               = 431,
-    ERR_INVALID             = 432,
-    ERR_NICK_TAKEN          = 433,
+enum IrcError
+{
+    IRC_OK = 0,
+    ERR_EMPTY = 431,
+    ERR_INVALID = 432,
+    ERR_NICK_TAKEN = 433,
 
-    ERR_NBR_PARAM           = 461,
-    ERR_ALREADYREGISTERED   = 462,
-    ERR_NOTREGISTERED       = 451,
-    ERR_UNKNOWNCOMMAND      = 421,
+    ERR_NBR_PARAM = 461,
+    ERR_ALREADYREGISTERED = 462,
+    ERR_NOTREGISTERED = 451,
+    ERR_UNKNOWNCOMMAND = 421,
+
+    ERR_NICKNAMEINUSE = 433,
+
+    ERR_NEEDMOREPARAMS = 461,
+    ERR_ALREADYREGISTRED = 462,
+    ERR_PASSWDMISMATCH = 464,
 };

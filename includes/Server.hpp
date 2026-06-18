@@ -43,6 +43,7 @@ class Server
     void execute(Message &msg, Client &c);
     void handle_nick(Message &msg, Client &c);
     void handle_user(Message &msg, Client &c);
+    void handle_realname(Message &msg, Client &c);
     void handle_pass(Message &msg, Client &c);
     Client *find_client(std::vector<pollfd> fds, size_t i);
     const std::string &getPort() const;
