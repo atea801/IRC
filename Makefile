@@ -7,6 +7,7 @@ SRCS =	src/main.cpp \
 		src/Message/Message_extract.cpp \
 		src/Message/Message_get_set.cpp \
 		src/Message/Message_parser.cpp \
+		src/Message/Message.cpp \
 		src/Server/Server_get_set.cpp \
 		src/Server/Server_exec.cpp \
 		src/Server/Server_action.cpp \

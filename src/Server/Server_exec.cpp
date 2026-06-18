@@ -12,10 +12,10 @@ void Server::execute(Message &msg, Client &c)
         c.setStatus(REGISTERED);
 }
 
-int Message::handle_quit(std::vector<std::string> args)
-{
+// int Message::handle_quit(std::vector<std::string> args)
+// {
     
-}
+// }
 
 void Server::handle_nick(Message &msg, Client &c)
 {
@@ -24,7 +24,7 @@ void Server::handle_nick(Message &msg, Client &c)
     {
     }
     std::vector<std::string> args = msg.get_args();
-    for (int i = 0; i < vec_clients.size(); i++)
+    for (size_t i = 0; i < vec_clients.size(); i++)
     {
         if (&vec_clients[i] != &c && vec_clients[i].getNickname() == args[0])
         {
