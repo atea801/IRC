@@ -162,7 +162,11 @@ int Server::client_actions(size_t i)
         // a. extraire la premiere commande + nettoyer
         message.extract_and_clean(*c);
 		std::cerr << "Command: " << message.get_command() << std::endl;
-		std::cerr << "Args: " << message.get_args()[0] << std::endl;
+		if (!message.get_args().empty())
+			std::cerr << "Args: " << message.get_args()[0] << std::endl;
+		else
+			std::cerr << "Args: empty" << std::endl;
+
         // b. execute
         this->execute(message, *c);
     }
