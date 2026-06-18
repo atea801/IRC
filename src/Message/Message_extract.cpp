@@ -6,39 +6,49 @@
  * @param pos
  * @param data
  */
+
 void Message::fill_cmd_and_args(size_t pos, std::string data)
 {
-    int j = 0;
-    int flag_com = 0;
-    for (size_t i = 0; i < pos; i++)
+    size_t i = 0;
+    
+    // 1. extraire la commande jusqu'au premier espace
+    size_t space = data.find(' ');
+    if (space == std::string::npos || space >= pos)
     {
-        while (data[i] == ' ')
+        // pas d'espace → que la commande, pas d'args
+        this->command = data.substr(0, pos);
+        return ;
+    }
+    this->command = data.substr(0, space);
+    i = space + 1;
+
+    // 2. extraire les args
+    while (i < pos)
+    {
+        // sauter les espaces
+        while (i < pos && data[i] == ' ')
             i++;
-        if (data[i] == ' ' && flag_com == 0)
+        if (i >= pos)
+            break ;
+        // trailing
+        if (data[i] == ':')
         {
-            flag_com = 1;
-            this->command = data.substr(0, i);
-            j = i + 1;
-        }
-        else if (data[i] == ' ' && flag_com == 1)
-        {
-            std::string arg = data.substr(j, i - j);
-            this->args.push_back(arg);
-            j = i + 1;
-        }
-        else if (data[i] == ':')
-        {
-            std::string arg = data.substr(i + 1, pos - (i + 1));
+            this->args.push_back(data.substr(i + 1, pos - i - 1));
             this->trailing_arg = true;
-            this->args.push_back(arg);
+            break ;
         }
-        else if (i == pos - 1)
+        // arg normal
+        size_t next_space = data.find(' ', i);
+        if (next_space == std::string::npos || next_space >= pos)
         {
-            std::string arg = data.substr(j, i - j + 1);
-            this->args.push_back(arg);
+            this->args.push_back(data.substr(i, pos - i));
+            break ;
         }
+        this->args.push_back(data.substr(i, next_space - i));
+        i = next_space + 1;
     }
 }
+
 
 /**
  * @brief extraction d elements commande et args a partir

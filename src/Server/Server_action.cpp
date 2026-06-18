@@ -161,12 +161,11 @@ int Server::client_actions(size_t i)
     {
         // a. extraire la premiere commande + nettoyer
         message.extract_and_clean(*c);
-        // b. on parse la lign extraire en focniton de commande parisng 2
-        // message.parser_arg(*c);
-        // c. execute
+		std::cerr << "Command: " << message.get_command() << std::endl;
+		std::cerr << "Args: " << message.get_args()[0] << std::endl;
+        // b. execute
         this->execute(message, *c);
     }
-
     // 5. Reponse su serveur aux clients
     ssize_t sent = 0;
     while (sent < n)
