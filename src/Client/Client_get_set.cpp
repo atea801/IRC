@@ -35,19 +35,19 @@ const e_CLientState &Client::getStatus() const
     return this->_status;
 }
 
-const bool &Client::getPass() const
+const bool &Client::getBoolPass() const
 {
-    return this->pass;
+    return this->_bool_pass;
 }
 
-const bool &Client::getnick() const
+const bool &Client::getBoolNick() const
 {
-    return this->nick;
+    return this->_bool_nick;
 }
 
-const bool &Client::getuser() const
+const bool &Client::getBoolUser() const
 {
-    return this->user;
+    return this->_bool_user;
 }
 
 void Client::setNickname(std::string const nickname_input)
@@ -80,17 +80,17 @@ void Client::setStatus(e_CLientState const status_input)
     this->_status = status_input;
 }
 
-void Client::setPass(bool const authenticated)
+void Client::setBoolPass(bool const pass)
 {
-    this->pass = pass;
+    this->_bool_pass = pass;
 }
 
-void Client::setUser(bool const authenticated)
+void Client::setBoolUser(bool const user)
 {
-    this->user = user;
+    this->_bool_user = user;
 }
 
-void Client::setNick(bool const authenticated)
+void Client::setBoolNick(bool const nick)
 {
-    this->nick = nick;
+    this->_bool_nick = nick;
 }
