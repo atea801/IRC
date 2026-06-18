@@ -5,6 +5,7 @@
 #include <arpa/inet.h>
 #include <cctype>
 #include <cerrno>
+#include <sstream>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -45,6 +46,7 @@ class Server
     void handle_user(Message &msg, Client &c);
     void handle_pass(Message &msg, Client &c);
     Client *find_client(std::vector<pollfd> fds, size_t i);
+	void send_reply_error(Client &c, IrcError error, const std::string &message);
     const std::string &getPort() const;
     const std::string &getPassword() const;
 };
