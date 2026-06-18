@@ -44,6 +44,9 @@ build/
 Build/
 build-*/
 
+# VS Code dir
+.vscode
+
 # CMake generated files
 CMakeFiles/
 CMakeCache.txt
