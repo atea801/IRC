@@ -22,6 +22,14 @@ void Server::handle_nick(Message &msg, Client &c)
     IrcError error = msg.parsing_nick();
     if (error != IRC_OK)
     {
+		if(error == ERR_NONICKNAMEGIVEN)
+			send_reply_error(c, error, "No nickname given");
+		if(error == ERR_INVALID)
+			send_reply_error(c, error, "No nickname is invalid");
+		//sur ce message d'erreur normalement on met <client><nick> :message
+		//comment faire remonter le <client> ? necessaire ?  detail
+		if(error == ERR_ERRONEUSNICKNAME)
+			send_reply_error(c, error, "Erroneus nickname");
     }
     std::vector<std::string> args = msg.get_args();
     for (size_t i = 0; i < vec_clients.size(); i++)
