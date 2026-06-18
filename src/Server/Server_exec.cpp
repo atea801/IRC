@@ -34,10 +34,6 @@ void Server::handle_user(Message &msg, Client &c)
     if (error != IRC_OK)
     {
     }
-    error = msg.parsing_realname();
-    if (error != IRC_OK)
-    {
-    }
     std::vector<std::string> args = msg.get_args();
     c.setUsername(args[0]);
     c.setRealname(args[3]);
