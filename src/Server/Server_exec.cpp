@@ -2,28 +2,19 @@
 
 void Server::execute(Message &msg, Client &c)
 {
-    handle_pass(msg, c);
-    handle_nick(msg, c);
-    handle_user(msg, c);
+    if (msg.get_command() == "PASS")
+        handle_pass(msg, c);
+    else if (msg.get_command() == "NICK")
+        handle_nick(msg, c);
+    else if (msg.get_command() == "USER")
+        handle_user(msg, c);
     if (c.getBoolPass() == true && c.getBoolUser() == true && c.getBoolNick() == true)
         c.setStatus(REGISTERED);
 }
 
 int Message::handle_quit(std::vector<std::string> args)
 {
-
-    if (args.size() == 0)
-        return (0);
-    else if (args.size() == 1 && this->trailing_arg == true)
-    {
-        std::string arg = args[0];
-        for (int i = 0; i < arg.size(); i++)
-        {
-        }
-        return (1);
-    }
-    else
-        return (-1);
+    
 }
 
 void Server::handle_nick(Message &msg, Client &c)

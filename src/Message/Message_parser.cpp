@@ -49,3 +49,14 @@ IrcError Message::parsing_pass(){
 		return ERR_NEEDMOREPARAMS;
 	return IRC_OK;
 }
+
+IrcError Message::parsing_quit()
+{
+	if (this->args.empty())
+        return ERR_EMPTY;
+	if (this->args.size() != 1)
+		return ERR_NEEDMOREPARAMS;
+    if (this->args[0].empty())
+		return ERR_NEEDMOREPARAMS;
+	return IRC_OK;
+}
