@@ -26,4 +26,5 @@ class Message
     const std::vector<std::string> &get_args() const;
 	IrcError parsing_nick();
 	IrcError parsing_user();
+	IrcError parsing_pass();
 };

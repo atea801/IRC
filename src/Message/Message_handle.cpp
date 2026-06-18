@@ -25,7 +25,7 @@ IrcError Message::parsing_user(){
 	if (this->args.empty())
 		return ERR_EMPTY;
 	if (this->args.size() != 4)
-		return ERR_NBR_PARAM;
+		return ERR_NEEDMOREPARAMS;
 	std::string special = " @!";
 	for (size_t i = 0; i < this->args[0].size(); i++){
 		if (special.find(args[0][i]) != std::string::npos)
@@ -35,5 +35,15 @@ IrcError Message::parsing_user(){
 	// 	return ERR_INVALID;
 	// if (args[1][0] != '0' || args[2][0] != '*')
 	// 	return ERR_INVALID;
+	return IRC_OK;
+}
+
+IrcError Message::parsing_pass(){
+	if (this->args.empty())
+		return ERR_EMPTY;
+	if (this->args.size() != 1)
+		return ERR_NEEDMOREPARAMS;
+	if (args[0].empty())
+		return ERR_NEEDMOREPARAMS;
 	return IRC_OK;
 }
