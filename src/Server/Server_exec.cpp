@@ -9,6 +9,23 @@ void Server::execute(Message &msg, Client &c)
         c.setStatus(REGISTERED);
 }
 
+int Message::handle_quit(std::vector<std::string> args)
+{
+
+    if (args.size() == 0)
+        return (0);
+    else if (args.size() == 1 && this->trailing_arg == true)
+    {
+        std::string arg = args[0];
+        for (int i = 0; i < arg.size(); i++)
+        {
+        }
+        return (1);
+    }
+    else
+        return (-1);
+}
+
 void Server::handle_nick(Message &msg, Client &c)
 {
     IrcError error = msg.parsing_nick();

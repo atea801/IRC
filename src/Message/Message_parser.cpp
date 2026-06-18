@@ -1,80 +1,51 @@
 #include "Message.hpp"
 
-/**
- * @brief remplie les attributs priver commande et args de la class message
- *
- * @param pos
- * @param data
- */
-void Message::fill_cmd_and_args(size_t pos, std::string data)
+IrcError Message::parsing_nick()
 {
-    int j = 0;
-    int flag_com = 0;
-    for (size_t i = 0; i < pos; i++)
+    // 1 arg est vide
+    if (this->args.empty())
+        return ERR_EMPTY;
+    // 2 check qu'il y a bien qu'un seul str dans le vecteur
+    if (this->args.size() > 1 || args[0].size() > 9)
+        return ERR_INVALID;
+    // 3 check premier caractere
+    std::string special = "-_[]{}\\|";
+    if (!isalpha(args[0][0]) && special.find(this->args[0][0]) == std::string::npos)
+        return ERR_INVALID;
+    // 3 check caracteres
+    for (size_t i = 1; i < this->args[0].size(); i++)
     {
-        while (data[i] == ' ')
-            i++;
-        if (data[i] == ' ' && flag_com == 0)
-        {
-            flag_com = 1;
-            this->command = data.substr(0, i);
-            j = i + 1;
-        }
-        else if (data[i] == ' ' && flag_com == 1)
-        {
-            std::string arg = data.substr(j, i - j);
-            this->args.push_back(arg);
-            j = i + 1;
-        }
-        else if (data[i] == ':')
-        {
-            std::string arg = data.substr(i + 1, pos - (i + 1));
-            this->trailing_arg = true;
-            this->args.push_back(arg);
-        }
-        else if (i == pos - 1)
-        {
-            std::string arg = data.substr(j, i - j + 1);
-            this->args.push_back(arg);
-        }
+        // si le caractere n'est pas une lettre/chiffre et qu'il n'est pas dans les car speciaux
+        if (!isalnum(args[0][i]) && special.find(this->args[0][i]) == std::string::npos)
+            return ERR_INVALID;
     }
+    return IRC_OK;
 }
 
-/**
- * @brief extraction d elements commande et args a partir
- * du buffer d un client precis et suppression des elements
- * apres recuperation. permet de garder le buffer client a jour.
- *
- * @param data (buffer remplie par recv)
- * @return int
- */
-void Message::extract_and_clean(Client &c)
-{
-    // 1. extraire la premiere commande
-    std::string data = c.getBuffer();
-    size_t pos = data.find("\r\n");
-    bool is_space = (data.find(' ') != std::string::npos);
-    if (is_space == true)
-        fill_cmd_and_args(pos, data);
-    else
-        this->command = data.substr(0, pos);
-    // 2. nettoie le buf
-    c.setBuffer(data.substr(pos + 2));
+
+IrcError Message::parsing_user(){
+	if (this->args.empty())
+		return ERR_EMPTY;
+	if (this->args.size() != 4)
+		return ERR_NEEDMOREPARAMS;
+	std::string special = " @!";
+	for (size_t i = 0; i < this->args[0].size(); i++){
+		if (special.find(args[0][i]) != std::string::npos)
+			return ERR_INVALID;
+	}
+	// if (this->args[1].size() != 1 || this->args[2].size() != 1)
+	// 	return ERR_INVALID;
+	// if (args[1][0] != '0' || args[2][0] != '*')
+	// 	return ERR_INVALID;
+	return IRC_OK;
 }
 
-int Message::handle_quit(std::vector<std::string> args)
-{
-
-    if (args.size() == 0)
-        return (0);
-    else if (args.size() == 1 && this->trailing_arg == true)
-    {
-        std::string arg = args[0];
-        for (int i = 0; i < arg.size(); i++)
-        {
-        }
-        return (1);
-    }
-    else
-        return (-1);
+IrcError Message::parsing_pass(){
+	if (this->args.empty())
+		return ERR_EMPTY;
+	if (this->args.size() != 1)
+		return ERR_NEEDMOREPARAMS;
+	if (args[0].empty())
+		return ERR_NEEDMOREPARAMS;
+	return IRC_OK;
 }
