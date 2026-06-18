@@ -5,10 +5,10 @@
 enum e_CLientState
 {
     HANDSHAKE,
-    PASS, // mot de passe
-    NICK, // nickname
-    USER,
-    REGISTERED,
+    PASS = false, // mot de passe
+    NICK = false, // nickname
+    USER = false,
+    REGISTERED = false,
 };
 
 class Client
@@ -21,8 +21,9 @@ class Client
     std::string _hostname; // adresse ip du client
     std::string _buffer;   // permet de stocker les morceaux envoyer par recv()
     e_CLientState _status;
-    bool Authenticated = false;
-
+    bool pass = false;
+    bool nick = false;
+    bool user = false;
   public:
     /*--Constructeurs-Destructeur--*/
     Client();
@@ -40,7 +41,9 @@ class Client
     const std::string &getHostname() const;
     const std::string &getBuffer() const;
     const e_CLientState &getStatus() const;
-    const bool &getAuthenticated() const;
+    const bool &getBoolPass() const;
+    const bool &getBoolNick() const;
+    const bool &getBoolUser() const;
 
     /*--Setters--*/
     void setNickname(std::string const nickname_input);
@@ -49,5 +52,7 @@ class Client
     void setHostname(std::string const hostname_input);
     void setBuffer(std::string const buffer_input);
     void setStatus(e_CLientState const status_input);
-    void setAuthenticated(bool const Authenticated);
+    void setBoolPass(bool const pass);
+    void setBoolNick(bool const nick);
+    void setBoolUser(bool const user);
 };

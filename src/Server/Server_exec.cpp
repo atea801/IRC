@@ -2,7 +2,11 @@
 
 void Server::execute(Message &msg, Client &c)
 {
+    handle_pass(msg, c);
     handle_nick(msg, c);
+    handle_user(msg, c);
+    if (c.getBoolPass() == true && c.getBoolUser() == true && c.getBoolNick() == true)
+        c.setStatus(REGISTERED);
 }
 
 void Server::handle_nick(Message &msg, Client &c)
@@ -21,6 +25,7 @@ void Server::handle_nick(Message &msg, Client &c)
         }
     }
     c.setNickname(args[0]);
+    c.setBoolNick(true);
 }
 
 void Server::handle_user(Message &msg, Client &c)
@@ -29,18 +34,14 @@ void Server::handle_user(Message &msg, Client &c)
     if (error != IRC_OK)
     {
     }
-    std::vector<std::string> args = msg.get_args();
-    c.setUsername(args[0]);
-}
-
-void Server::handle_realname(Message &msg, Client &c)
-{
-    IrcError error = msg.parsing_realname();
+    error = msg.parsing_realname();
     if (error != IRC_OK)
     {
     }
     std::vector<std::string> args = msg.get_args();
-    c.setRealname(args[0]);
+    c.setUsername(args[0]);
+    c.setRealname(args[3]);
+    c.setBoolUser(true);
 }
 
 void Server::handle_pass(Message &msg, Client &c)
@@ -60,5 +61,5 @@ void Server::handle_pass(Message &msg, Client &c)
         error = ERR_PASSWDMISMATCH;
         return;
     }
-    c.setAuthenticated(true);
+    c.setBoolPass(true);
 }
