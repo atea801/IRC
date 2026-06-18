@@ -21,6 +21,7 @@ class Client
     std::string _hostname; // adresse ip du client
     std::string _buffer;   // permet de stocker les morceaux envoyer par recv()
     e_CLientState _status;
+    bool Authenticated = false;
 
   public:
     /*--Constructeurs-Destructeur--*/
@@ -39,6 +40,7 @@ class Client
     const std::string &getHostname() const;
     const std::string &getBuffer() const;
     const e_CLientState &getStatus() const;
+    const bool &getAuthenticated() const ;
 
     /*--Setters--*/
     void setNickname(std::string const nickname_input);
@@ -47,4 +49,5 @@ class Client
     void setHostname(std::string const hostname_input);
     void setBuffer(std::string const buffer_input);
     void setStatus(e_CLientState const status_input);
+    void setAuthenticated(bool const Authenticated);
 };

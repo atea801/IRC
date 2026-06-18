@@ -35,6 +35,11 @@ const e_CLientState &Client::getStatus() const
     return this->_status;
 }
 
+const bool &Client::getAuthenticated() const
+{
+    return this->Authenticated;
+}
+
 void Client::setNickname(std::string const nickname_input)
 {
     this->_nickname = nickname_input;
@@ -63,4 +68,9 @@ void Client::setBuffer(std::string const buffer_input)
 void Client::setStatus(e_CLientState const status_input)
 {
     this->_status = status_input;
+}
+
+void Client::setAuthenticated(bool const authenticated)
+{
+    this->Authenticated = authenticated;
 }
