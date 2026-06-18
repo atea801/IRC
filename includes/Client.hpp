@@ -21,9 +21,9 @@ class Client
     std::string _hostname; // adresse ip du client
     std::string _buffer;   // permet de stocker les morceaux envoyer par recv()
     e_CLientState _status;
-    bool pass = false;
-    bool nick = false;
-    bool user = false;
+    bool _bool_pass;
+    bool _bool_nick;
+    bool _bool_user;
   public:
     /*--Constructeurs-Destructeur--*/
     Client();

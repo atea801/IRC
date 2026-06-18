@@ -1,18 +1,20 @@
 #include "Client.hpp"
 
 Client::Client()
-    : _fdclient(-1), _nickname(""), _realname(""), _username(""), _hostname(""), _buffer(""), _status(HANDSHAKE)
+    : _fdclient(-1), _nickname(""), _realname(""), _username(""), _hostname(""), _buffer(""), _status(HANDSHAKE),
+	_bool_pass(false), _bool_nick(false), _bool_user(false)
 {
 }
 
 Client::Client(int fd_input)
-    : _fdclient(fd_input), _nickname(""), _realname(""), _username(""), _hostname(""), _buffer(""), _status(HANDSHAKE)
+    : _fdclient(fd_input), _nickname(""), _realname(""), _username(""), _hostname(""), _buffer(""), _status(HANDSHAKE),
+	_bool_pass(false), _bool_nick(false), _bool_user(false)
 {
 }
 
 Client::Client(std::string hostname_input)
     : _fdclient(-1), _nickname(""), _realname(""), _username(""), _hostname(hostname_input), _buffer(""),
-      _status(HANDSHAKE)
+      _status(HANDSHAKE), _bool_pass(false), _bool_nick(false), _bool_user(false)
 {
 }
 
