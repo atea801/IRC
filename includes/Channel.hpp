@@ -6,7 +6,7 @@
 /*   By: bkaras-g <bkaras-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/16 14:57:26 by bkaras-g          #+#    #+#             */
-/*   Updated: 2026/06/16 16:07:37 by bkaras-g         ###   ########.fr       */
+/*   Updated: 2026/06/18 16:29:05 by bkaras-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include <string>
 #include <vector>
 #include <Client.hpp>
+// #include 
 
 class Channel {
 private:
@@ -71,7 +72,14 @@ public:
 
     // ---------- Member Methods -----------------------
     // addMember / removeMember / addOperator / isMember / invite ...
-
+    void    addMember(Client &c);
+    void    removeMember(Client &c);
+    bool    isMember(Client &c);
+    void    addOperator(Client &c);
+    void    removeOperator(Client &c);
+    bool    isOperator(Client &c);
+    void    invite(Client &c);
+    bool    isInvited(Client &c);
 };
 
 #endif // CHANNEL_HPP
