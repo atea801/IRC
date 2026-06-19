@@ -22,41 +22,43 @@ IrcError Message::parsing_nick()
     return IRC_OK;
 }
 
-
-IrcError Message::parsing_user(){
-	if (this->args.empty())
-		return ERR_EMPTY;
-	if (this->args.size() != 4)
-		return ERR_NEEDMOREPARAMS;
-	std::string special = " @!";
-	for (size_t i = 0; i < this->args[0].size(); i++){
-		if (special.find(args[0][i]) != std::string::npos)
-			return ERR_INVALID;
-	}
-	// if (this->args[1].size() != 1 || this->args[2].size() != 1)
-	// 	return ERR_INVALID;
-	// if (args[1][0] != '0' || args[2][0] != '*')
-	// 	return ERR_INVALID;
-	return IRC_OK;
+IrcError Message::parsing_user()
+{
+    if (this->args.empty())
+        return ERR_EMPTY;
+    if (this->args.size() != 4)
+        return ERR_NEEDMOREPARAMS;
+    std::string special = " @!";
+    for (size_t i = 0; i < this->args[0].size(); i++)
+    {
+        if (special.find(args[0][i]) != std::string::npos)
+            return ERR_INVALID;
+    }
+    // if (this->args[1].size() != 1 || this->args[2].size() != 1)
+    // 	return ERR_INVALID;
+    // if (args[1][0] != '0' || args[2][0] != '*')
+    // 	return ERR_INVALID;
+    return IRC_OK;
 }
 
-IrcError Message::parsing_pass(){
-	if (this->args.empty())
-		return ERR_EMPTY;
-	if (this->args.size() != 1)
-		return ERR_NEEDMOREPARAMS;
-	if (args[0].empty())
-		return ERR_NEEDMOREPARAMS;
-	return IRC_OK;
+IrcError Message::parsing_pass()
+{
+    if (this->args.empty())
+        return ERR_EMPTY;
+    if (this->args.size() != 1)
+        return ERR_NEEDMOREPARAMS;
+    if (args[0].empty())
+        return ERR_NEEDMOREPARAMS;
+    return IRC_OK;
 }
 
 IrcError Message::parsing_quit()
 {
-	if (this->args.empty())
+    if (this->args.empty())
         return ERR_EMPTY;
-	if (this->args.size() != 1)
-		return ERR_NEEDMOREPARAMS;
+    if (this->args.size() != 1)
+        return ERR_NEEDMOREPARAMS;
     if (this->args[0].empty())
-		return ERR_NEEDMOREPARAMS;
-	return IRC_OK;
+        return ERR_NEEDMOREPARAMS;
+    return IRC_OK;
 }
