@@ -6,7 +6,7 @@
 /*   By: bkaras-g <bkaras-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 16:04:02 by bkaras-g          #+#    #+#             */
-/*   Updated: 2026/06/19 16:17:20 by bkaras-g         ###   ########.fr       */
+/*   Updated: 2026/06/19 16:33:57 by bkaras-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ public:
         this->_elements.erase(it);
     }
 
-    void isInVec(T &element){
+    void has(T &element){
         typename std::vector<T*>::iterator it;
         it = std::find(_items.begin(), _items.end(), &e);
         if (it != this->_elements.end())
@@ -37,4 +37,10 @@ public:
         else
             return (false);
     }
+    
+    size_t size() const {
+        return this->_items.size(); }
+
+    const std::vector<T*>& get() const {
+        return this->_items; }
 };

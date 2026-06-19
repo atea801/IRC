@@ -6,7 +6,7 @@
 /*   By: bkaras-g <bkaras-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/16 14:57:26 by bkaras-g          #+#    #+#             */
-/*   Updated: 2026/06/19 12:29:50 by bkaras-g         ###   ########.fr       */
+/*   Updated: 2026/06/19 16:35:44 by bkaras-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,15 +17,16 @@
 #include <vector>
 #include <algorithm>
 #include "Client.hpp"
+#include "PtrVec.hpp"
 // #include 
 
 class Channel {
 private:
     // ---------- Private Data members -------------------------
     std::string             _name;
-    std::vector<Client *>   _members;
-    std::vector<Client *>   _chanOps;
-    std::vector<Client *>   _invited;
+    PtrVec<Client *>        _members;
+    PtrVec<Client *>        _chanOps;
+    PtrVec<Client *>        _invited;
     std::string             _topic;
     bool                    _topic_restricted;  // mode +t : seuls les chanOps peuvent changer le topic
     bool                    _is_invite_only;    // mode +i
@@ -51,9 +52,9 @@ public:
     //imperatif de return un const pour eviter que la variable retournee soit
     //modifiee par des petits hackers en herbe
     const std::string&              getName() const;
-    const std::vector<Client *>&    getMembers() const;
-    const std::vector<Client *>&    getChanOps() const;
-    const std::vector<Client *>&    getInvited() const;
+    const PtrVec<Client *>&         getMembers() const;
+    const PtrVec<Client *>&         getChanOps() const;
+    const PtrVec<Client *>&         getInvited() const;
     const std::string&              getTopic() const;
     bool                            isTopicRestricted() const;
     bool                            isInviteOnly() const;

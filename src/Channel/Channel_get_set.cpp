@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ChannelGetSet.cpp                                  :+:      :+:    :+:   */
+/*   Channel_get_set.cpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: bkaras-g <bkaras-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/16 16:11:40 by bkaras-g          #+#    #+#             */
-/*   Updated: 2026/06/16 18:05:19 by bkaras-g         ###   ########.fr       */
+/*   Updated: 2026/06/19 16:37:54 by bkaras-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,9 +22,9 @@ void Channel::setName(const std::string& name)
     this->_name = name;
 }
 
-const std::vector<Client *>&    Channel::getMembers() const
+const PtrVec<Client *>&    Channel::getMembers() const
 {
-    return (this->_members);
+    return (this->_members.get());
 }
 
 const std::vector<Client *>&    Channel::getChanOps() const
