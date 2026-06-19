@@ -6,7 +6,7 @@
 /*   By: bkaras-g <bkaras-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/16 14:57:26 by bkaras-g          #+#    #+#             */
-/*   Updated: 2026/06/19 11:58:54 by bkaras-g         ###   ########.fr       */
+/*   Updated: 2026/06/19 12:29:50 by bkaras-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ private:
     std::string             _name;
     std::vector<Client *>   _members;
     std::vector<Client *>   _chanOps;
-    std::vector<Client *>   _invited; //ou bool is_invited chez Client
+    std::vector<Client *>   _invited;
     std::string             _topic;
     bool                    _topic_restricted;  // mode +t : seuls les chanOps peuvent changer le topic
     bool                    _is_invite_only;    // mode +i
