@@ -173,27 +173,24 @@ int Server::client_actions(size_t i)
     {
         // a. extraire la premiere commande + nettoyer
         message.extract_and_clean(*c);
-		std::cerr << "Command: " << message.get_command() << std::endl;
-		if (!message.get_args().empty())
-			std::cerr << "Args: " << message.get_args()[0] << std::endl;
-		else
-			std::cerr << "Args: empty" << std::endl;
-
-        // b. execute
+        // b. on parse la lign extraire en focniton de commande parisng 2
+        // c. execute
         this->exec_flow(message, *c);
+        if (c->getStatus() == QUIT)
+            return (1);
     }
     // 5. Reponse su serveur aux clients
-    ssize_t sent = 0;
-    while (sent < n)
-    {
-        ssize_t ret = send(fds[i].fd, buf + sent, n - sent, 0);
-        if (ret < 0)
-        {
-            perror("send");
-            return (-1);
-        }
-        sent += ret;
-    }
+    // ssize_t sent = 0;
+    // while (sent < n)
+    // {
+    //     ssize_t ret = send(fds[i].fd, buf + sent, n - sent, 0);
+    //     if (ret < 0)
+    //     {
+    //         perror("send");
+    //         return (-1);
+    //     }
+    //     sent += ret;
+    // }
     return (0);
 }
 

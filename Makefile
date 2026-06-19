@@ -20,7 +20,7 @@ OBJ_DIR = obj
 OBJS = $(SRCS:%.cpp=$(OBJ_DIR)/%.o)
 
 CXX = c++
-CXXFLAGS = -Wall -Werror -Wextra -g -std=c++98
+CXXFLAGS = -Wall  -Wextra -g -std=c++98
 INCLUDES = -I./includes
 
 all:

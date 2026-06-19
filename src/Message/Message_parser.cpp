@@ -54,5 +54,11 @@ IrcError Message::parsing_pass(){
  */
 IrcError Message::parsing_quit()
 {
-	return IRC_OK;
+    if (this->args.empty())
+        return ERR_EMPTY;
+    if (this->args.size() != 1)
+        return ERR_NEEDMOREPARAMS;
+    if (this->args[0].empty())
+        return ERR_NEEDMOREPARAMS;
+    return IRC_OK;
 }
