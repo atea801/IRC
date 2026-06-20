@@ -6,7 +6,7 @@
 /*   By: komorebi <komorebi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/16 14:57:26 by bkaras-g          #+#    #+#             */
-/*   Updated: 2026/06/20 15:18:30 by komorebi         ###   ########.fr       */
+/*   Updated: 2026/06/20 16:46:22 by komorebi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,7 +72,8 @@ public:
     void    removeUserLimit();
 
     // ---------- Member Methods -----------------------
-    // addMember / removeMember / addOperator / isMember / invite ...
+    
+    // Fonctions pour gérer les membres, les opérateurs et les invités du canal
     void    addMember(Client &c);
     size_t  NumberOfMembers();
     void    removeMember(Client &c);
