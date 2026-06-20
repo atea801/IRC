@@ -6,7 +6,7 @@
 /*   By: komorebi <komorebi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/16 16:11:40 by bkaras-g          #+#    #+#             */
-/*   Updated: 2026/06/20 15:05:16 by komorebi         ###   ########.fr       */
+/*   Updated: 2026/06/20 15:17:49 by komorebi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,12 +29,12 @@ const std::vector<Client *>&    Channel::getMembers() const
 
 const std::vector<Client *>&    Channel::getChanOps() const
 {
-    return (this->_chanOps);
+    return (this->_chanOps.get());
 }
 
 const std::vector<Client *>&    Channel::getInvited() const
 {
-    return (this->_invited);
+    return (this->_invited.get());
 }
 
 const std::string&  Channel::getTopic() const

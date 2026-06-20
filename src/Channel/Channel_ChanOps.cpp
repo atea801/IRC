@@ -14,37 +14,25 @@
 
 void    Channel::addOperator(Client &c)
 {
-    this->_chanOps.push_back(&c);
+    this->_chanOps.add(c);
 }
 
 void    Channel::removeOperator(Client &c)
 {
-    std::vector<Client *>::const_iterator it;
-    it = std::find(this->getChanOps().begin(), this->getChanOps().end(), &c);
-    this->_chanOps.erase(it);
+    this->_chanOps.remove(c);
 }
 
 bool    Channel::isOperator(Client &c)
 {
-    std::vector<Client *>::const_iterator it;
-    it = std::find(this->getChanOps().begin(), this->getChanOps().end(), &c);
-    if (it == this->getChanOps().end())
-        return (false);
-    else
-        return (true);
+    return (this->_chanOps.has(c));
 }
 
 void    Channel::invite(Client &c)
 {
-    this->_invited.push_back(&c);
+    this->_invited.add(c);
 }
 
 bool    Channel::isInvited(Client &c)
 {
-    std::vector<Client *>::const_iterator it;
-    it = std::find(this->getInvited().begin(), this->getInvited().end(), &c);
-    if (it == this->getInvited().end())
-        return (false);
-    else
-        return (true);
+    return (this->_invited.has(c));
 }

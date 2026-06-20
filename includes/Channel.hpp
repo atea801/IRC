@@ -6,7 +6,7 @@
 /*   By: komorebi <komorebi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/16 14:57:26 by bkaras-g          #+#    #+#             */
-/*   Updated: 2026/06/20 15:05:31 by komorebi         ###   ########.fr       */
+/*   Updated: 2026/06/20 15:18:30 by komorebi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,15 +18,14 @@
 #include <algorithm>
 #include "Client.hpp"
 #include "PtrVec.hpp"
-// #include 
 
 class Channel {
 private:
     // ---------- Private Data members -------------------------
     std::string             _name;
-    PtrVec<Client *>        _members;
-    PtrVec<Client *>        _chanOps;
-    PtrVec<Client *>        _invited;
+    PtrVec<Client>          _members;
+    PtrVec<Client>          _chanOps;
+    PtrVec<Client>          _invited;
     std::string             _topic;
     bool                    _topic_restricted;  // mode +t : seuls les chanOps peuvent changer le topic
     bool                    _is_invite_only;    // mode +i
@@ -53,8 +52,8 @@ public:
     //modifiee par des petits hackers en herbe
     const std::string&              getName() const;
     const std::vector<Client *>&         getMembers() const;
-    const PtrVec<Client *>&         getChanOps() const;
-    const PtrVec<Client *>&         getInvited() const;
+    const std::vector<Client *>&         getChanOps() const;
+    const std::vector<Client *>&         getInvited() const;
     const std::string&              getTopic() const;
     bool                            isTopicRestricted() const;
     bool                            isInviteOnly() const;

@@ -14,12 +14,12 @@
 
 void    Channel::addMember(Client &c)
 {
-    this->_members.push_back(&c);
+    this->_members.add(c);
 }
 
 size_t  Channel::NumberOfMembers()
 {
-    return (this->getMembers().size());
+    return (this->_members.size());
 }
 
 /*
@@ -28,9 +28,7 @@ check à faire ici (si le client existe par exemple)
 */
 void    Channel::removeMember(Client &c)
 {
-    std::vector<Client *>::const_iterator it;
-    it = std::find(this->getMembers().begin(), this->getMembers().end(), &c);
-    this->_members.erase(it);
+    this->_members.remove(c);
 }
 
 /*
@@ -38,11 +36,6 @@ Vérifie si le client `c` est membre du channel.
 */
 bool    Channel::isMember(Client &c)
 {
-    std::vector<Client *>::const_iterator it;
-    it = std::find(this->getMembers().begin(), this->getMembers().end(), &c);
-    if (it == this->getMembers().end())
-        return (false);
-    else
-        return (true);
+    return (this->_members.has(c));
 }
 
