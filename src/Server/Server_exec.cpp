@@ -2,7 +2,9 @@
 
 void Server::exec_flow(Message &msg, Client &c)
 {
-    //add accept lower case
+    //switch this->msg.command to uppercase
+    //check if the client is registered, if not, only allow PASS, NICK and USER commands
+    //check if this->args is empty, if so, return ERR_NEEDMOREPARAMS
     if (msg.get_command() == "PASS")
         handle_pass(msg, c);
     else if (msg.get_command() == "NICK")
