@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bkaras-g <bkaras-g@student.42.fr>          +#+  +:+       +#+        */
+/*   By: komorebi <komorebi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/16 14:57:26 by bkaras-g          #+#    #+#             */
-/*   Updated: 2026/06/19 16:35:44 by bkaras-g         ###   ########.fr       */
+/*   Updated: 2026/06/20 15:05:31 by komorebi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ public:
     //imperatif de return un const pour eviter que la variable retournee soit
     //modifiee par des petits hackers en herbe
     const std::string&              getName() const;
-    const PtrVec<Client *>&         getMembers() const;
+    const std::vector<Client *>&         getMembers() const;
     const PtrVec<Client *>&         getChanOps() const;
     const PtrVec<Client *>&         getInvited() const;
     const std::string&              getTopic() const;
