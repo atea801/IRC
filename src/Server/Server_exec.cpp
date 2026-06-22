@@ -1,7 +1,8 @@
 #include "Server.hpp"
 
-void Server::execute(Message &msg, Client &c)
+void Server::exec_flow(Message &msg, Client &c)
 {
+    //add accept lower case
     if (msg.get_command() == "PASS")
         handle_pass(msg, c);
     else if (msg.get_command() == "NICK")
@@ -19,6 +20,7 @@ void Server::execute(Message &msg, Client &c)
 
 void Server::handle_nick(Message &msg, Client &c)
 {
+    //parsing pure
     IrcError error = msg.parsing_nick();
     if (error != IRC_OK)
     {
@@ -32,7 +34,8 @@ void Server::handle_nick(Message &msg, Client &c)
 			send_reply_error(c, error, "Erroneus nickname");
 		return;
     }
-    std::vector<std::string> args = msg.get_args();
+    //check prealable
+    std::vector<std::string> args = msg.get_args(); 
     for (size_t i = 0; i < vec_clients.size(); i++)
     {
         if (&vec_clients[i] != &c && vec_clients[i].getNickname() == args[0])
@@ -42,6 +45,7 @@ void Server::handle_nick(Message &msg, Client &c)
             return;
         }
     }
+    //execution final
     c.setNickname(args[0]);
     c.setBoolNick(true);
 }

@@ -180,7 +180,7 @@ int Server::client_actions(size_t i)
 			std::cerr << "Args: empty" << std::endl;
 
         // b. execute
-        this->execute(message, *c);
+        this->exec_flow(message, *c);
     }
     // 5. Reponse su serveur aux clients
     ssize_t sent = 0;
