@@ -2,21 +2,24 @@
 
 void Server::exec_flow(Message &msg, Client &c)
 {
+	std::string cmd = msg.get_command();
+	for (size_t i = 0; i < cmd.size(); i++)
+        cmd[i] = toupper(cmd[i]);
     //add accept lower case
-    if (msg.get_command() == "PASS")
+	if (c.getStatus() != REGISTERED){
+		if (cmd != "PASS" && cmd != "NICK" && cmd != "USER"){
+			send_reply_error(c, ERR_NOTREGISTERED, "You have not registered");
+		}
+	}
+    if (cmd == "PASS")
         handle_pass(msg, c);
-    else if (msg.get_command() == "NICK")
+    else if (cmd == "NICK")
         handle_nick(msg, c);
-    else if (msg.get_command() == "USER")
+    else if (cmd == "USER")
         handle_user(msg, c);
     if (c.getBoolPass() == true && c.getBoolUser() == true && c.getBoolNick() == true)
         c.setStatus(REGISTERED);
 }
-
-// int Message::handle_quit(std::vector<std::string> args)
-// {
-    
-// }
 
 void Server::handle_nick(Message &msg, Client &c)
 {
