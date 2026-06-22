@@ -24,9 +24,7 @@ IrcError Message::parsing_nick()
 
 
 IrcError Message::parsing_user(){
-	if (this->args.empty())
-		return ERR_EMPTY;
-	if (this->args.size() != 4)
+	if (this->args.empty() || this->args.size() != 4)
 		return ERR_NEEDMOREPARAMS;
 	std::string special = " @!";
 	for (size_t i = 0; i < this->args[0].size(); i++){
@@ -41,22 +39,20 @@ IrcError Message::parsing_user(){
 }
 
 IrcError Message::parsing_pass(){
-	if (this->args.empty())
-		return ERR_EMPTY;
-	if (this->args.size() != 1)
-		return ERR_NEEDMOREPARAMS;
-	if (args[0].empty())
+	if (this->args.empty() || this->args.size() != 1 || args[0].empty())
 		return ERR_NEEDMOREPARAMS;
 	return IRC_OK;
 }
 
+/**
+ * @brief Il n'y a pas de cas ou le parisng est invalid
+ * QUIT
+ * QUIT :bye
+ * QUIT :Gone to have lunch
+ * 
+ * @return IrcError 
+ */
 IrcError Message::parsing_quit()
 {
-	if (this->args.empty())
-        return ERR_EMPTY;
-	if (this->args.size() != 1)
-		return ERR_NEEDMOREPARAMS;
-    if (this->args[0].empty())
-		return ERR_NEEDMOREPARAMS;
 	return IRC_OK;
 }

@@ -30,13 +30,15 @@ void Server::handle_nick(Message &msg, Client &c)
 		//comment faire remonter le <client> ? necessaire ?  detail
 		if(error == ERR_ERRONEUSNICKNAME)
 			send_reply_error(c, error, "Erroneus nickname");
+		return;
     }
     std::vector<std::string> args = msg.get_args();
     for (size_t i = 0; i < vec_clients.size(); i++)
     {
         if (&vec_clients[i] != &c && vec_clients[i].getNickname() == args[0])
         {
-            error = ERR_NICK_TAKEN;
+            error = ERR_NICKNAMEINUSE;
+			send_reply_error(c, error, "NICK: Nickname is already in use");
             return;
         }
     }
@@ -47,11 +49,17 @@ void Server::handle_nick(Message &msg, Client &c)
 void Server::handle_user(Message &msg, Client &c)
 {
     IrcError error = msg.parsing_user();
-    if (error != IRC_OK)
-    {
+    if (error != IRC_OK){
+		if(error == ERR_NEEDMOREPARAMS)
+			send_reply_error(c, error, "USER :Not enough parameters");
+		if(error == ERR_INVALID)
+			send_reply_error(c, error, "User is invalid");
+		return;
     }
     std::vector<std::string> args = msg.get_args();
     c.setUsername(args[0]);
+	//parsing_user vérifie args.size() != 4 mais si le trailing est dans args[3] 
+	//— est-ce que ton parser met bien le realname en args[3] ? Vérifie avec un cerr de debug.
     c.setRealname(args[3]);
     c.setBoolUser(true);
 }
@@ -61,16 +69,15 @@ void Server::handle_pass(Message &msg, Client &c)
     IrcError error = msg.parsing_pass();
     if (error != IRC_OK)
     {
+		if(error == ERR_NEEDMOREPARAMS)
+			send_reply_error(c, error, " PASS :Not enough parameters");
+		return;
     }
     const std::vector<std::string> &args = msg.get_args();
-    if (args.size() != 1)
-    {
-        error = ERR_NEEDMOREPARAMS;
-        return;
-    }
     if (args[0] != this->password)
     {
         error = ERR_PASSWDMISMATCH;
+		send_reply_error(c, error, "Password incorrect");
         return;
     }
     c.setBoolPass(true);
