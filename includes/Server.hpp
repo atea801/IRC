@@ -40,7 +40,7 @@ class Server
     int accept_new_client();
     int create_socket();
     int client_actions(size_t i);
-    void execute(Message &msg, Client &c);
+    void exec_flow(Message &msg, Client &c);
     void handle_nick(Message &msg, Client &c);
     void handle_user(Message &msg, Client &c);
     void handle_pass(Message &msg, Client &c);

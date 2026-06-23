@@ -54,6 +54,7 @@ void Message::fill_cmd_and_args(size_t pos, std::string data)
     }
 }
 
+
 /**
  * @brief extraction d elements commande et args a partir
  * du buffer d un client precis et suppression des elements
@@ -67,11 +68,7 @@ void Message::extract_and_clean(Client &c)
     // 1. extraire la premiere commande
     std::string data = c.getBuffer();
     size_t pos = data.find("\r\n");
-    bool is_space = (data.find(' ') != std::string::npos);
-    if (is_space == true)
-        fill_cmd_and_args(pos, data);
-    else
-        this->command = data.substr(0, pos);
+    fill_cmd_and_args(pos, data);
     // 2. nettoie le buf
     c.setBuffer(data.substr(pos + 2));
 }
