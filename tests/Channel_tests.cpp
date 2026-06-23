@@ -6,7 +6,7 @@
 /*   By: bkaras-g <bkaras-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/23 17:43:50 by bkaras-g          #+#    #+#             */
-/*   Updated: 2026/06/23 17:44:26 by bkaras-g         ###   ########.fr       */
+/*   Updated: 2026/06/23 18:11:06 by bkaras-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,15 +15,15 @@
 **
 ** Compilation (depuis la racine du projet) :
 **   c++ -Wall -Wextra -g -std=c++98 -I./includes \
-**       Channel_tests.cpp \
-**       src/Channel/Channel.cpp \
-**       src/Channel/Channel_members.cpp \
-**       src/Channel/Channel_ChanOps.cpp \
-**       src/Channel/Channel_get_set.cpp \
-**       src/Client/Client.cpp \
-**       src/Client/Client_get_set.cpp \
-**       -o channel_tests
-**   ./channel_tests
+       tests/Channel_tests.cpp \
+       src/Channel/Channel.cpp \
+       src/Channel/Channel_members.cpp \
+       src/Channel/Channel_ChanOps.cpp \
+       src/Channel/Channel_get_set.cpp \
+       src/Client/Client.cpp \
+       src/Client/Client_get_set.cpp \
+       -o channel_tests
+   ./channel_tests
 **
 ** N.B. : le constructeur par defaut de Channel n'initialise PAS les membres
 ** booleens / size_t (_topic_restricted, _is_invite_only, _has_a_password,
@@ -52,6 +52,10 @@ static int g_checks_failed = 0;
             std::cout << "  [FAIL] " << __FILE__ << ":" << __LINE__            \
                       << "  CHECK(" << #cond << ")" << std::endl;              \
         }                                                                      \
+        else {                                                                 \
+            std::cout << "  [SUCCESS] " << __FILE__ << ":" << __LINE__         \
+                      << "  CHECK(" << #cond << ")" << std::endl;              \
+        }                                                                      \
     } while (0)
 
 #define CHECK_EQ(a, b)                                                         \
@@ -60,6 +64,12 @@ static int g_checks_failed = 0;
         if (!((a) == (b))) {                                                   \
             ++g_checks_failed;                                                 \
             std::cout << "  [FAIL] " << __FILE__ << ":" << __LINE__            \
+                      << "  CHECK_EQ(" << #a << ", " << #b << ")"              \
+                      << "  got '" << (a) << "' expected '" << (b) << "'"      \
+                      << std::endl;                                            \
+        }                                                                      \
+        else {                                                                 \
+            std::cout << "  [SUCCESS] " << __FILE__ << ":" << __LINE__         \
                       << "  CHECK_EQ(" << #a << ", " << #b << ")"              \
                       << "  got '" << (a) << "' expected '" << (b) << "'"      \
                       << std::endl;                                            \
