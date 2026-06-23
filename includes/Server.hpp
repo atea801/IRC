@@ -44,6 +44,7 @@ class Server
     void handle_nick(Message &msg, Client &c);
     void handle_user(Message &msg, Client &c);
     void handle_pass(Message &msg, Client &c);
+    void handle_quit(Message &msg, Client &c);
     void handle_privmsg(Message &msg, Client &c);
     int find_dest(std::string dest);
     Client *find_client(std::vector<pollfd> fds, size_t i);

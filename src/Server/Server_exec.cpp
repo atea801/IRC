@@ -10,7 +10,7 @@ void Server::exec_flow(Message &msg, Client &c)
     else if (msg.get_command() == "USER")
         handle_user(msg, c);
     else if (msg.get_command() == "QUIT")
-        c.setStatus(QUIT);
+        handle_quit(msg, c);
     else if (msg.get_command() == "PRIVMSG")
         handle_privmsg(msg, c);
     if (c.getBoolPass() == true && c.getBoolUser() == true && c.getBoolNick() == true)
@@ -97,3 +97,19 @@ int Server::find_dest(std::string dest)
     return -1;
 }
 
+void Server::handle_quit(Message &msg, Client &c)
+{
+    // IrcError error = msg.parsing_quit();
+    // if (error != IRC_OK)
+    // {}
+    std::vector<std::string> args = msg.get_args();
+    if (!args.empty() && !args[0].empty())
+    {
+        //send a modifier pour qu il envoie le message au fd des channels 
+        //que le client aillant faire quit participait
+        send(c.getFdClient(), args[0].c_str(), args[0].size(), 0);
+        c.setStatus(QUIT);
+    }
+    else
+        c.setStatus(QUIT);
+}
