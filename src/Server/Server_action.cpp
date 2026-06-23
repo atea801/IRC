@@ -163,7 +163,7 @@ int Server::client_actions(size_t i)
         message.extract_and_clean(*c);
         // b. on parse la lign extraire en focniton de commande parisng 2
         // c. execute
-        this->execute(message, *c);
+        this->exec_flow(message, *c);
         if (c->getStatus() == QUIT)
             return (1);
     }
