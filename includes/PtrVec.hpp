@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   PtrVec.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: komorebi <komorebi@student.42.fr>          +#+  +:+       +#+        */
+/*   By: bkaras-g <bkaras-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 16:04:02 by bkaras-g          #+#    #+#             */
-/*   Updated: 2026/06/20 16:44:10 by komorebi         ###   ########.fr       */
+/*   Updated: 2026/06/23 18:03:36 by bkaras-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,8 @@ Elle permet de stocker des pointeurs vers des objets de type T et fournit
 des méthodes pour ajouter, supprimer et vérifier la présence d'éléments
  dans le vecteur. Elle est utilisée dans la classe Channel pour gérer
  les membres, les opérateurs et les invités du canal.
+ Pas besoin d'implémenter des constructeurs ni de destructeur car tout est 
+ déjà pris en charge par `std::vector`
 */
 template <typename T>
 class PtrVec {
