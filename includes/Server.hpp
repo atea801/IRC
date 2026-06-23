@@ -46,9 +46,11 @@ class Server
     void handle_user(Message &msg, Client &c);
     void handle_pass(Message &msg, Client &c);
     void handle_privmsg(Message &msg, Client &c);
+    void handle_cap(Client &c);
+    void handle_ping(Client &c);
     int find_dest(std::string dest);
     Client *find_client(std::vector<pollfd> fds, size_t i);
-	void send_reply_error(Client &c, IrcError error, const std::string &message);
+	  void send_reply_error(Client &c, IrcError error, const std::string &message);
     const std::string &getPort() const;
     const std::string &getPassword() const;
 };

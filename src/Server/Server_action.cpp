@@ -171,10 +171,16 @@ int Server::client_actions(size_t i)
     Message message;
     while (c->getBuffer().find("\r\n") != std::string::npos)
     {
+        std::cout << "RAW BUFFER: [" << c->getBuffer() << "]" << std::endl;
         // a. extraire la premiere commande + nettoyer
         message.extract_and_clean(*c);
         // b. on parse la lign extraire en focniton de commande parisng 2
         // c. execute
+        const std::vector<std::string> args = message.get_args();
+        std::cout << "[PARSED fd=" << fds[i].fd << "] "
+              << "CMD=" << message.get_command()
+              << " ARGS=" << args[0]
+              << std::endl;
         this->exec_flow(message, *c);
         if (c->getStatus() == QUIT)
             return (1);

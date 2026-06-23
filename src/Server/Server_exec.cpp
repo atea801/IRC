@@ -11,7 +11,11 @@ void Server::exec_flow(Message &msg, Client &c)
 			send_reply_error(c, ERR_NOTREGISTERED, "You have not registered");
 		}
 	}
-    if (cmd == "PASS")
+    if (cmd == "CAP")
+        handle_cap(c);
+    else if (cmd == "PING")
+        handle_ping(c);
+    else if (cmd == "PASS")
         handle_pass(msg, c);
     else if (cmd == "NICK")
         handle_nick(msg, c);
@@ -21,8 +25,6 @@ void Server::exec_flow(Message &msg, Client &c)
         c.setStatus(QUIT);
     else if (msg.get_command() == "PRIVMSG")
         handle_privmsg(msg, c);
-    if (c.getBoolPass() == true && c.getBoolUser() == true && c.getBoolNick() == true)
-        c.setStatus(REGISTERED);
 }
 
 void Server::handle_nick(Message &msg, Client &c)
@@ -124,3 +126,17 @@ int Server::find_dest(std::string dest)
     return -1;
 }
 
+void Server::handle_cap(Client &c)
+{
+    std::string reply = "CAP * LS :\r\n";
+    send(c.getFdClient(), reply.c_str(), reply.size(), 0);
+}
+
+void Server::handle_ping(Client &c)
+{
+    std::vector<std::string> args;
+    if (args.empty() || args.size() != 1 || args[0].empty())
+        return;
+    std::string msg_to_send = "PONG :" + args[0];
+    send(c.getFdClient(), msg_to_send.c_str(), msg_to_send.size(), 0);
+}
