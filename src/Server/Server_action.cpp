@@ -179,18 +179,6 @@ int Server::client_actions(size_t i)
         if (c->getStatus() == QUIT)
             return (1);
     }
-    // 5. Reponse su serveur aux clients
-    // ssize_t sent = 0;
-    // while (sent < n)
-    // {
-    //     ssize_t ret = send(fds[i].fd, buf + sent, n - sent, 0);
-    //     if (ret < 0)
-    //     {
-    //         perror("send");
-    //         return (-1);
-    //     }
-    //     sent += ret;
-    // }
     return (0);
 }
 

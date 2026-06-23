@@ -27,7 +27,6 @@ void Server::exec_flow(Message &msg, Client &c)
 
 void Server::handle_nick(Message &msg, Client &c)
 {
-    std::cout << "caca\n";
     IrcError error = msg.parsing_nick();
     if (error != IRC_OK)
     {
@@ -125,4 +124,3 @@ int Server::find_dest(std::string dest)
     return -1;
 }
 
-// vec_clients[i].getStatus() == REGISTERED &&
