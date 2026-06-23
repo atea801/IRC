@@ -2,13 +2,13 @@
 
 Client::Client()
     : _fdclient(-1), _nickname(""), _realname(""), _username(""), _hostname(""), _buffer(""), _status(HANDSHAKE),
-	_bool_pass(false), _bool_nick(false), _bool_user(false)
+      _bool_pass(false), _bool_nick(false), _bool_user(false)
 {
 }
 
 Client::Client(int fd_input)
     : _fdclient(fd_input), _nickname(""), _realname(""), _username(""), _hostname(""), _buffer(""), _status(HANDSHAKE),
-	_bool_pass(false), _bool_nick(false), _bool_user(false)
+      _bool_pass(false), _bool_nick(false), _bool_user(false)
 {
 }
 
@@ -36,6 +36,11 @@ Client &Client::operator=(const Client &copy)
         this->_status = copy.getStatus();
     }
     return *this;
+}
+
+bool Client::operator==(const Client &other)
+{
+    return this->_fdclient == other._fdclient;
 }
 
 Client::~Client()

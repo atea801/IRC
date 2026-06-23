@@ -9,6 +9,7 @@ enum e_CLientState
     NICK = false, // nickname
     USER = false,
     REGISTERED = false,
+    QUIT,
 };
 
 class Client
@@ -24,6 +25,7 @@ class Client
     bool _bool_pass;
     bool _bool_nick;
     bool _bool_user;
+
   public:
     /*--Constructeurs-Destructeur--*/
     Client();
@@ -31,6 +33,7 @@ class Client
     Client(std::string hostname_input);
     Client(const Client &copy);
     Client &operator=(const Client &other);
+    bool operator==(const Client &other);
     ~Client();
 
     /*--Getters--*/
