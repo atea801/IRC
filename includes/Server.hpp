@@ -2,6 +2,7 @@
 
 #include "Client.hpp"
 #include "Message.hpp"
+#include "Channel.hpp"
 #include <arpa/inet.h>
 #include <cctype>
 #include <cerrno>
@@ -52,7 +53,11 @@ class Server
     void handle_privmsg(Message &msg, Client &c);
     int find_dest(std::string dest);
     Client *find_client(std::vector<pollfd> fds, size_t i);
+
+	//errors
 	void send_reply_error(Client &c, IrcError error, const std::string &message);
+	void send_reply_error(Client &c, IrcError error, const std::string &p1, const std::string &message);
+	void send_reply_error(Client &c, IrcError error, const std::string &p1, const std::string &p2, const std::string &message);
     const std::string &getPort() const;
     const std::string &getPassword() const;
 };
