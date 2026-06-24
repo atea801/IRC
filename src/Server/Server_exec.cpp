@@ -114,6 +114,29 @@ void Server::handle_privmsg(Message &msg, Client &c)
     send(dest, msg_to_send.c_str(), msg_to_send.size(), 0);
 }
 
+void Server::handle_Kick(Message &msg, Client &c)
+{
+    /*IrcError error = msg.parsing_Kick();
+    if (error != IRC_OK)
+    {
+		if(error == ERR_NEEDMOREPARAMS)
+			send_reply_error(c, error, " KICK :Not enough parameters");
+        if(error == ERR_NOSUCHCHANNEL)
+            //send_reply_error();
+
+        Numeric Replies (Source IRC Doc):
+
+    ERR_NEEDMOREPARAMS (461)
+    ERR_NOSUCHCHANNEL (403)
+    ERR_CHANOPRIVSNEEDED (482)
+    ERR_USERNOTINCHANNEL (441)
+    ERR_NOTONCHANNEL (442)
+
+		return;
+    }
+    */
+}
+
 int Server::find_dest(std::string dest)
 {
     for (size_t i = 0; i < vec_clients.size(); i++)
