@@ -142,12 +142,44 @@ void Server::handle_Kick(Message &msg, Client &c)
 
 		return;
     }
+        L'erreur 461 est du parsing de syntaxe pure. 
+        Toutes les autres erreurs nécessitent d'identifier la liste des 
+        channels et la liste des clients dans msg.args, puis de vérifier
+        si les channels et les clients existent vraiment, si le user à 
+        l'origine de la commande KICK est bien un chanOps, etc. 
+        Donc une fois que tous ces checks ont été faits, on peut en 
+        récupérer un vecteur de pointeurs vers Channels et un vecteur de
+        pointeurs vers Clients sur lesquels on peut gérer l'exec de KICK
     */
-    if (msg.get_channels().size() == msg.get_clients().size())
+    
+    // PtrVec<Channel> channelsFromMsg = get_channel_ptrs_from_message(msg);
+    // PtrVec<Client> clientsFromMsg = get_client_ptrs_from_message(msg);
+
+    PtrVec<Channel> channelsFromMsg;
+    PtrVec<Client> clientsFromMsg;
+    
+    //si nb channels == nb clients alors on supprime le client i du channel i
+    //vérifier si c'est bien la logique de KICK
+    if (channelsFromMsg.size() == clientsFromMsg.size())
     {
-        for (size_t i = 0; i < msg.get_channels().size(); i++)
+        for (size_t i = 0; i < channelsFromMsg.size(); i++)
         {
-            //find_channel
+            channelsFromMsg.get()[i]->removeMember(*clientsFromMsg.get()[i]);
+            if (channelsFromMsg.get()[i]->isOperator(*clientsFromMsg.get()[i]))
+                channelsFromMsg.get()[i]->removeOperator(*clientsFromMsg.get()[i]);
+        }
+    }
+    else //sinon on supprime chaque user de chaque channel specifie
+    //vérifier si c'est bien la logique de KICK
+    {
+        for (size_t chanIndex; chanIndex < channelsFromMsg.size(); chanIndex++)
+        {
+            for (size_t clientIndex = 0; clientIndex < clientsFromMsg.size(); clientIndex++)
+            {
+                channelsFromMsg.get()[chanIndex]->removeMember(*clientsFromMsg.get()[clientIndex]);
+                if (channelsFromMsg.get()[chanIndex]->isOperator(*clientsFromMsg.get()[clientIndex]))
+                    channelsFromMsg.get()[chanIndex]->removeOperator(*clientsFromMsg.get()[clientIndex]);
+            }
         }
     }
 }

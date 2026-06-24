@@ -65,6 +65,7 @@ class Server
     /*--Fonctions utilitaires*/
     int find_dest(std::string dest);
     Client *find_client(std::vector<pollfd> fds, size_t i);
+    int find_channel(std::string dest);
 
     /*--Gestion des erreurs (Numeric replies)--*/
 	  void send_reply_error(Client &c, IrcError error, const std::string &message);
