@@ -16,7 +16,6 @@ enum IrcError
     ERR_NOTREGISTERED = 451,
     ERR_UNKNOWNCOMMAND = 421,
 
-
     ERR_PASSWDMISMATCH = 464,
 };
 

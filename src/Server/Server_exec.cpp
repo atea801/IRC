@@ -2,19 +2,21 @@
 
 void Server::exec_flow(Message &msg, Client &c)
 {
-	std::string cmd = msg.get_command();
-	for (size_t i = 0; i < cmd.size(); i++)
+    std::string cmd = msg.get_command();
+    for (size_t i = 0; i < cmd.size(); i++)
         cmd[i] = toupper(cmd[i]);
-    //add accept lower case
-	if (c.getStatus() != REGISTERED){
-		if (cmd != "PASS" && cmd != "NICK" && cmd != "USER"){
-			send_reply_error(c, ERR_NOTREGISTERED, "You have not registered");
-		}
-	}
+    // add accept lower case
+    if (c.getStatus() != REGISTERED)
+    {
+        if (cmd != "PASS" && cmd != "NICK" && cmd != "USER")
+        {
+            send_reply_error(c, ERR_NOTREGISTERED, "You have not registered");
+        }
+    }
     if (cmd == "CAP")
         handle_cap(c);
     else if (cmd == "PING")
-        handle_ping(c);
+        handle_ping(msg, c);
     else if (cmd == "PASS")
         handle_pass(msg, c);
     else if (cmd == "NICK")
@@ -25,6 +27,17 @@ void Server::exec_flow(Message &msg, Client &c)
         c.setStatus(QUIT);
     else if (msg.get_command() == "PRIVMSG")
         handle_privmsg(msg, c);
+    if (c.getBoolPass() && c.getBoolNick() && c.getBoolUser() && c.getStatus() != REGISTERED)
+    {
+        c.setStatus(REGISTERED);
+        std::string nick = c.getNickname();
+        std::string reply = ":irc.server 001 " + nick + " :Welcome to the IRC Network " + nick + "\r\n";
+        send(c.getFdClient(), reply.c_str(), reply.size(), 0);
+    }
+    std::cout << "REGCHECK pass=" << c.getBoolPass()
+          << " nick=" << c.getBoolNick()
+          << " user=" << c.getBoolUser()
+          << " status=" << c.getStatus() << std::endl;
 }
 
 void Server::handle_nick(Message &msg, Client &c)
@@ -32,28 +45,28 @@ void Server::handle_nick(Message &msg, Client &c)
     IrcError error = msg.parsing_nick();
     if (error != IRC_OK)
     {
-		if(error == ERR_NONICKNAMEGIVEN)
-			send_reply_error(c, error, "No nickname given");
-		if(error == ERR_INVALID)
-			send_reply_error(c, error, "No nickname is invalid");
-		//sur ce message d'erreur normalement on met <client><nick> :message
-		//comment faire remonter le <client> ? necessaire ?  detail
-		if(error == ERR_ERRONEUSNICKNAME)
-			send_reply_error(c, error, "Erroneus nickname");
-		return;
+        if (error == ERR_NONICKNAMEGIVEN)
+            send_reply_error(c, error, "No nickname given");
+        if (error == ERR_INVALID)
+            send_reply_error(c, error, "No nickname is invalid");
+        // sur ce message d'erreur normalement on met <client><nick> :message
+        // comment faire remonter le <client> ? necessaire ?  detail
+        if (error == ERR_ERRONEUSNICKNAME)
+            send_reply_error(c, error, "Erroneus nickname");
+        return;
     }
-    //check prealable
-    std::vector<std::string> args = msg.get_args(); 
+    // check prealable
+    std::vector<std::string> args = msg.get_args();
     for (size_t i = 0; i < vec_clients.size(); i++)
     {
         if (&vec_clients[i] != &c && vec_clients[i].getNickname() == args[0])
         {
             error = ERR_NICKNAMEINUSE;
-			send_reply_error(c, error, "NICK: Nickname is already in use");
+            send_reply_error(c, error, "NICK: Nickname is already in use");
             return;
         }
     }
-    //execution final
+    // execution final
     c.setNickname(args[0]);
     c.setBoolNick(true);
 }
@@ -61,17 +74,18 @@ void Server::handle_nick(Message &msg, Client &c)
 void Server::handle_user(Message &msg, Client &c)
 {
     IrcError error = msg.parsing_user();
-    if (error != IRC_OK){
-		if(error == ERR_NEEDMOREPARAMS)
-			send_reply_error(c, error, "USER :Not enough parameters");
-		if(error == ERR_INVALID)
-			send_reply_error(c, error, "User is invalid");
-		return;
+    if (error != IRC_OK)
+    {
+        if (error == ERR_NEEDMOREPARAMS)
+            send_reply_error(c, error, "USER :Not enough parameters");
+        if (error == ERR_INVALID)
+            send_reply_error(c, error, "User is invalid");
+        return;
     }
     std::vector<std::string> args = msg.get_args();
     c.setUsername(args[0]);
-	//parsing_user vérifie args.size() != 4 mais si le trailing est dans args[3] 
-	//— est-ce que ton parser met bien le realname en args[3] ? Vérifie avec un cerr de debug.
+    // parsing_user vérifie args.size() != 4 mais si le trailing est dans args[3]
+    // — est-ce que ton parser met bien le realname en args[3] ? Vérifie avec un cerr de debug.
     c.setRealname(args[3]);
     c.setBoolUser(true);
 }
@@ -81,9 +95,9 @@ void Server::handle_pass(Message &msg, Client &c)
     IrcError error = msg.parsing_pass();
     if (error != IRC_OK)
     {
-		if(error == ERR_NEEDMOREPARAMS)
-			send_reply_error(c, error, " PASS :Not enough parameters");
-		return;
+        if (error == ERR_NEEDMOREPARAMS)
+            send_reply_error(c, error, " PASS :Not enough parameters");
+        return;
     }
     const std::vector<std::string> args = msg.get_args();
     if (args.size() != 1)
@@ -94,7 +108,7 @@ void Server::handle_pass(Message &msg, Client &c)
     if (args[0] != this->password)
     {
         error = ERR_PASSWDMISMATCH;
-		send_reply_error(c, error, "Password incorrect");
+        send_reply_error(c, error, "Password incorrect");
         return;
     }
     c.setBoolPass(true);
@@ -132,11 +146,23 @@ void Server::handle_cap(Client &c)
     send(c.getFdClient(), reply.c_str(), reply.size(), 0);
 }
 
-void Server::handle_ping(Client &c)
+void Server::handle_ping(Message &msg, Client &c)
 {
-    std::vector<std::string> args;
+    std::vector<std::string> args = msg.get_args();
     if (args.empty() || args.size() != 1 || args[0].empty())
         return;
-    std::string msg_to_send = "PONG :" + args[0];
+    std::string msg_to_send = "PONG :" + args[0] + "\r\n";
     send(c.getFdClient(), msg_to_send.c_str(), msg_to_send.size(), 0);
+}
+
+void Server::remove_client(int fd)
+{
+    for (size_t j = 0; j < vec_clients.size(); j++)
+    {
+        if (vec_clients[j].getFdClient() == fd)
+        {
+            vec_clients.erase(vec_clients.begin() + j);
+            break;
+        }
+    }
 }

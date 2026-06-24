@@ -126,15 +126,13 @@ Client *Server::find_client(std::vector<pollfd> fds, size_t i)
     return NULL;
 }
 
-void Server::send_reply_error(Client &c, IrcError error, const std::string &message){
-	
-	int code = static_cast<int>(error);
-	std::ostringstream reply;
+void Server::send_reply_error(Client &c, IrcError error, const std::string &message)
+{
 
-	reply << ":irc.server " 
-          << code
-          << " " << c.getNickname() 
-          << " :" << message << "\r\n";
+    int code = static_cast<int>(error);
+    std::ostringstream reply;
+
+    reply << ":irc.server " << code << " " << c.getNickname() << " :" << message << "\r\n";
     send(c.getFdClient(), reply.str().c_str(), reply.str().size(), 0);
 }
 
@@ -168,19 +166,16 @@ int Server::client_actions(size_t i)
     c->setBuffer(c->getBuffer() + std::string(buf, n));
 
     // 4. boucle clean du buffer
-    Message message;
     while (c->getBuffer().find("\r\n") != std::string::npos)
     {
-        std::cout << "RAW BUFFER: [" << c->getBuffer() << "]" << std::endl;
+        Message message;
         // a. extraire la premiere commande + nettoyer
         message.extract_and_clean(*c);
         // b. on parse la lign extraire en focniton de commande parisng 2
         // c. execute
         const std::vector<std::string> args = message.get_args();
         std::cout << "[PARSED fd=" << fds[i].fd << "] "
-              << "CMD=" << message.get_command()
-              << " ARGS=" << args[0]
-              << std::endl;
+                  << "CMD=" << message.get_command() << std::endl;
         this->exec_flow(message, *c);
         if (c->getStatus() == QUIT)
             return (1);
@@ -227,6 +222,7 @@ int Server::run()
                         return (-1);
                     if (status > 0)
                     {
+                        remove_client(fds[i].fd);
                         close(fds[i].fd);
                         std::cerr << "Client closed: " << fds[i].fd << "\n";
                         fds.erase(fds.begin() + i);
@@ -236,6 +232,7 @@ int Server::run()
                 }
                 if (fds[i].revents & (POLLHUP | POLLERR | POLLNVAL))
                 {
+                    remove_client(fds[i].fd);
                     close(fds[i].fd);
                     fds.erase(fds.begin() + i);
                     --i;

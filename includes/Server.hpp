@@ -5,7 +5,6 @@
 #include <arpa/inet.h>
 #include <cctype>
 #include <cerrno>
-#include <sstream>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -13,6 +12,7 @@
 #include <iostream>
 #include <netinet/in.h>
 #include <poll.h>
+#include <sstream>
 #include <string>
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -47,10 +47,11 @@ class Server
     void handle_pass(Message &msg, Client &c);
     void handle_privmsg(Message &msg, Client &c);
     void handle_cap(Client &c);
-    void handle_ping(Client &c);
+    void handle_ping(Message &msg, Client &c);
     int find_dest(std::string dest);
+    void remove_client(int fd);
     Client *find_client(std::vector<pollfd> fds, size_t i);
-	  void send_reply_error(Client &c, IrcError error, const std::string &message);
+    void send_reply_error(Client &c, IrcError error, const std::string &message);
     const std::string &getPort() const;
     const std::string &getPassword() const;
 };
