@@ -21,6 +21,7 @@ class Client
     std::string _username;
     std::string _hostname; // adresse ip du client
     std::string _buffer;   // permet de stocker les morceaux envoyer par recv()
+    // std::vector<Channel *> Channel;
     e_CLientState _status;
     bool _bool_pass;
     bool _bool_nick;

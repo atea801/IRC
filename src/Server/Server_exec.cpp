@@ -23,9 +23,9 @@ void Server::exec_flow(Message &msg, Client &c)
         handle_nick(msg, c);
     else if (cmd == "USER")
         handle_user(msg, c);
-    else if (msg.get_command() == "QUIT")
-        c.setStatus(QUIT);
-    else if (msg.get_command() == "PRIVMSG")
+    else if (cmd == "QUIT")
+        handle_quit(msg, c);
+    else if (cmd == "PRIVMSG")
         handle_privmsg(msg, c);
     if (c.getBoolPass() && c.getBoolNick() && c.getBoolUser() && c.getStatus() != REGISTERED)
     {
@@ -34,10 +34,8 @@ void Server::exec_flow(Message &msg, Client &c)
         std::string reply = ":irc.server 001 " + nick + " :Welcome to the IRC Network " + nick + "\r\n";
         send(c.getFdClient(), reply.c_str(), reply.size(), 0);
     }
-    std::cout << "REGCHECK pass=" << c.getBoolPass()
-          << " nick=" << c.getBoolNick()
-          << " user=" << c.getBoolUser()
-          << " status=" << c.getStatus() << std::endl;
+    std::cout << "REGCHECK pass=" << c.getBoolPass() << " nick=" << c.getBoolNick() << " user=" << c.getBoolUser()
+              << " status=" << c.getStatus() << std::endl;
 }
 
 void Server::handle_nick(Message &msg, Client &c)
@@ -122,22 +120,53 @@ void Server::handle_privmsg(Message &msg, Client &c)
 
     // }
     const std::vector<std::string> args = msg.get_args();
+    if (args.empty() && args[0].empty())
+        return;
     int dest = find_dest(args[0]);
-    std::cout << "ARGS SIZE = " << args.size() << std::endl;
-    for (size_t i = 0; i < args.size(); i++)
-        std::cout << "args[" << i << "] = [" << args[i] << "]" << std::endl;
-    std::string msg_to_send = ":" + c.getNickname() + " PRIVMSG " + args[0] + " :" + args[1] + "\r\n";
-    send(dest, msg_to_send.c_str(), msg_to_send.size(), 0);
+    if (dest >= 0)
+    {
+        for (size_t i = 0; i < args.size(); i++)
+            std::cout << "args[" << i << "] = [" << args[i] << "]" << std::endl;
+        std::string msg_to_send = ":" + c.getNickname() + " PRIVMSG " + args[0] + " :" + args[1] + "\r\n";
+        send(dest, msg_to_send.c_str(), msg_to_send.size(), 0);
+    }
+    else if (find_channel(args[0]) >= 0)
+    {
+        std::vector<Client *> chan_mem = channels[find_channel(args[0])].getMembers();
+        for (int i = 0; i < chan_mem.size(); i++)
+        {
+            std::string msg_to_send =
+                ":" + chan_mem[i]->getNickname() + " PRIVMSG " + args[0] + " :" + args[1] + "\r\n";
+            send(chan_mem[i]->getFdClient(), msg_to_send.c_str(), msg_to_send.size(), 0);
+        }
+    }
+    return;
 }
 
 int Server::find_dest(std::string dest)
 {
-    for (size_t i = 0; i < vec_clients.size(); i++)
+    if (dest[0] != '#')
     {
-        if (vec_clients[i].getNickname() == dest)
-            return vec_clients[i].getFdClient();
+        for (size_t i = 0; i < vec_clients.size(); i++)
+        {
+            if (vec_clients[i].getNickname() == dest)
+                return vec_clients[i].getFdClient();
+        }
     }
-    return -1;
+    return (-1);
+}
+
+int Server::find_channel(std::string dest)
+{
+    if (channels.size() > 0)
+    {
+        for (int i = 0; i < channels.size(); i++)
+        {
+            if (channels[i].getName() == dest)
+                return (i);
+        }
+    }
+    return (-1);
 }
 
 void Server::handle_cap(Client &c)
@@ -165,4 +194,26 @@ void Server::remove_client(int fd)
             break;
         }
     }
+}
+
+// work in progress rien a voir c est nul pour l instant
+void Server::handle_quit(Message &msg, Client &c)
+{
+    // std::vector<std::string> args = msg.get_args();
+    // if (!args.empty() && !args[0].empty())
+    // {
+    //     for (int i = 0; i < this->channels.size(); i++)
+    //     {
+    //         std::vector<Client *>Clients = channels[i].getMembers();
+    //         for (int j = 0; j < Clients.size(); j++)
+    //         {
+    //             if (Clients[j]->getFdClient() == c.getFdClient())
+    //             {
+    //                handle_privmsg(msg, c);
+    //             }
+    //         }
+    //     }
+    // }
+    // else
+    c.setStatus(QUIT);
 }

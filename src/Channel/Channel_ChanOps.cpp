@@ -12,27 +12,27 @@
 
 #include "Channel.hpp"
 
-void    Channel::addOperator(Client &c)
+void Channel::addOperator(Client &c)
 {
     this->_chanOps.add(c);
 }
 
-void    Channel::removeOperator(Client &c)
+void Channel::removeOperator(Client &c)
 {
     this->_chanOps.remove(c);
 }
 
-bool    Channel::isOperator(Client &c)
+bool Channel::isOperator(Client &c)
 {
     return (this->_chanOps.has(c));
 }
 
-void    Channel::invite(Client &c)
+void Channel::invite(Client &c)
 {
     this->_invited.add(c);
 }
 
-bool    Channel::isInvited(Client &c)
+bool Channel::isInvited(Client &c)
 {
     return (this->_invited.has(c));
 }

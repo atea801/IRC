@@ -13,33 +13,33 @@
 #include "Channel.hpp"
 #include <iostream>
 
-//a implementer en prenant en compte les variables membres
+// a implementer en prenant en compte les variables membres
 Channel::Channel(void)
-    : _name(""), _members(), _chanOps(), _invited(), _topic(""), _topic_restricted(false), 
-    _is_invite_only(false), _has_a_password(false), _password(""), _has_a_user_limit(false),
-    _user_limit(0)
+    : _name(""), _members(), _chanOps(), _invited(), _topic(""), _topic_restricted(false), _is_invite_only(false),
+      _has_a_password(false), _password(""), _has_a_user_limit(false), _user_limit(0)
 {
     std::cout << "Channel default constructor called" << std::endl;
 }
 
-//a implementer en prenant en compte les variables membres
-Channel::Channel(const Channel& copy)
+// a implementer en prenant en compte les variables membres
+Channel::Channel(const Channel &copy)
 {
     std::cout << "Channel copy constructor called" << std::endl;
     *this = copy;
 }
 
-//a implementer en prenant en compte les variables membres
+// a implementer en prenant en compte les variables membres
 Channel::~Channel(void)
 {
     std::cout << "Channel destructor called" << std::endl;
 }
 
-//a implementer en prenant en compte les variables membres
-Channel& Channel::operator=(const Channel& copy)
+// a implementer en prenant en compte les variables membres
+Channel &Channel::operator=(const Channel &copy)
 {
     std::cout << "Channel assignment operator called" << std::endl;
-    if (this != &copy) {
+    if (this != &copy)
+    {
         this->_name = copy._name;
         this->_members = copy._members;
         this->_chanOps = copy._chanOps;

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Channel.hpp"
 #include "Client.hpp"
 #include "Message.hpp"
 #include <arpa/inet.h>
@@ -24,6 +25,7 @@ class Server
   private:
     std::vector<pollfd> fds;
     std::vector<Client> vec_clients;
+    std::vector<Channel> channels;
     std::string port;
     std::string password;
     int server_fd;
@@ -48,7 +50,9 @@ class Server
     void handle_privmsg(Message &msg, Client &c);
     void handle_cap(Client &c);
     void handle_ping(Message &msg, Client &c);
+    void handle_quit(Message &msg, Client &c);
     int find_dest(std::string dest);
+    int find_channel(std::string dest);
     void remove_client(int fd);
     Client *find_client(std::vector<pollfd> fds, size_t i);
     void send_reply_error(Client &c, IrcError error, const std::string &message);
