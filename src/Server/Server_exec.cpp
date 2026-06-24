@@ -114,6 +114,14 @@ void Server::handle_privmsg(Message &msg, Client &c)
     send(dest, msg_to_send.c_str(), msg_to_send.size(), 0);
 }
 
+/*
+Servers MUST NOT send multiple users in this message to clients, 
+and MUST distribute these multiple-user KICK messages as a series of messages
+with a single user name on each. This is necessary to maintain backward
+compatibility with existing client software. 
+If a KICK message is distributed in this way, <comment> (if it exists)
+should be on each of these messages.
+*/
 void Server::handle_Kick(Message &msg, Client &c)
 {
     /*IrcError error = msg.parsing_Kick();
@@ -135,6 +143,7 @@ void Server::handle_Kick(Message &msg, Client &c)
 		return;
     }
     */
+    
 }
 
 int Server::find_dest(std::string dest)
