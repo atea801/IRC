@@ -22,11 +22,15 @@
 class Server
 {
   private:
+    std::string _server_name;
     std::vector<pollfd> fds;
     std::vector<Client> vec_clients;
     std::string port;
     std::string password;
     int server_fd;
+
+	void send_raw(Client &c, const std::string &line);
+	std::string reply_head(Client &c, IrcError error) const;
 
   public:
     Server(std::string port, std::string password);
