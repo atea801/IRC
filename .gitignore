@@ -35,6 +35,8 @@
 *.lib
 
 # Executables
+irc
+channel_tests
 *.exe
 *.out
 *.app

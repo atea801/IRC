@@ -2,6 +2,10 @@
 
 NAME =	irc
 SRCS =	src/main.cpp \
+		src/Channel/Channel.cpp \
+		src/Channel/Channel_members.cpp \
+		src/Channel/Channel_ChanOps.cpp \
+		src/Channel/Channel_get_set.cpp \
 		src/Client/Client.cpp \
 		src/Client/Client_get_set.cpp \
 		src/Message/Message_extract.cpp \
