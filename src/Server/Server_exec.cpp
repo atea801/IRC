@@ -145,7 +145,10 @@ void Server::handle_Kick(Message &msg, Client &c)
     */
     if (msg.get_channels().size() == msg.get_clients().size())
     {
-        
+        for (size_t i = 0; i < msg.get_channels().size(); i++)
+        {
+            //find_channel
+        }
     }
 }
 
