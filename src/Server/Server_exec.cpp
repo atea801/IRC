@@ -162,3 +162,15 @@ int Server::find_dest(std::string dest)
     return -1;
 }
 
+int Server::find_channel(std::string dest)
+{
+    if (channels.size() > 0)
+    {
+        for (int i = 0; i < channels.size(); i++)
+        {
+            if (channels[i].getName() == dest)
+                return (i);
+        }
+    }
+    return (-1);
+}
