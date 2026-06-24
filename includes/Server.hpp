@@ -29,26 +29,41 @@ class Server
     int server_fd;
 
   public:
+
+    /*--Constructeurs-Destructeur--*/
     Server(std::string port, std::string password);
     ~Server();
     Server(const Server &copy);
     Server &operator=(const Server &other);
-    int check_port(char *port);
-    int init_server(char **av);
+
+    /*--Getters--*/
+    const std::string &getPort() const;
+    const std::string &getPassword() const;
+
+    /*--Setters--*/
     void setPort(const std::string &port);
     void setPassword(const std::string &password);
+
+    /*--création et gestion de la connection Client-Serveur--*/
+    int check_port(char *port);
+    int init_server(char **av);
     int run();
     int accept_new_client();
     int create_socket();
     int client_actions(size_t i);
+
+    /*--Gestion des commandes IRC--*/
     void exec_flow(Message &msg, Client &c);
     void handle_nick(Message &msg, Client &c);
     void handle_user(Message &msg, Client &c);
     void handle_pass(Message &msg, Client &c);
     void handle_privmsg(Message &msg, Client &c);
+
+    /*--Fonctions utilitaires*/
     int find_dest(std::string dest);
     Client *find_client(std::vector<pollfd> fds, size_t i);
-	void send_reply_error(Client &c, IrcError error, const std::string &message);
-    const std::string &getPort() const;
-    const std::string &getPassword() const;
+
+    /*--Gestion des erreurs (Numeric replies)--*/
+	  void send_reply_error(Client &c, IrcError error, const std::string &message);
+    
 };
