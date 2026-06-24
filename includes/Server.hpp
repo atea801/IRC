@@ -2,6 +2,7 @@
 
 #include "Client.hpp"
 #include "Message.hpp"
+#include "Channel.hpp"
 #include <arpa/inet.h>
 #include <cctype>
 #include <cerrno>
@@ -24,6 +25,7 @@ class Server
   private:
     std::vector<pollfd> fds;
     std::vector<Client> vec_clients;
+    std::vector<Channel> channels;
     std::string port;
     std::string password;
     int server_fd;
