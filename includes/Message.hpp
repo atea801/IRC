@@ -11,6 +11,8 @@ class Message
     std::string command;
     std::vector<std::string> args;
     bool trailing_arg;
+    std::vector<std::string> channels;
+    std::vector<std::string> clients;
 
   public:
     Message();
@@ -24,6 +26,8 @@ class Message
     void fill_cmd_and_args(size_t pos, std::string data);
     const std::string &get_command() const;
     const std::vector<std::string> &get_args() const;
+    const std::vector<std::string> &get_channels() const;
+    const std::vector<std::string> &get_clients() const;
     IrcError parsing_nick();
     IrcError parsing_user();
     IrcError parsing_pass();

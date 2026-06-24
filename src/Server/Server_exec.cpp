@@ -143,7 +143,10 @@ void Server::handle_Kick(Message &msg, Client &c)
 		return;
     }
     */
-    
+    if (msg.get_channels().size() == msg.get_clients().size())
+    {
+        
+    }
 }
 
 int Server::find_dest(std::string dest)
