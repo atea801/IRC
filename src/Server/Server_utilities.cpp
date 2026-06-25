@@ -6,7 +6,7 @@
 /*   By: bkaras-g <bkaras-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/25 11:15:45 by bkaras-g          #+#    #+#             */
-/*   Updated: 2026/06/25 12:33:21 by bkaras-g         ###   ########.fr       */
+/*   Updated: 2026/06/25 14:11:15 by bkaras-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,4 +49,25 @@ std::vector<std::string> Server::findChannelsInMsg(Message &msg)
     }
     channels.push_back(channels_token.substr(pos));
     return (channels);
+}
+
+int Server::checkChannels(const std::vector<std::string> &channelsToCheck) const
+{
+    bool found;
+
+    for (size_t i = 0; i < channelsToCheck.size(); i++)
+    {
+        found = false;
+        for (size_t j = 0; j < this->channels.size(); j++)
+        {
+            if (channelsToCheck[i] == this->channels[j].getName())
+            {
+                found = true;
+                break;
+            }    
+        }
+        if (found == false)
+            return (ERR_NOSUCHCHANNEL);
+    }
+    return (IRC_OK);
 }
