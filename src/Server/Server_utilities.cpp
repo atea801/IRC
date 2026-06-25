@@ -6,7 +6,7 @@
 /*   By: bkaras-g <bkaras-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/25 11:15:45 by bkaras-g          #+#    #+#             */
-/*   Updated: 2026/06/25 14:15:42 by bkaras-g         ###   ########.fr       */
+/*   Updated: 2026/06/25 14:34:46 by bkaras-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 // Cherche dans les arguments du message le premier token débutant par '#' ou '&',
 // puis découpe ce token par ',' pour retourner la liste des noms de channels (avec leur préfixe).
 // @param msg  Le message IRC parsé dont on analyse les arguments.
-// @return     Un vecteur de noms de channels sans préfixe, ou un vecteur vide si aucun channel trouvé.
+// @return     Un vecteur de noms de channels avec leur préfixe, ou un vecteur vide si aucun channel trouvé.
 std::vector<std::string> Server::findChannelsInMsg(Message &msg)
 {
     std::vector<std::string> channels;
@@ -51,6 +51,10 @@ std::vector<std::string> Server::findChannelsInMsg(Message &msg)
     return (channels);
 }
 
+// Vérifie que chaque channel de channelsToCheck existe sur le serveur.
+// Le préfixe fait partie du nom : '#music' et '&music' sont deux channels distincts.
+// @param channelsToCheck  Liste des noms de channels (avec préfixe) à vérifier.
+// @return                 IRC_OK si tous les channels existent, ERR_NOSUCHCHANNEL sinon.
 int Server::checkChannels(const std::vector<std::string> &channelsToCheck) const
 {
     bool found;
@@ -68,6 +72,30 @@ int Server::checkChannels(const std::vector<std::string> &channelsToCheck) const
         }
         if (found == false)
             return (ERR_NOSUCHCHANNEL);
+    }
+    return (IRC_OK);
+}
+
+// Vérifie que chaque client de clientsToCheck existe sur le serveur (par son nickname).
+// @param clientsToCheck  Liste des nicknames à vérifier.
+// @return                IRC_OK si tous les clients existent, ERR_NOSUCHNICK sinon.
+int Server::checkClientsOnServer(const std::vector<std::string> &clientsToCheck) const
+{
+    bool found;
+
+    for (size_t i = 0; i < clientsToCheck.size(); i++)
+    {
+        found = false;
+        for (size_t j = 0; j < this->vec_clients.size(); j++)
+        {
+            if (clientsToCheck[i] == this->vec_clients[j].getNickname())
+            {
+                found = true;
+                break;
+            }
+        }
+        if (found == false)
+            return (ERR_NOSUCHNICK);
     }
     return (IRC_OK);
 }

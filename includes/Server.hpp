@@ -70,6 +70,7 @@ class Server
 
     /*--Gestion des erreurs (Numeric replies)--*/
     int Server::checkChannels(const std::vector<std::string> &channelsToCheck) const;
+    int Server::checkClientsOnServer(const std::vector<std::string> &clientsToCheck) const;
     void send_reply_error(Client &c, IrcError error, const std::string &message);
     
 };
