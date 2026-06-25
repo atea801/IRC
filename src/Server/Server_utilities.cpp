@@ -6,7 +6,7 @@
 /*   By: bkaras-g <bkaras-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/25 11:15:45 by bkaras-g          #+#    #+#             */
-/*   Updated: 2026/06/25 16:59:19 by bkaras-g         ###   ########.fr       */
+/*   Updated: 2026/06/25 17:38:26 by bkaras-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,10 +94,22 @@ int Server::checkMultipleClientsOnServer(const std::vector<std::string> &clients
 
 bool Server::checkSingleClientOnServer(std::string nickname)
 {
+    return (findClientByNickname(nickname) != NULL);
+}
+
+/*
+identifie un Client à partir de son nickname
+@param nickname le nickname à identifier
+@return Client* si trouvé; NULL si pas trouvé
+Attention ! Le pointeur vers Client qui est return est valide tant que le vecteur
+des clients n'est pas modifié avec un pushback() par exemple. A utiliser tout de suite.
+*/
+Client* Server::findClientByNickname(const std::string &nickname)
+{
     for (size_t j = 0; j < this->vec_clients.size(); j++)
     {
         if (nickname == this->vec_clients[j].getNickname())
-            return (true);
+            return (&this->vec_clients[j]);
     }
-    return (false);
+    return (NULL);
 }
