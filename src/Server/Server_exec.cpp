@@ -172,7 +172,7 @@ void Server::handle_Kick(Message &msg, Client &c)
     else //sinon on supprime chaque user de chaque channel specifie
     //vérifier si c'est bien la logique de KICK
     {
-        for (size_t chanIndex; chanIndex < channelsFromMsg.size(); chanIndex++)
+        for (size_t chanIndex = 0; chanIndex < channelsFromMsg.size(); chanIndex++)
         {
             for (size_t clientIndex = 0; clientIndex < clientsFromMsg.size(); clientIndex++)
             {
