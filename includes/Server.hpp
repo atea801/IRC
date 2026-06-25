@@ -69,8 +69,9 @@ class Server
     std::vector<std::string> findChannelsInMsg(Message &msg);
 
     /*--Gestion des erreurs (Numeric replies)--*/
-    int Server::checkChannels(const std::vector<std::string> &channelsToCheck) const;
-    int Server::checkClientsOnServer(const std::vector<std::string> &clientsToCheck) const;
+    int checkChannels(const std::vector<std::string> &channelsToCheck) const;
+    bool checkSingleClientOnServer(std::string nickname);
+    int checkMultipleClientsOnServer(const std::vector<std::string> &clientsToCheck);
     void send_reply_error(Client &c, IrcError error, const std::string &message);
     
 };

@@ -6,7 +6,7 @@
 /*   By: bkaras-g <bkaras-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/25 11:15:45 by bkaras-g          #+#    #+#             */
-/*   Updated: 2026/06/25 14:34:46 by bkaras-g         ###   ########.fr       */
+/*   Updated: 2026/06/25 16:59:19 by bkaras-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,23 +79,25 @@ int Server::checkChannels(const std::vector<std::string> &channelsToCheck) const
 // Vérifie que chaque client de clientsToCheck existe sur le serveur (par son nickname).
 // @param clientsToCheck  Liste des nicknames à vérifier.
 // @return                IRC_OK si tous les clients existent, ERR_NOSUCHNICK sinon.
-int Server::checkClientsOnServer(const std::vector<std::string> &clientsToCheck) const
+int Server::checkMultipleClientsOnServer(const std::vector<std::string> &clientsToCheck)
 {
     bool found;
 
     for (size_t i = 0; i < clientsToCheck.size(); i++)
     {
-        found = false;
-        for (size_t j = 0; j < this->vec_clients.size(); j++)
-        {
-            if (clientsToCheck[i] == this->vec_clients[j].getNickname())
-            {
-                found = true;
-                break;
-            }
-        }
+        found = this->checkSingleClientOnServer(clientsToCheck[i]);
         if (found == false)
             return (ERR_NOSUCHNICK);
     }
     return (IRC_OK);
+}
+
+bool Server::checkSingleClientOnServer(std::string nickname)
+{
+    for (size_t j = 0; j < this->vec_clients.size(); j++)
+    {
+        if (nickname == this->vec_clients[j].getNickname())
+            return (true);
+    }
+    return (false);
 }
