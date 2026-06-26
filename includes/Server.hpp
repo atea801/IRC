@@ -80,9 +80,4 @@ class Server
 	void send_reply_error(Client &c, IrcError error, const std::string &message);
 	void send_reply_error(Client &c, IrcError error, const std::string &p1, const std::string &message);
 	void send_reply_error(Client &c, IrcError error, const std::string &p1, const std::string &p2, const std::string &message);
-
-
-	const std::string &getPort() const;
-    const std::string &getPassword() const;
-    
 };
