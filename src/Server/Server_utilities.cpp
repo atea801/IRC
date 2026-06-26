@@ -6,7 +6,7 @@
 /*   By: bkaras-g <bkaras-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/25 11:15:45 by bkaras-g          #+#    #+#             */
-/*   Updated: 2026/06/25 17:38:26 by bkaras-g         ###   ########.fr       */
+/*   Updated: 2026/06/26 12:07:32 by bkaras-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ std::vector<std::string> Server::findChannelsInMsg(Message &msg)
     while (comma_idx != std::string::npos)
     {
         channels.push_back(channels_token.substr(pos, comma_idx - pos));
-        pos = comma_idx + 1; //skip the ',' and the '#' or '&'
+        pos = comma_idx + 1; //skip the ','
         comma_idx = channels_token.find(',', pos);
     }
     channels.push_back(channels_token.substr(pos));
