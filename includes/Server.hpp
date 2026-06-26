@@ -23,12 +23,16 @@
 class Server
 {
   private:
+    std::string _server_name;
     std::vector<pollfd> fds;
     std::vector<Client> vec_clients;
     std::vector<Channel> channels;
     std::string port;
     std::string password;
     int server_fd;
+
+	void send_raw(Client &c, const std::string &line);
+	std::string reply_head(Client &c, IrcError error) const;
 
   public:
 
@@ -73,6 +77,12 @@ class Server
     int checkChannels(const std::vector<std::string> &channelsToCheck) const;
     bool checkSingleClientOnServer(std::string nickname);
     int checkMultipleClientsOnServer(const std::vector<std::string> &clientsToCheck);
-    void send_reply_error(Client &c, IrcError error, const std::string &message);
+  void send_reply_error(Client &c, IrcError error, const std::string &message);
+	void send_reply_error(Client &c, IrcError error, const std::string &p1, const std::string &message);
+	void send_reply_error(Client &c, IrcError error, const std::string &p1, const std::string &p2, const std::string &message);
+
+
+	const std::string &getPort() const;
+    const std::string &getPassword() const;
     
 };

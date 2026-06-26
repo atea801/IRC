@@ -34,10 +34,8 @@ void Server::handle_nick(Message &msg, Client &c)
 			send_reply_error(c, error, "No nickname given");
 		if(error == ERR_INVALID)
 			send_reply_error(c, error, "No nickname is invalid");
-		//sur ce message d'erreur normalement on met <client><nick> :message
-		//comment faire remonter le <client> ? necessaire ?  detail
 		if(error == ERR_ERRONEUSNICKNAME)
-			send_reply_error(c, error, "Erroneus nickname");
+			send_reply_error(c, error, msg.get_args()[0], "Erroneus nickname");
 		return;
     }
     //check prealable
@@ -47,11 +45,11 @@ void Server::handle_nick(Message &msg, Client &c)
         if (&vec_clients[i] != &c && vec_clients[i].getNickname() == args[0])
         {
             error = ERR_NICKNAMEINUSE;
-			send_reply_error(c, error, "NICK: Nickname is already in use");
+			send_reply_error(c, error, msg.get_args()[0], "Nickname is already in use");
             return;
         }
     }
-    //execution final
+    //execution finale
     c.setNickname(args[0]);
     c.setBoolNick(true);
 }
@@ -61,7 +59,7 @@ void Server::handle_user(Message &msg, Client &c)
     IrcError error = msg.parsing_user();
     if (error != IRC_OK){
 		if(error == ERR_NEEDMOREPARAMS)
-			send_reply_error(c, error, "USER :Not enough parameters");
+			send_reply_error(c, error, msg.get_command(), "Not enough parameters");
 		if(error == ERR_INVALID)
 			send_reply_error(c, error, "User is invalid");
 		return;
@@ -80,15 +78,10 @@ void Server::handle_pass(Message &msg, Client &c)
     if (error != IRC_OK)
     {
 		if(error == ERR_NEEDMOREPARAMS)
-			send_reply_error(c, error, " PASS :Not enough parameters");
+			send_reply_error(c, error, msg.get_command(), "Not enough parameters");
 		return;
     }
     const std::vector<std::string> args = msg.get_args();
-    if (args.size() != 1)
-    {
-        error = ERR_NEEDMOREPARAMS;
-        return;
-    }
     if (args[0] != this->password)
     {
         error = ERR_PASSWDMISMATCH;
