@@ -142,10 +142,20 @@ void Server::handle_Kick(Message &msg, Client &c)
     }
     if (checkChannels(channelsRaw) == ERR_NOSUCHCHANNEL)
     {
+        //ERR_NOSUCHCHANNEL (403)
         //send_reply_error "<client> <channel> :No such channel"
     }
     Channel *chan = findChannelByName(channelsRaw[0]);
-    if (chan.)
+    if (!chan->isMember(c))
+    {
+        //ERR_NOTONCHANNEL (442)
+        //send_reply_error "<client> <channel> :You're not on that channel"
+    }
+    if (!chan->isOperator(c))
+    {
+        //ERR_CHANOPRIVSNEEDED (482)
+        //send_reply_error "<client> <channel> :You're not channel operator"
+    }
     
     
     // PtrVec<Channel> channelsFromMsg = get_channel_ptrs_from_message(msg);
