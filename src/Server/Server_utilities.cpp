@@ -6,7 +6,7 @@
 /*   By: bkaras-g <bkaras-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/25 11:15:45 by bkaras-g          #+#    #+#             */
-/*   Updated: 2026/06/26 12:07:32 by bkaras-g         ###   ########.fr       */
+/*   Updated: 2026/06/26 12:25:44 by bkaras-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,22 +33,29 @@ std::vector<std::string> Server::findChannelsInMsg(Message &msg)
             break;
         }    
     }
-    if (channels_token == "")
+    if (channels_token == "") // si pas de channel trouvé, on renvoie un vecteur vide
         return (channels);
         
     //On récupère les noms des channels en retirant les préfixes '#' et '&'
-    size_t comma_idx;
+    return (ft_split(',', channels_token));
+}
+
+std::vector<std::string> ft_split(char separator, const std::string &str)
+{
+    size_t sep_idx;
     size_t pos;
+    std::vector<std::string> result;
+
     pos = 0;
-    comma_idx = channels_token.find(',', pos);
-    while (comma_idx != std::string::npos)
+    sep_idx = str.find(separator, pos);
+    while (sep_idx != std::string::npos)
     {
-        channels.push_back(channels_token.substr(pos, comma_idx - pos));
-        pos = comma_idx + 1; //skip the ','
-        comma_idx = channels_token.find(',', pos);
+        result.push_back(str.substr(pos, sep_idx - pos));
+        pos = sep_idx + 1; //skip the separator
+        sep_idx = str.find(separator, pos);
     }
-    channels.push_back(channels_token.substr(pos));
-    return (channels);
+    result.push_back(str.substr(pos));
+    return (result);
 }
 
 // Vérifie que chaque channel de channelsToCheck existe sur le serveur.

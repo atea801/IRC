@@ -86,3 +86,6 @@ class Server
     const std::string &getPassword() const;
     
 };
+
+// Fonction utilitaire libre (non-membre) : découpe `str` selon `separator`.
+std::vector<std::string> ft_split(char separator, const std::string &str);
