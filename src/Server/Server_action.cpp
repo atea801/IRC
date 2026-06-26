@@ -103,7 +103,7 @@ int Server::accept_new_client()
         client_p.revents = 0;
         fds.push_back(client_p);
         Client c(client_p.fd);
-        vec_clients.push_back(c);
+        vec_clients.insert(std::make_pair(c.getFdClient(), c));
     }
     return (0);
 }

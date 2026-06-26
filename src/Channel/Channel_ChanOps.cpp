@@ -1,4 +1,4 @@
- /* ************************************************************************** */
+/* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
 /*   Channel_ChanOps.cpp                                :+:      :+:    :+:   */
@@ -37,7 +37,7 @@ bool Channel::isInvited(Client &c)
     return (this->_invited.has(c));
 }
 
-void    Channel::removeInvited(Client &c)
+void Channel::removeInvited(Client &c)
 {
     this->_invited.remove(c);
 }

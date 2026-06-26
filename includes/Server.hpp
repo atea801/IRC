@@ -1,5 +1,9 @@
 #pragma once
 
+#include "Channel.hpp"
+#include "Client.hpp"
+#include "Message.hpp"
+#include "PtrVec.hpp"
 #include <arpa/inet.h>
 #include <cctype>
 #include <cerrno>
@@ -16,27 +20,23 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <vector>
-#include "Message.hpp"
-#include "Client.hpp"
-#include "Channel.hpp"
-#include "PtrVec.hpp"
+#include <map>
 
 class Server
 {
   private:
     std::string _server_name;
     std::vector<pollfd> fds;
-    std::vector<Client> vec_clients;
+    std::map<int, Client> vec_clients;
     std::vector<Channel> channels;
     std::string port;
     std::string password;
     int server_fd;
 
-	void send_raw(Client &c, const std::string &line);
-	std::string reply_head(Client &c, IrcError error) const;
+    void send_raw(Client &c, const std::string &line);
+    std::string reply_head(Client &c, IrcError error) const;
 
   public:
-
     /*--Constructeurs-Destructeur--*/
     Server(std::string port, std::string password);
     ~Server();
@@ -77,7 +77,8 @@ class Server
     Client *find_client(std::vector<pollfd> fds, size_t i);
 
     /*--Gestion des erreurs (Numeric replies)--*/
-	void send_reply_error(Client &c, IrcError error, const std::string &message);
-	void send_reply_error(Client &c, IrcError error, const std::string &p1, const std::string &message);
-	void send_reply_error(Client &c, IrcError error, const std::string &p1, const std::string &p2, const std::string &message);
+    void send_reply_error(Client &c, IrcError error, const std::string &message);
+    void send_reply_error(Client &c, IrcError error, const std::string &p1, const std::string &message);
+    void send_reply_error(Client &c, IrcError error, const std::string &p1, const std::string &p2,
+                          const std::string &message);
 };

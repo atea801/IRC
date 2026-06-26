@@ -183,22 +183,16 @@ void Server::handle_ping(Message &msg, Client &c)
 
 void Server::remove_client(int fd)
 {
-    for (size_t j = 0; j < vec_clients.size(); j++)
-    {
-        if (vec_clients[j].getFdClient() == fd)
-        {
-            vec_clients.erase(vec_clients.begin() + j);
-            break;
-        }
-    }
+        vec_clients.erase(fd);
 }
 
+
+//fonction en cours de creation
 void Server::handle_quit(Message &msg, Client &c)
 {
     std::vector<std::string> args = msg.get_args();
     if (!args.empty() && !args[0].empty())
     {
-        
     }
     else
         c.setStatus(QUIT);
