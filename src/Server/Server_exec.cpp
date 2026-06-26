@@ -144,7 +144,8 @@ void Server::handle_Kick(Message &msg, Client &c)
     {
         //send_reply_error "<client> <channel> :No such channel"
     }
-    
+    Channel *chan = findChannelByName(channelsRaw[0]);
+    if (chan.)
     
     
     // PtrVec<Channel> channelsFromMsg = get_channel_ptrs_from_message(msg);

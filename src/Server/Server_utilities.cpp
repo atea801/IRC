@@ -6,7 +6,7 @@
 /*   By: bkaras-g <bkaras-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/25 11:15:45 by bkaras-g          #+#    #+#             */
-/*   Updated: 2026/06/26 15:38:15 by bkaras-g         ###   ########.fr       */
+/*   Updated: 2026/06/26 15:39:57 by bkaras-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,12 +111,29 @@ identifie un Client à partir de son nickname
 Attention ! Le pointeur vers Client qui est return est valide tant que le vecteur
 des clients n'est pas modifié avec un pushback() par exemple. A utiliser tout de suite.
 */
-Client* Server::findClientByNickname(const std::string &nickname) const
+Client *Server::findClientByNickname(const std::string &nickname)
 {
     for (size_t j = 0; j < this->vec_clients.size(); j++)
     {
         if (nickname == this->vec_clients[j].getNickname())
             return (&this->vec_clients[j]);
+    }
+    return (NULL);
+}
+
+/*
+identifie un Channel à partir de son nom (préfixe inclus)
+@param name le nom du channel à identifier (ex: "#music")
+@return Channel* si trouvé; NULL si pas trouvé
+Attention ! Le pointeur vers Channel qui est return est valide tant que le vecteur
+des channels n'est pas modifié avec un pushback() par exemple. A utiliser tout de suite.
+*/
+Channel* Server::findChannelByName(const std::string &name)
+{
+    for (size_t j = 0; j < this->channels.size(); j++)
+    {
+        if (name == this->channels[j].getName())
+            return (&this->channels[j]);
     }
     return (NULL);
 }
