@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: komorebi <komorebi@student.42.fr>          +#+  +:+       +#+        */
+/*   By: bkaras-g <bkaras-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/16 14:57:26 by bkaras-g          #+#    #+#             */
-/*   Updated: 2026/06/20 16:46:22 by komorebi         ###   ########.fr       */
+/*   Updated: 2026/06/24 11:53:14 by bkaras-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,15 +75,16 @@ class Channel
     // ---------- Member Methods -----------------------
 
     // Fonctions pour gérer les membres, les opérateurs et les invités du canal
-    void addMember(Client &c);
-    size_t NumberOfMembers();
-    void removeMember(Client &c);
-    bool isMember(Client &c);
-    void addOperator(Client &c);
-    void removeOperator(Client &c);
-    bool isOperator(Client &c);
-    void invite(Client &c);
-    bool isInvited(Client &c);
+    void    addMember(Client &c);
+    size_t  NumberOfMembers();
+    void    removeMember(Client &c);
+    bool    isMember(Client &c);
+    void    addOperator(Client &c);
+    void    removeOperator(Client &c);
+    bool    isOperator(Client &c);
+    void    invite(Client &c);
+    bool    isInvited(Client &c);
+    void    removeInvited(Client &c);
 };
 
 #endif // CHANNEL_HPP

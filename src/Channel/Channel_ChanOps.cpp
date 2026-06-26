@@ -6,7 +6,7 @@
 /*   By: bkaras-g <bkaras-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 00:00:00 by bkaras-g          #+#    #+#             */
-/*   Updated: 2026/06/19 14:05:52 by bkaras-g         ###   ########.fr       */
+/*   Updated: 2026/06/24 11:53:47 by bkaras-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,4 +35,9 @@ void Channel::invite(Client &c)
 bool Channel::isInvited(Client &c)
 {
     return (this->_invited.has(c));
+}
+
+void    Channel::removeInvited(Client &c)
+{
+    this->_invited.remove(c);
 }

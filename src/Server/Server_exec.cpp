@@ -100,11 +100,6 @@ void Server::handle_pass(Message &msg, Client &c)
         return;
     }
     const std::vector<std::string> args = msg.get_args();
-    if (args.size() != 1)
-    {
-        error = ERR_NEEDMOREPARAMS;
-        return;
-    }
     if (args[0] != this->password)
     {
         error = ERR_PASSWDMISMATCH;
