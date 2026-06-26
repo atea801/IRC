@@ -1,6 +1,9 @@
 #pragma once
 
 #include <iostream>
+#include "PtrVec.hpp"
+
+class Channel;
 
 enum e_CLientState
 {
@@ -21,7 +24,7 @@ class Client
     std::string _username;
     std::string _hostname; // adresse ip du client
     std::string _buffer;   // permet de stocker les morceaux envoyer par recv()
-    // std::vector<Channel *> Channel;
+    PtrVec<Channel> _client_channels;
     e_CLientState _status;
     bool _bool_pass;
     bool _bool_nick;
@@ -59,4 +62,5 @@ class Client
     void setBoolPass(bool const pass);
     void setBoolNick(bool const nick);
     void setBoolUser(bool const user);
+    void addChannel(Channel &new_channel);
 };

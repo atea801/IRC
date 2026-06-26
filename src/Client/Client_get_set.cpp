@@ -94,3 +94,8 @@ void Client::setBoolNick(bool const nick)
 {
     this->_bool_nick = nick;
 }
+
+void Client::addChannel(Channel &new_channel) 
+{
+    this->_client_channels.add(new_channel);
+}

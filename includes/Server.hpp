@@ -1,8 +1,5 @@
 #pragma once
 
-#include "Channel.hpp"
-#include "Client.hpp"
-#include "Message.hpp"
 #include <arpa/inet.h>
 #include <cctype>
 #include <cerrno>
@@ -19,6 +16,10 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <vector>
+#include "Message.hpp"
+#include "Client.hpp"
+#include "Channel.hpp"
+#include "PtrVec.hpp"
 
 class Server
 {
@@ -51,6 +52,7 @@ class Server
     void handle_cap(Client &c);
     void handle_ping(Message &msg, Client &c);
     void handle_quit(Message &msg, Client &c);
+    void handle_join(Message &msg, Client &c);
     int find_dest(std::string dest);
     int find_channel(std::string dest);
     void remove_client(int fd);

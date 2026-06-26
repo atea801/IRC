@@ -23,10 +23,12 @@ void Server::exec_flow(Message &msg, Client &c)
         handle_nick(msg, c);
     else if (cmd == "USER")
         handle_user(msg, c);
-    else if (cmd == "QUIT")
-        handle_quit(msg, c);
+    // else if (cmd == "QUIT")
+    //     handle_quit(msg, c);
     else if (cmd == "PRIVMSG")
         handle_privmsg(msg, c);
+    else if (cmd == "JOIN")
+        handle_join(msg, c);
     if (c.getBoolPass() && c.getBoolNick() && c.getBoolUser() && c.getStatus() != REGISTERED)
     {
         c.setStatus(REGISTERED);
@@ -133,7 +135,7 @@ void Server::handle_privmsg(Message &msg, Client &c)
     else if (find_channel(args[0]) >= 0)
     {
         std::vector<Client *> chan_mem = channels[find_channel(args[0])].getMembers();
-        for (int i = 0; i < chan_mem.size(); i++)
+        for (size_t i = 0; i < chan_mem.size(); i++)
         {
             std::string msg_to_send =
                 ":" + chan_mem[i]->getNickname() + " PRIVMSG " + args[0] + " :" + args[1] + "\r\n";
@@ -160,7 +162,7 @@ int Server::find_channel(std::string dest)
 {
     if (channels.size() > 0)
     {
-        for (int i = 0; i < channels.size(); i++)
+        for (size_t i = 0; i < channels.size(); i++)
         {
             if (channels[i].getName() == dest)
                 return (i);
@@ -196,24 +198,36 @@ void Server::remove_client(int fd)
     }
 }
 
-// work in progress rien a voir c est nul pour l instant
 void Server::handle_quit(Message &msg, Client &c)
 {
-    // std::vector<std::string> args = msg.get_args();
-    // if (!args.empty() && !args[0].empty())
-    // {
-    //     for (int i = 0; i < this->channels.size(); i++)
-    //     {
-    //         std::vector<Client *>Clients = channels[i].getMembers();
-    //         for (int j = 0; j < Clients.size(); j++)
-    //         {
-    //             if (Clients[j]->getFdClient() == c.getFdClient())
-    //             {
-    //                handle_privmsg(msg, c);
-    //             }
-    //         }
-    //     }
-    // }
-    // else
-    c.setStatus(QUIT);
+    std::vector<std::string> args = msg.get_args();
+    if (!args.empty() && !args[0].empty())
+    {
+        
+    }
+    else
+        c.setStatus(QUIT);
+}
+
+void Server::handle_join(Message &msg, Client &c)
+{
+    // IrcError error = msg.parsing_join();
+    // if (error != IRC_OK)
+    // {}
+    std::vector<std::string> args = msg.get_args();
+    if (find_channel(args[0]) == -1)
+    {
+        Channel new_channel;
+        new_channel.setName(args[0]);
+        new_channel.addMember(c);
+        new_channel.addOperator(c);
+        channels.push_back(new_channel);
+        c.addChannel(new_channel);
+        std::cout << "channel as been created\n";
+    }
+    else
+    {
+        channels[find_channel(args[0])].addMember(c);
+        std::cout << "member as been added\n";
+    }
 }
