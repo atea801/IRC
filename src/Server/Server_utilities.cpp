@@ -6,7 +6,7 @@
 /*   By: bkaras-g <bkaras-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/25 11:15:45 by bkaras-g          #+#    #+#             */
-/*   Updated: 2026/06/26 12:25:44 by bkaras-g         ###   ########.fr       */
+/*   Updated: 2026/06/26 15:38:15 by bkaras-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,7 +111,7 @@ identifie un Client à partir de son nickname
 Attention ! Le pointeur vers Client qui est return est valide tant que le vecteur
 des clients n'est pas modifié avec un pushback() par exemple. A utiliser tout de suite.
 */
-Client* Server::findClientByNickname(const std::string &nickname)
+Client* Server::findClientByNickname(const std::string &nickname) const
 {
     for (size_t j = 0; j < this->vec_clients.size(); j++)
     {

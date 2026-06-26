@@ -69,7 +69,7 @@ class Server
     /*--Fonctions utilitaires*/
     int find_dest(std::string dest);
     Client *find_client(std::vector<pollfd> fds, size_t i);
-    Client* findClientByNickname(const std::string &nickname);
+    Client* findClientByNickname(const std::string &nickname) const;
     int find_channel_index(std::string dest);
     Channel *findChannelByName(const std:: string &name) const;
     std::vector<std::string> findChannelsInMsg(Message &msg);
