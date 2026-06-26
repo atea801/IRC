@@ -114,6 +114,11 @@ with a single user name on each. This is necessary to maintain backward
 compatibility with existing client software. 
 If a KICK message is distributed in this way, <comment> (if it exists)
 should be on each of these messages.
+ERR_NEEDMOREPARAMS (461)
+    ERR_NOSUCHCHANNEL (403)
+    ERR_CHANOPRIVSNEEDED (482)
+    ERR_USERNOTINCHANNEL (441)
+    ERR_NOTONCHANNEL (442)
 */
 void Server::handle_Kick(Message &msg, Client &c)
 {
@@ -122,28 +127,25 @@ void Server::handle_Kick(Message &msg, Client &c)
     {
 		if(error == ERR_NEEDMOREPARAMS)
 			send_reply_error(c, error, " KICK :Not enough parameters");
-        if(error == ERR_NOSUCHCHANNEL)
-            //send_reply_error();
-
-        Numeric Replies (Source IRC Doc):
-
-    ERR_NEEDMOREPARAMS (461)
-    ERR_NOSUCHCHANNEL (403)
-    ERR_CHANOPRIVSNEEDED (482)
-    ERR_USERNOTINCHANNEL (441)
-    ERR_NOTONCHANNEL (442)
-
 		return;
     }
-        L'erreur 461 est du parsing de syntaxe pure. 
-        Toutes les autres erreurs nécessitent d'identifier la liste des 
-        channels et la liste des clients dans msg.args, puis de vérifier
-        si les channels et les clients existent vraiment, si le user à 
-        l'origine de la commande KICK est bien un chanOps, etc. 
-        Donc une fois que tous ces checks ont été faits, on peut en 
-        récupérer un vecteur de pointeurs vers Channels et un vecteur de
-        pointeurs vers Clients sur lesquels on peut gérer l'exec de KICK
     */
+
+    std::vector<std::string> channelsRaw = findChannelsInMsg(msg);
+    if (channelsRaw.size() == 0)
+    {
+        //Pas de channel dans Msg. Quelle erreur renvoyer ?
+    }
+    else if (channelsRaw.size() > 1)
+    {
+        //Trop de channels dans Msg. Quelle erreur renvoyer ?
+    }
+    if (checkChannels(channelsRaw) == ERR_NOSUCHCHANNEL)
+    {
+        //send_reply_error "<client> <channel> :No such channel"
+    }
+    
+    
     
     // PtrVec<Channel> channelsFromMsg = get_channel_ptrs_from_message(msg);
     // PtrVec<Client> clientsFromMsg = get_client_ptrs_from_message(msg);
@@ -187,7 +189,7 @@ int Server::find_dest(std::string dest)
     return -1;
 }
 
-int Server::find_channel(std::string dest)
+int Server::find_channel_index(std::string dest)
 {
     if (channels.size() > 0)
     {
