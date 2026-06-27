@@ -114,11 +114,11 @@ with a single user name on each. This is necessary to maintain backward
 compatibility with existing client software. 
 If a KICK message is distributed in this way, <comment> (if it exists)
 should be on each of these messages.
-ERR_NEEDMOREPARAMS (461)
-    ERR_NOSUCHCHANNEL (403)
-    ERR_CHANOPRIVSNEEDED (482)
+ERR_NEEDMOREPARAMS (461) ok
+    ERR_NOSUCHCHANNEL (403) ok
+    ERR_CHANOPRIVSNEEDED (482) ok
     ERR_USERNOTINCHANNEL (441)
-    ERR_NOTONCHANNEL (442)
+    ERR_NOTONCHANNEL (442) ok
 */
 void Server::handle_Kick(Message &msg, Client &c)
 {
@@ -132,61 +132,51 @@ void Server::handle_Kick(Message &msg, Client &c)
     */
 
     std::vector<std::string> channelsRaw = findChannelsInMsg(msg);
-    if (channelsRaw.size() == 0)
-    {
-        //Pas de channel dans Msg. Quelle erreur renvoyer ?
-    }
-    else if (channelsRaw.size() > 1)
-    {
-        //Trop de channels dans Msg. Quelle erreur renvoyer ?
-    }
-    if (checkChannels(channelsRaw) == ERR_NOSUCHCHANNEL)
+
+    //le cas channelsRaw.size() == 0 est checké dans parsing_Kick()
+    // if channelsRaw.size() > 1 --> pas de numeric reply dédié. Claude: 
+    //La plupart des serveurs IRC renvoient ERR_NOSUCHCHANNEL car ils 
+    //prennent l'ensemble de l'arg des channels comme un nom de channel
+    // unique (par ex #a,&b) 
+    if (channelsRaw.size() > 1 || checkChannels(channelsRaw) == ERR_NOSUCHCHANNEL)
     {
         //ERR_NOSUCHCHANNEL (403)
         //send_reply_error "<client> <channel> :No such channel"
+    	return;
     }
     Channel *chan = findChannelByName(channelsRaw[0]);
     if (!chan->isMember(c))
     {
         //ERR_NOTONCHANNEL (442)
         //send_reply_error "<client> <channel> :You're not on that channel"
+    	return;
     }
     if (!chan->isOperator(c))
     {
         //ERR_CHANOPRIVSNEEDED (482)
         //send_reply_error "<client> <channel> :You're not channel operator"
+    	return;
     }
-    
-    
-    // PtrVec<Channel> channelsFromMsg = get_channel_ptrs_from_message(msg);
-    // PtrVec<Client> clientsFromMsg = get_client_ptrs_from_message(msg);
 
-    PtrVec<Channel> channelsFromMsg;
-    PtrVec<Client> clientsFromMsg;
-    
-    //si nb channels == nb clients alors on supprime le client i du channel i
-    //vérifier si c'est bien la logique de KICK
-    if (channelsFromMsg.size() == clientsFromMsg.size())
+    std::vector<std::string> clientsRaw = ft_split(',', msg.get_args()[1]);
+    PtrVec<Client> clientsPtrVec;
+    for (size_t i = 0; i < clientsRaw.size(); i++)
     {
-        for (size_t i = 0; i < channelsFromMsg.size(); i++)
+        Client * c = findClientByNickname(clientsRaw[i]);
+        if (c == NULL)
         {
-            channelsFromMsg.get()[i]->removeMember(*clientsFromMsg.get()[i]);
-            if (channelsFromMsg.get()[i]->isOperator(*clientsFromMsg.get()[i]))
-                channelsFromMsg.get()[i]->removeOperator(*clientsFromMsg.get()[i]);
+            //ERR_USERNOTINCHANNEL (441)
+            //send_reply_error "<client> <nick> <channel> :They aren't on that channel"
+    	    return;
         }
+        clientsPtrVec.add(*c);
     }
-    else //sinon on supprime chaque user de chaque channel specifie
-    //vérifier si c'est bien la logique de KICK
+
+    for (size_t i = 0; i < clientsPtrVec.size(); i++)
     {
-        for (size_t chanIndex = 0; chanIndex < channelsFromMsg.size(); chanIndex++)
-        {
-            for (size_t clientIndex = 0; clientIndex < clientsFromMsg.size(); clientIndex++)
-            {
-                channelsFromMsg.get()[chanIndex]->removeMember(*clientsFromMsg.get()[clientIndex]);
-                if (channelsFromMsg.get()[chanIndex]->isOperator(*clientsFromMsg.get()[clientIndex]))
-                    channelsFromMsg.get()[chanIndex]->removeOperator(*clientsFromMsg.get()[clientIndex]);
-            }
-        }
+        chan->removeMember(*clientsPtrVec.get()[i]);
+        if (chan->isOperator(*clientsPtrVec.get()[i]))
+            chan->removeOperator(*clientsPtrVec.get()[i]);
     }
 }
 
