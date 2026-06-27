@@ -184,6 +184,59 @@ void Server::handle_Kick(Message &msg, Client &c)
     }
 }
 
+/*
+Erreurs de parsing: ERR_NEEDMOREPARAMS, ERR_UNKNOWNMODE
+*/
+void Server::handle_mode(Message &msg, Client &c)
+{
+    /*IrcError error = msg.parsing_mode();
+    if (error != IRC_OK)
+    {
+		if(error == ERR_NEEDMOREPARAMS)
+			send_reply_error(c, error, " MODE :Not enough parameters");
+        if(error == ERR_UNKNOWNMODE)
+			send_reply_error "<client> <modechar> :is unknown mode char to me"
+		return;
+    }
+    */
+
+    Channel * chan = findChannelByName(msg.get_args()[0]);
+    if (!chan)
+    {
+        //ERR_NOSUCHCHANNEL (403)
+        //send_reply_error "<client> <channel> :No such channel"
+    	return;
+    }
+    if (msg.get_args().size() == 1) //MODE #general --> demande les modes activés
+    {
+        //RPL_CHANNELMODEIS (324)
+        //"<client> <channel> <modestring> <mode arguments>..."
+        //exemple avec tous les modes possibles: ":irc.42.fr 324 dan #music +itkl secret 42"
+        //secret est le password (+k)
+        //42 est le user limit (+l)
+        //i et t ne donnent pas de mode arguments
+    }
+    if (!chan->isOperator(c))
+    {
+        //ERR_CHANOPRIVSNEEDED (482)
+        //send_reply_error "<client> <channel> :You're not channel operator"
+    	return;
+    }
+    std::string modestring = msg.get_args()[1];
+    std::vector<std::string> mode_args;
+    const std::vector<std::string> &args = msg.get_args();
+    
+    for (size_t i = 2; i < args.size(); i++)
+        mode_args.push_back(args[i]);
+
+    std::string::iterator it = modestring.begin();
+    while (it != modestring.end())
+    {
+        
+    }
+}
+
+
 int Server::find_dest(std::string dest)
 {
     for (size_t i = 0; i < vec_clients.size(); i++)
