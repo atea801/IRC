@@ -215,6 +215,7 @@ void Server::handle_mode(Message &msg, Client &c)
         //secret est le password (+k)
         //42 est le user limit (+l)
         //i et t ne donnent pas de mode arguments
+        //Attention: le mode +o est exclu de ce num reply
     }
     if (!chan->isOperator(c))
     {
@@ -230,11 +231,88 @@ void Server::handle_mode(Message &msg, Client &c)
         mode_args.push_back(args[i]);
 
     std::string::iterator it = modestring.begin();
+    char sign;
+    size_t args_idx = 0;
     while (it != modestring.end())
     {
-        
+        if (*it == '+' || *it == '-')
+        {
+            sign = *it;
+            it++;
+        }
+        if (*it == 'o')
+        {
+            if (findClientByNickname(mode_args[args_idx]) == NULL)
+            {
+                //ERR_USERNOTINCHANNEL (441) "<client> <nick> <channel> :They aren't on that channel"
+                args_idx++; 
+                //PAS DE return car on continue l'exec des autres modes demandés 
+                //on peut avoir par ex "MODE +ok-i Bob secret" et meme si Bob ne fait pas partie du channel
+                //on doit continuer à traiter les autres modes
+            }
+        }
+        std::string param;
+        if (modeNeedsParam(sign, *it))
+            param = mode_args[args_idx++]; //pas de check si mode_args contient bien des args car fait au parsing
+        identify_and_exec_mode(*chan, c, sign, *it, param);
+        it++;
     }
 }
+
+void identify_and_exec_mode(Channel &chan, Client &c, char sign, char mode_letter, const std::string &param)
+{
+    bool set;
+    if (sign == '+')
+        set = true;
+    else
+        set = false;
+    switch (mode_letter)
+    {
+        case 'i':
+        {
+            chan.setInviteOnly(set);
+            break;
+        }
+        case 't':
+        {
+            chan.setTopicRestricted(set);
+            break;
+        }
+        case 'k':
+        {
+            if (set == true)
+                chan.setPassword(param);
+            else
+                chan.removePassword();
+            break;
+        }
+        case 'o':
+        {
+            if (set == true)
+                chan.addOperator(c);
+            else
+                chan.removeOperator(c);
+            break;
+        }
+        case 'l':
+        {
+            if (set == true)
+                chan.setUserLimit(std::atoi(param.c_str()));
+            else
+                chan.removeUserLimit();
+            break;
+        }
+    }
+}
+
+// Type B (k, o): param on '+' AND '-'. Type C (l): param only on '+'. Type D (i, t): never.
+static bool modeNeedsParam(char sign, char letter)
+{
+    if (letter == 'k' || letter == 'o') return true;
+    if (letter == 'l')                  return (sign == '+');
+    return false;
+}
+
 
 
 int Server::find_dest(std::string dest)
