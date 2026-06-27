@@ -73,6 +73,7 @@ class Server
     int find_channel_index(std::string dest);
     Channel *findChannelByName(const std::string &name);
     std::vector<std::string> findChannelsInMsg(Message &msg);
+    void broadcastToChannel(Channel &chan, const std::string &line, Client *exclude = NULL);
 
     /*--Gestion des erreurs (Numeric replies)--*/
     int checkChannels(const std::vector<std::string> &channelsToCheck) const;

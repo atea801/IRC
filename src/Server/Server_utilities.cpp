@@ -137,3 +137,21 @@ Channel* Server::findChannelByName(const std::string &name)
     }
     return (NULL);
 }
+
+/*
+Envoie une ligne IRC à tous les membres d'un channel.
+Le \r\n final est ajouté par send_raw(), donc `line` ne doit pas le contenir.
+@param chan     le channel dont les membres reçoivent la ligne
+@param line     la ligne IRC complète à diffuser (ex: ":nick!user@host KICK #c bob :bye")
+@param exclude  client à ne pas notifier (ex: l'émetteur pour PRIVMSG); NULL pour envoyer à tous
+*/
+void Server::broadcastToChannel(Channel &chan, const std::string &line, Client *exclude)
+{
+    const std::vector<Client *> &members = chan.getMembers();
+    for (size_t i = 0; i < members.size(); i++)
+    {
+        if (exclude != NULL && members[i] == exclude)
+            continue;
+        send_raw(*members[i], line);
+    }
+}

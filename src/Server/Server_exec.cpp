@@ -159,24 +159,28 @@ void Server::handle_Kick(Message &msg, Client &c)
     }
 
     std::vector<std::string> clientsRaw = ft_split(',', msg.get_args()[1]);
-    PtrVec<Client> clientsPtrVec;
+
+    // Préfixe de l'émetteur (nick!user@host) et commentaire optionnel (défaut: nick du kicker)
+    std::string kickerPrefix = c.getNickname() + "!" + c.getUsername() + "@" + c.getHostname();
+    std::string comment = (msg.get_args().size() > 2) ? msg.get_args()[2] : c.getNickname();
+
+    // Un message KICK distinct par utilisateur, diffusé à tout le channel.
+    // Une fois le message envoyé, on supprime le client qui doit être Kick
     for (size_t i = 0; i < clientsRaw.size(); i++)
     {
-        Client * c = findClientByNickname(clientsRaw[i]);
-        if (c == NULL)
+        Client *target = findClientByNickname(clientsRaw[i]);
+        if (target == NULL || !chan->isMember(*target))
         {
-            //ERR_USERNOTINCHANNEL (441)
-            //send_reply_error "<client> <nick> <channel> :They aren't on that channel"
-    	    return;
+            //ERR_USERNOTINCHANNEL (441) "<client> <nick> <channel> :They aren't on that channel"
+            continue;
         }
-        clientsPtrVec.add(*c);
-    }
 
-    for (size_t i = 0; i < clientsPtrVec.size(); i++)
-    {
-        chan->removeMember(*clientsPtrVec.get()[i]);
-        if (chan->isOperator(*clientsPtrVec.get()[i]))
-            chan->removeOperator(*clientsPtrVec.get()[i]);
+        std::string line = ":" + kickerPrefix + " KICK " + chan->getName() + " " + clientsRaw[i] + " :" + comment;
+        broadcastToChannel(*chan, line); // envoyé à tous, y compris la cible, AVANT le retrait
+
+        chan->removeMember(*target);
+        if (chan->isOperator(*target))
+            chan->removeOperator(*target);
     }
 }
 
