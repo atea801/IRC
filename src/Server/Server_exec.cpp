@@ -29,6 +29,10 @@ void Server::exec_flow(Message &msg, Client &c)
         handle_privmsg(msg, c);
     else if (cmd == "JOIN")
         handle_join(msg, c);
+    else if (cmd == "MODE")
+        handle_mode(msg, c);
+    else if (cmd == "KICK")
+        handle_mode(msg, c);
     if (c.getBoolPass() && c.getBoolNick() && c.getBoolUser() && c.getStatus() != REGISTERED)
     {
         c.setStatus(REGISTERED);
@@ -137,17 +141,14 @@ void Server::handle_privmsg(Message &msg, Client &c)
 }
 
 /*
-Servers MUST NOT send multiple users in this message to clients,
-and MUST distribute these multiple-user KICK messages as a series of messages
-with a single user name on each. This is necessary to maintain backward
-compatibility with existing client software.
-If a KICK message is distributed in this way, <comment> (if it exists)
-should be on each of these messages.
-ERR_NEEDMOREPARAMS (461) ok
-    ERR_NOSUCHCHANNEL (403) ok
-    ERR_CHANOPRIVSNEEDED (482) ok
-    ERR_USERNOTINCHANNEL (441)
-    ERR_NOTONCHANNEL (442) ok
+Traitement de l'exec de KICK. Format: <channel> <user> *( "," <user> ) [<comment>]
+Exemple : `KICK #chan Alice,Bob byeee`
+
+Voir sur Figma le diagramme d'exec flow suivi par cette fonction.
+
+Après check des numeric replies, un message KICK distinct par user est 
+diffusé à tout le channel, y compris le ou les users KICK, puis suppression du ou 
+des users du Channel.
 */
 void Server::handle_Kick(Message &msg, Client &c)
 {
@@ -166,7 +167,7 @@ void Server::handle_Kick(Message &msg, Client &c)
     //  if channelsRaw.size() > 1 --> pas de numeric reply dédié. Claude:
     // La plupart des serveurs IRC renvoient ERR_NOSUCHCHANNEL car ils
     // prennent l'ensemble de l'arg des channels comme un nom de channel
-    //  unique (par ex #a,&b)
+    //  unique (par ex #a,&b --> nom de channel #a,&b)
     if (channelsRaw.size() > 1 || checkChannels(channelsRaw) == ERR_NOSUCHCHANNEL)
     {
         // ERR_NOSUCHCHANNEL (403)
@@ -187,25 +188,33 @@ void Server::handle_Kick(Message &msg, Client &c)
         return;
     }
 
-    std::vector<std::string> clientsRaw = ft_split(',', msg.get_args()[1]);
-
-    // Préfixe de l'émetteur (nick!user@host) et commentaire optionnel (défaut: nick du kicker)
+    //préparation du message KICK à envoyer:
+    //on définit le préfixe de l'émetteur (nick!user@host) et le comment s'il a été fourni,
+    //sinon comment par défaut: nick du kicker
     std::string kickerPrefix = c.getNickname() + "!" + c.getUsername() + "@" + c.getHostname();
-    std::string comment = (msg.get_args().size() > 2) ? msg.get_args()[2] : c.getNickname();
+    std::string comment;
+    if (msg.get_args().size() > 2)
+        comment = msg.get_args()[2];
+    else
+        comment = c.getNickname();
+    
+    //on récupère la liste des clients qu'on stocke dans un vecteur
+    //ca reste des std::string pour l'instant. Le check si ce sont bien des Clients est 
+    //réalisé plus bas
+    std::vector<std::string> clientsRaw = ft_split(',', msg.get_args()[1]);
 
     // Un message KICK distinct par utilisateur, diffusé à tout le channel.
     // Une fois le message envoyé, on supprime le client qui doit être Kick
-    for (size_t i = 0; i < clientsRaw.size(); i++)
+    for (size_t i = 0; i < clientsRaw.size(); i++) //boucle sur le nombre de users à Kick
     {
         Client *target = findClientByNickname(clientsRaw[i]);
         if (target == NULL || !chan->isMember(*target))
         {
-            // ERR_USERNOTINCHANNEL (441) "<client> <nick> <channel> :They aren't on that channel"
-            continue;
+            send_reply_error(c, ERR_USERNOTINCHANNEL, clientsRaw[i], chan->getName(), "They aren't on that channel");
+            continue; //on continue à traiter les autres users à KICK
         }
-
         std::string line = ":" + kickerPrefix + " KICK " + chan->getName() + " " + clientsRaw[i] + " :" + comment;
-        broadcastToChannel(*chan, line); // envoyé à tous, y compris la cible, AVANT le retrait
+        broadcastToChannel(*chan, line); // envoyé à tous, y compris la cible, AVANT le kick
 
         chan->removeMember(*target);
         if (chan->isOperator(*target))
