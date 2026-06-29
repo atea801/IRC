@@ -6,7 +6,7 @@
 /*   By: bkaras-g <bkaras-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/27 17:52:49 by bkaras-g          #+#    #+#             */
-/*   Updated: 2026/06/29 13:50:39 by bkaras-g         ###   ########.fr       */
+/*   Updated: 2026/06/29 15:37:04 by bkaras-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,7 @@ void Server::handle_mode(Message &msg, Client &c)
     {
         // ERR_NOSUCHCHANNEL (403)
         // send_reply_error "<client> <channel> :No such channel"
+        send_reply_error(c, ERR_NOSUCHCHANNEL, msg.get_args()[0], "No such channel");
         return;
     }
     if (msg.get_args().size() == 1) // MODE #general --> demande les modes activés
@@ -68,6 +69,7 @@ void Server::handle_mode(Message &msg, Client &c)
     {
         // ERR_CHANOPRIVSNEEDED (482)
         // send_reply_error "<client> <channel> :You're not channel operator"
+        send_reply_error(c, ERR_CHANOPRIVSNEEDED, chan->getName(), "You're not channel operator");
         return;
     }
 
@@ -97,11 +99,14 @@ void Server::handle_mode(Message &msg, Client &c)
         }
         if (*it == 'o') //check num reply : si le client à ajouter en ChanOps est dans le channel
         {
-            if (findClientByNickname(mode_args[args_idx]) == NULL)
+            Client *target = findClientByNickname(mode_args[args_idx]);
+            if (target == NULL || !chan->isMember(*target))
             {
                 // ERR_USERNOTINCHANNEL (441) "<client> <nick> <channel> :They aren't on that channel"
+                send_reply_error(c, ERR_USERNOTINCHANNEL, mode_args[args_idx], chan->getName(), "They aren't on that channel");
                 args_idx++;
-                // PAS DE return car on continue l'exec des autres modes demandés
+                it++;
+                continue; // PAS DE return car on continue l'exec des autres modes demandés
                 // on peut avoir par ex "MODE +ok-i Bob secret" et meme si Bob ne fait pas partie du channel
                 // on doit continuer à traiter les autres modes
             }
