@@ -6,7 +6,7 @@
 /*   By: bkaras-g <bkaras-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/25 11:15:45 by bkaras-g          #+#    #+#             */
-/*   Updated: 2026/06/26 12:07:32 by bkaras-g         ###   ########.fr       */
+/*   Updated: 2026/06/26 15:39:57 by bkaras-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,22 +33,29 @@ std::vector<std::string> Server::findChannelsInMsg(Message &msg)
             break;
         }
     }
-    if (channels_token == "")
+    if (channels_token == "") // si pas de channel trouvé, on renvoie un vecteur vide
         return (channels);
+        
+    //On récupère les noms des channels en retirant les préfixes '#' et '&'
+    return (ft_split(',', channels_token));
+}
 
-    // On récupère les noms des channels en retirant les préfixes '#' et '&'
-    size_t comma_idx;
+std::vector<std::string> ft_split(char separator, const std::string &str)
+{
+    size_t sep_idx;
     size_t pos;
+    std::vector<std::string> result;
+
     pos = 0;
-    comma_idx = channels_token.find(',', pos);
-    while (comma_idx != std::string::npos)
+    sep_idx = str.find(separator, pos);
+    while (sep_idx != std::string::npos)
     {
-        channels.push_back(channels_token.substr(pos, comma_idx - pos));
-        pos = comma_idx + 1; // skip the ','
-        comma_idx = channels_token.find(',', pos);
+        result.push_back(str.substr(pos, sep_idx - pos));
+        pos = sep_idx + 1; //skip the separator
+        sep_idx = str.find(separator, pos);
     }
-    channels.push_back(channels_token.substr(pos));
-    return (channels);
+    result.push_back(str.substr(pos));
+    return (result);
 }
 
 // Vérifie que chaque channel de channelsToCheck existe sur le serveur.
@@ -112,4 +119,39 @@ Client *Server::findClientByNickname(const std::string &nickname)
             return (&this->vec_clients[j]);
     }
     return (NULL);
+}
+
+/*
+identifie un Channel à partir de son nom (préfixe inclus)
+@param name le nom du channel à identifier (ex: "#music")
+@return Channel* si trouvé; NULL si pas trouvé
+Attention ! Le pointeur vers Channel qui est return est valide tant que le vecteur
+des channels n'est pas modifié avec un pushback() par exemple. A utiliser tout de suite.
+*/
+Channel* Server::findChannelByName(const std::string &name)
+{
+    for (size_t j = 0; j < this->channels.size(); j++)
+    {
+        if (name == this->channels[j].getName())
+            return (&this->channels[j]);
+    }
+    return (NULL);
+}
+
+/*
+Envoie une ligne IRC à tous les membres d'un channel.
+Le \r\n final est ajouté par send_raw(), donc `line` ne doit pas le contenir.
+@param chan     le channel dont les membres reçoivent la ligne
+@param line     la ligne IRC complète à diffuser (ex: ":nick!user@host KICK #c bob :bye")
+@param exclude  client à ne pas notifier (ex: l'émetteur pour PRIVMSG); NULL pour envoyer à tous
+*/
+void Server::broadcastToChannel(Channel &chan, const std::string &line, Client *exclude)
+{
+    const std::vector<Client *> &members = chan.getMembers();
+    for (size_t i = 0; i < members.size(); i++)
+    {
+        if (exclude != NULL && members[i] == exclude)
+            continue;
+        send_raw(*members[i], line);
+    }
 }
