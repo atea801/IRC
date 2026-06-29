@@ -51,6 +51,7 @@ class Client
     const bool &getBoolPass() const;
     const bool &getBoolNick() const;
     const bool &getBoolUser() const;
+    const PtrVec<Channel> &get_client_channel() const;
 
     /*--Setters--*/
     void setNickname(std::string const nickname_input);

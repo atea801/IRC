@@ -10,9 +10,9 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <vector>
-#include <string>
 #include "Server.hpp"
+#include <string>
+#include <vector>
 
 // Cherche dans les arguments du message le premier token débutant par '#' ou '&',
 // puis découpe ce token par ',' pour retourner la liste des noms de channels (avec leur préfixe).
@@ -22,7 +22,7 @@ std::vector<std::string> Server::findChannelsInMsg(Message &msg)
 {
     std::vector<std::string> channels;
 
-    // On trouve la string qui contient les noms des channels pour la stocker 
+    // On trouve la string qui contient les noms des channels pour la stocker
     // dans channels_token
     std::string channels_token = "";
     for (size_t i = 0; i < msg.get_args().size(); i++)
@@ -31,12 +31,12 @@ std::vector<std::string> Server::findChannelsInMsg(Message &msg)
         {
             channels_token = msg.get_args()[i];
             break;
-        }    
+        }
     }
     if (channels_token == "")
         return (channels);
-        
-    //On récupère les noms des channels en retirant les préfixes '#' et '&'
+
+    // On récupère les noms des channels en retirant les préfixes '#' et '&'
     size_t comma_idx;
     size_t pos;
     pos = 0;
@@ -44,7 +44,7 @@ std::vector<std::string> Server::findChannelsInMsg(Message &msg)
     while (comma_idx != std::string::npos)
     {
         channels.push_back(channels_token.substr(pos, comma_idx - pos));
-        pos = comma_idx + 1; //skip the ','
+        pos = comma_idx + 1; // skip the ','
         comma_idx = channels_token.find(',', pos);
     }
     channels.push_back(channels_token.substr(pos));
@@ -68,7 +68,7 @@ int Server::checkChannels(const std::vector<std::string> &channelsToCheck) const
             {
                 found = true;
                 break;
-            }    
+            }
         }
         if (found == false)
             return (ERR_NOSUCHCHANNEL);
@@ -104,7 +104,7 @@ identifie un Client à partir de son nickname
 Attention ! Le pointeur vers Client qui est return est valide tant que le vecteur
 des clients n'est pas modifié avec un pushback() par exemple. A utiliser tout de suite.
 */
-Client* Server::findClientByNickname(const std::string &nickname)
+Client *Server::findClientByNickname(const std::string &nickname)
 {
     for (size_t j = 0; j < this->vec_clients.size(); j++)
     {

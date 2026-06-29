@@ -12,6 +12,7 @@
 #include <cstring>
 #include <fcntl.h>
 #include <iostream>
+#include <map>
 #include <netinet/in.h>
 #include <poll.h>
 #include <sstream>
@@ -20,7 +21,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <vector>
-#include <map>
 
 class Server
 {
@@ -69,27 +69,22 @@ class Server
     void handle_ping(Message &msg, Client &c);
     void handle_quit(Message &msg, Client &c);
     void handle_join(Message &msg, Client &c);
-    void handle_Kick(Message &msg, Client &c); //K pour distinguer du n de handle_nick()
+    void handle_Kick(Message &msg, Client &c); // K pour distinguer du n de handle_nick()
 
     /*--Fonctions utilitaires*/
     int find_dest(std::string dest);
     int find_channel(std::string dest);
     void remove_client(int fd);
     Client *find_client(std::vector<pollfd> fds, size_t i);
-    Client* findClientByNickname(const std::string &nickname);
-    int find_channel(std::string dest);
+    Client *findClientByNickname(const std::string &nickname);
     std::vector<std::string> findChannelsInMsg(Message &msg);
 
     /*--Gestion des erreurs (Numeric replies)--*/
     int checkChannels(const std::vector<std::string> &channelsToCheck) const;
     bool checkSingleClientOnServer(std::string nickname);
     int checkMultipleClientsOnServer(const std::vector<std::string> &clientsToCheck);
-  void send_reply_error(Client &c, IrcError error, const std::string &message);
-	void send_reply_error(Client &c, IrcError error, const std::string &p1, const std::string &message);
-	void send_reply_error(Client &c, IrcError error, const std::string &p1, const std::string &p2, const std::string &message);
-
-
-	const std::string &getPort() const;
-    const std::string &getPassword() const;
-    
+    void send_reply_error(Client &c, IrcError error, const std::string &message);
+    void send_reply_error(Client &c, IrcError error, const std::string &p1, const std::string &message);
+    void send_reply_error(Client &c, IrcError error, const std::string &p1, const std::string &p2,
+                          const std::string &message);
 };
