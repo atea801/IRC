@@ -7,7 +7,7 @@ void Server::exec_flow(Message &msg, Client &c)
         cmd[i] = toupper(cmd[i]);
     if (cmd.empty())
         return;
-
+    // std::cout << "[cmd]=[" << cmd << "]" << std::endl;
     if (c.getStatus() != REGISTERED)
     {
         if (cmd != "PASS" && cmd != "NICK" && cmd != "USER")
@@ -32,7 +32,12 @@ void Server::exec_flow(Message &msg, Client &c)
 
     if (c.getBoolPass() && c.getBoolUser() && c.getBoolNick())
         c.setStatus(REGISTERED);
-    std::cout << "STATUS :" << c.getStatus() << '\n';
+    std::cout << "[" << cmd << "] "
+          << "pass=" << c.getBoolPass()
+          << " nick=" << c.getBoolNick()
+          << " user=" << c.getBoolUser()
+          << " | status=" << (c.getStatus() == REGISTERED ? "REGISTERED" : "HANDSHAKE")
+          << std::endl;
 }
 
 void Server::handle_nick(Message &msg, Client &c)
