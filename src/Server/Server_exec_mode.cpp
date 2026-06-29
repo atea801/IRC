@@ -6,7 +6,7 @@
 /*   By: bkaras-g <bkaras-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/27 17:52:49 by bkaras-g          #+#    #+#             */
-/*   Updated: 2026/06/29 15:37:04 by bkaras-g         ###   ########.fr       */
+/*   Updated: 2026/06/29 15:53:29 by bkaras-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,13 +57,8 @@ void Server::handle_mode(Message &msg, Client &c)
     }
     if (msg.get_args().size() == 1) // MODE #general --> demande les modes activés
     {
-        // RPL_CHANNELMODEIS (324)
-        //"<client> <channel> <modestring> <mode arguments>..."
-        // exemple avec tous les modes possibles: ":irc.42.fr 324 dan #music +itkl secret 42"
-        // secret est le password (+k)
-        // 42 est le user limit (+l)
-        // i et t ne donnent pas de mode arguments
-        // Attention: le mode +o est exclu de ce num reply
+        send_reply_channelmodeis(c, *chan);
+        return;
     }
     if (!chan->isOperator(c))
     {
@@ -160,8 +155,40 @@ void identify_and_exec_mode(Channel &chan, Client &c, char sign, char mode_lette
     }
 }
 
-// Mode k, o: param on '+' AND '-'. 
-// Mode l: param only on '+'. 
+/*
+Construit et envoie le numeric reply RPL_CHANNELMODEIS (324) qui liste les modes
+actuellement activés sur le channel, suivi de leurs <mode arguments> dans le même ordre.
+Format: ":<server> 324 <client> <channel> <modestring> <mode arguments>..."
+Ordre des modes: i, t, k, l (le mode +o n'apparaît PAS dans ce reply).
+Seuls k (password) et l (user limit) ajoutent un argument.
+Même logique d'envoi que send_reply_error() : reply_head() + send_raw().
+*/
+void Server::send_reply_channelmodeis(Client &c, Channel &chan)
+{
+    std::string modestring = "+";
+    std::string arguments = "";
+
+    if (chan.isInviteOnly())
+        modestring += "i";
+    if (chan.isTopicRestricted())
+        modestring += "t";
+    if (chan.hasPassword())
+    {
+        modestring += "k";
+        arguments += " " + chan.getPassword();
+    }
+    if (chan.hasUserLimit())
+    {
+        modestring += "l";
+        std::ostringstream oss;
+        oss << chan.getUserLimit();
+        arguments += " " + oss.str();
+    }
+    send_raw(c, reply_head(c, RPL_CHANNELMODEIS) + " " + chan.getName() + " " + modestring + arguments);
+}
+
+// Mode k, o: param on '+' AND '-'.
+// Mode l: param only on '+'.
 // Mode i, t: no param.
 static bool modeNeedsParam(char sign, char letter)
 {

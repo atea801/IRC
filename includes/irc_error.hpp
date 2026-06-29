@@ -3,6 +3,7 @@
 enum IrcError
 {
     IRC_OK = 0,
+    RPL_CHANNELMODEIS = 324,
     ERR_NONICKNAMEGIVEN = 431,
 
     ERR_INVALID = 432,
