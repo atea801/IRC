@@ -71,33 +71,18 @@ void Server::handle_user(Message &msg, Client &c)
     if (error != IRC_OK)
     {
         if (error == ERR_NEEDMOREPARAMS)
-            send_reply_error(c, error, "USER :Not enough parameters");
+            send_reply_error(c, error, msg.get_command(), "Not enough parameters");
         if (error == ERR_INVALID)
             send_reply_error(c, error, "User is invalid");
         return;
     }
     std::vector<std::string> args = msg.get_args();
-    // std::cerr << "args.size() = " << args.size() << std::endl;
-    // for (size_t i = 0; i < args.size(); ++i)
-    //     std::cerr << "  args[" << i << "] = [" << args[i] << "]" << std::endl;
-    // ----------------------------------------------------
-
 	if (c.getStatus() == REGISTERED)
     {
         send_reply_error(c, ERR_ALREADYREGISTERED, "You may not reregister");
         return;
     }
-
-    IrcError error = msg.parsing_user();
-    if (error != IRC_OK)
-    {
-        if (error == ERR_NEEDMOREPARAMS)
-            send_reply_error(c, error, msg.get_command(), "Not enough parameters");
-        return;
-    }
     c.setUsername(args[0]);
-    // parsing_user vérifie args.size() != 4 mais si le trailing est dans args[3]
-    // — est-ce que ton parser met bien le realname en args[3] ? Vérifie avec un cerr de debug.
     c.setRealname(args[3]);
     c.setBoolUser(true);
 }
