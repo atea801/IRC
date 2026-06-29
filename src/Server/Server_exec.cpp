@@ -23,8 +23,8 @@ void Server::exec_flow(Message &msg, Client &c)
         handle_nick(msg, c);
     else if (cmd == "USER")
         handle_user(msg, c);
-    // else if (cmd == "QUIT")
-    //     handle_quit(msg, c);
+    else if (cmd == "QUIT")
+        handle_quit(msg, c);
     else if (cmd == "PRIVMSG")
         handle_privmsg(msg, c);
     else if (cmd == "JOIN")
@@ -130,9 +130,8 @@ void Server::handle_privmsg(Message &msg, Client &c)
     else if (findChannelByName(args[0]))
     {
         Channel *Chan_to_send = findChannelByName(args[0]);
-            std::string msg_to_send =
-                ":" + c.getNickname() + " PRIVMSG " + args[0] + " :" + args[1];
-            broadcastToChannel(*Chan_to_send, msg_to_send);
+        std::string msg_to_send = ":" + c.getNickname() + " PRIVMSG " + args[0] + " :" + args[1];
+        broadcastToChannel(*Chan_to_send, msg_to_send);
     }
     return;
 }
@@ -227,19 +226,6 @@ int Server::find_dest(std::string dest)
     return (-1);
 }
 
-int Server::find_channel_index(std::string dest)
-{
-    if (channels.size() > 0)
-    {
-        for (size_t i = 0; i < channels.size(); i++)
-        {
-            if (channels[i].getName() == dest)
-                return (i);
-        }
-    }
-    return (-1);
-}
-
 void Server::handle_cap(Client &c)
 {
     std::string reply = "CAP * LS :\r\n";
@@ -265,8 +251,7 @@ void Server::handle_quit(Message &msg, Client &c)
 {
     std::vector<std::string> args = msg.get_args();
     std::string reason = (!args.empty() && !args[0].empty()) ? args[0] : "Client Quit";
-    std::string msg_to_send = ":" + c.getNickname() + "!" + c.getUsername()
-                     + "@localhost QUIT :" + reason;
+    std::string msg_to_send = ":" + c.getNickname() + "!" + c.getUsername() + "@localhost QUIT :" + reason;
     PtrVec<Channel> c_channels = c.get_client_channel();
     for (size_t i = 0; i < c_channels.size(); i++)
     {
@@ -281,28 +266,27 @@ void Server::handle_quit(Message &msg, Client &c)
 
 void Server::handle_join(Message &msg, Client &c)
 {
-    // IrcError error = msg.parsing_join();
-    // if (error != IRC_OK)
-    // {}
     std::vector<std::string> args = msg.get_args();
-    if (!findChannelByName(args[0]))
+    if (args.empty() || args[0].empty())
+        return;
+    Channel *chan = findChannelByName(args[0]);
+    if (!chan)
     {
         Channel new_channel;
         new_channel.setName(args[0]);
-        new_channel.addMember(c);
-        new_channel.addOperator(c);
-        channels.push_back(new_channel);
-        c.addChannel(new_channel);
-        std::cout << "channel as been created\n";
+        channels.insert(std::make_pair(args[0], new_channel));
+        chan = findChannelByName(args[0]);
+        chan->addMember(c);
+        chan->addOperator(c);
     }
     else
     {
-        Channel *ChanToJoin = findChannelByName(args[0]);
-        ChanToJoin->addMember(c);
-        c.addChannel(*ChanToJoin);
-        // :nick!user@localhost JOIN #channel
-        std::string msg_to_send = ":" + c.getNickname() + "!" + c.getUsername()
-                     + "@localhost JOIN :" + ChanToJoin->getName();
-        broadcastToChannel(*ChanToJoin, msg_to_send);
+        if (chan->isMember(c))
+        {
+            send_reply_error(c, ERR_USERONCHANNEL, "you already joined the server");
+            return;
+        }
+        chan->addMember(c);
+        c.addChannel(*chan);
     }
 }

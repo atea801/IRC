@@ -28,7 +28,7 @@ class Server
     std::string _server_name;
     std::vector<pollfd> fds;
     std::map<int, Client> vec_clients;
-    std::vector<Channel> channels;
+    std::map<std::string, Channel> channels;
     std::string port;
     std::string password;
     int server_fd;

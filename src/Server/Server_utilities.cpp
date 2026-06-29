@@ -64,20 +64,9 @@ std::vector<std::string> ft_split(char separator, const std::string &str)
 // @return                 IRC_OK si tous les channels existent, ERR_NOSUCHCHANNEL sinon.
 int Server::checkChannels(const std::vector<std::string> &channelsToCheck) const
 {
-    bool found;
-
     for (size_t i = 0; i < channelsToCheck.size(); i++)
     {
-        found = false;
-        for (size_t j = 0; j < this->channels.size(); j++)
-        {
-            if (channelsToCheck[i] == this->channels[j].getName())
-            {
-                found = true;
-                break;
-            }
-        }
-        if (found == false)
+        if (this->channels.find(channelsToCheck[i]) == this->channels.end())
             return (ERR_NOSUCHCHANNEL);
     }
     return (IRC_OK);
@@ -130,11 +119,9 @@ des channels n'est pas modifié avec un pushback() par exemple. A utiliser tout 
 */
 Channel *Server::findChannelByName(const std::string &name)
 {
-    for (size_t j = 0; j < this->channels.size(); j++)
-    {
-        if (name == this->channels[j].getName())
-            return (&this->channels[j]);
-    }
+    std::map<std::string, Channel>::iterator it = this->channels.find(name);
+    if (it != this->channels.end())
+        return (&it->second);
     return (NULL);
 }
 
