@@ -12,12 +12,12 @@
 
 #include "Channel.hpp"
 
-void    Channel::addMember(Client &c)
+void Channel::addMember(Client &c)
 {
     this->_members.add(c);
 }
 
-size_t  Channel::NumberOfMembers()
+size_t Channel::NumberOfMembers()
 {
     return (this->_members.size());
 }
@@ -26,7 +26,7 @@ size_t  Channel::NumberOfMembers()
 Supprime le client `c` du channel. Le parsing a déjà été effectué donc pas de
 check à faire ici (si le client existe par exemple)
 */
-void    Channel::removeMember(Client &c)
+void Channel::removeMember(Client &c)
 {
     this->_members.remove(c);
 }
@@ -34,8 +34,7 @@ void    Channel::removeMember(Client &c)
 /*
 Vérifie si le client `c` est membre du channel.
 */
-bool    Channel::isMember(Client &c)
+bool Channel::isMember(Client &c)
 {
     return (this->_members.has(c));
 }
-

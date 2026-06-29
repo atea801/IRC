@@ -1,12 +1,11 @@
 #pragma once
 
+#include "Channel.hpp"
 #include "Client.hpp"
 #include "Message.hpp"
-#include "Channel.hpp"
 #include <arpa/inet.h>
 #include <cctype>
 #include <cerrno>
-#include <sstream>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -14,6 +13,7 @@
 #include <iostream>
 #include <netinet/in.h>
 #include <poll.h>
+#include <sstream>
 #include <string>
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -30,11 +30,10 @@ class Server
     std::string password;
     int server_fd;
 
-	void send_raw(Client &c, const std::string &line);
-	std::string reply_head(Client &c, IrcError error) const;
+    void send_raw(Client &c, const std::string &line);
+    std::string reply_head(Client &c, IrcError error) const;
 
   public:
-
     /*--Constructeurs-Destructeur--*/
     Server(std::string port, std::string password);
     ~Server();
@@ -69,12 +68,8 @@ class Server
     Client *find_client(std::vector<pollfd> fds, size_t i);
 
     /*--Gestion des erreurs (Numeric replies)--*/
-	void send_reply_error(Client &c, IrcError error, const std::string &message);
-	void send_reply_error(Client &c, IrcError error, const std::string &p1, const std::string &message);
-	void send_reply_error(Client &c, IrcError error, const std::string &p1, const std::string &p2, const std::string &message);
-
-
-	const std::string &getPort() const;
-    const std::string &getPassword() const;
-    
+    void send_reply_error(Client &c, IrcError error, const std::string &message);
+    void send_reply_error(Client &c, IrcError error, const std::string &p1, const std::string &message);
+    void send_reply_error(Client &c, IrcError error, const std::string &p1, const std::string &p2,
+                          const std::string &message);
 };

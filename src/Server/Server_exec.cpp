@@ -2,27 +2,37 @@
 
 void Server::exec_flow(Message &msg, Client &c)
 {
-	std::string cmd = msg.get_command();
-	for (size_t i = 0; i < cmd.size(); i++)
+    std::string cmd = msg.get_command();
+    for (size_t i = 0; i < cmd.size(); i++)
         cmd[i] = toupper(cmd[i]);
-    //add accept lower case
-	if (c.getStatus() != REGISTERED){
-		if (cmd != "PASS" && cmd != "NICK" && cmd != "USER"){
-			send_reply_error(c, ERR_NOTREGISTERED, "You have not registered");
-		}
-	}
+    if (cmd.empty())
+        return;
+
+    if (c.getStatus() != REGISTERED)
+    {
+        if (cmd != "PASS" && cmd != "NICK" && cmd != "USER")
+        {
+            send_reply_error(c, ERR_NOTREGISTERED, "You have not registered");
+            return;
+        }
+    }
+
     if (cmd == "PASS")
         handle_pass(msg, c);
     else if (cmd == "NICK")
         handle_nick(msg, c);
     else if (cmd == "USER")
         handle_user(msg, c);
-    else if (msg.get_command() == "QUIT")
+    else if (cmd == "QUIT")
         c.setStatus(QUIT);
-    else if (msg.get_command() == "PRIVMSG")
+    else if (cmd == "PRIVMSG")
         handle_privmsg(msg, c);
-    if (c.getBoolPass() == true && c.getBoolUser() == true && c.getBoolNick() == true)
+    else
+        send_reply_error(c, ERR_UNKNOWNCOMMAND, cmd, "Unknown command");
+
+    if (c.getBoolPass() && c.getBoolUser() && c.getBoolNick())
         c.setStatus(REGISTERED);
+    std::cout << "STATUS :" << c.getStatus() << '\n';
 }
 
 void Server::handle_nick(Message &msg, Client &c)
@@ -30,62 +40,75 @@ void Server::handle_nick(Message &msg, Client &c)
     IrcError error = msg.parsing_nick();
     if (error != IRC_OK)
     {
-		if(error == ERR_NONICKNAMEGIVEN)
-			send_reply_error(c, error, "No nickname given");
-		if(error == ERR_INVALID)
-			send_reply_error(c, error, "No nickname is invalid");
-		if(error == ERR_ERRONEUSNICKNAME)
-			send_reply_error(c, error, msg.get_args()[0], "Erroneus nickname");
-		return;
+        if (error == ERR_NONICKNAMEGIVEN)
+            send_reply_error(c, error, "No nickname given");
+        else if (error == ERR_ERRONEUSNICKNAME)
+            send_reply_error(c, error, msg.get_args()[0], "Erroneus nickname");
+        return;
     }
-    //check prealable
-    std::vector<std::string> args = msg.get_args(); 
+    // check prealable
+    std::vector<std::string> args = msg.get_args();
     for (size_t i = 0; i < vec_clients.size(); i++)
     {
         if (&vec_clients[i] != &c && vec_clients[i].getNickname() == args[0])
         {
             error = ERR_NICKNAMEINUSE;
-			send_reply_error(c, error, msg.get_args()[0], "Nickname is already in use");
+            send_reply_error(c, error, msg.get_args()[0], "Nickname is already in use");
             return;
         }
     }
-    //execution finale
+    // execution finale
     c.setNickname(args[0]);
     c.setBoolNick(true);
 }
 
 void Server::handle_user(Message &msg, Client &c)
 {
-    IrcError error = msg.parsing_user();
-    if (error != IRC_OK){
-		if(error == ERR_NEEDMOREPARAMS)
-			send_reply_error(c, error, msg.get_command(), "Not enough parameters");
-		if(error == ERR_INVALID)
-			send_reply_error(c, error, "User is invalid");
-		return;
-    }
+    // --- DEBUG : voir comment la ligne a été découpée ---
     std::vector<std::string> args = msg.get_args();
+    // std::cerr << "args.size() = " << args.size() << std::endl;
+    // for (size_t i = 0; i < args.size(); ++i)
+    //     std::cerr << "  args[" << i << "] = [" << args[i] << "]" << std::endl;
+    // ----------------------------------------------------
+
+	if (c.getStatus() == REGISTERED)
+    {
+        send_reply_error(c, ERR_ALREADYREGISTERED, "You may not reregister");
+        return;
+    }
+
+    IrcError error = msg.parsing_user();
+    if (error != IRC_OK)
+    {
+        if (error == ERR_NEEDMOREPARAMS)
+            send_reply_error(c, error, msg.get_command(), "Not enough parameters");
+        return;
+    }
     c.setUsername(args[0]);
-	//parsing_user vérifie args.size() != 4 mais si le trailing est dans args[3] 
-	//— est-ce que ton parser met bien le realname en args[3] ? Vérifie avec un cerr de debug.
     c.setRealname(args[3]);
     c.setBoolUser(true);
 }
 
 void Server::handle_pass(Message &msg, Client &c)
 {
+	if (c.getStatus() == REGISTERED)
+    {
+        send_reply_error(c, ERR_ALREADYREGISTERED, "You may not reregister");
+        return;
+    }
+
     IrcError error = msg.parsing_pass();
     if (error != IRC_OK)
     {
-		if(error == ERR_NEEDMOREPARAMS)
-			send_reply_error(c, error, msg.get_command(), "Not enough parameters");
-		return;
+        if (error == ERR_NEEDMOREPARAMS)
+            send_reply_error(c, error, msg.get_command(), "Not enough parameters");
+        return;
     }
     const std::vector<std::string> args = msg.get_args();
     if (args[0] != this->password)
     {
         error = ERR_PASSWDMISMATCH;
-		send_reply_error(c, error, "Password incorrect");
+        send_reply_error(c, error, "Password incorrect");
         return;
     }
     c.setBoolPass(true);
@@ -116,4 +139,3 @@ int Server::find_dest(std::string dest)
     }
     return -1;
 }
-
