@@ -34,10 +34,8 @@ IrcError Message::parsing_user()
         if (special.find(args[0][i]) != std::string::npos)
             return ERR_INVALID;
     }
-    // if (this->args[1].size() != 1 || this->args[2].size() != 1)
-    // 	return ERR_INVALID;
-    // if (args[1][0] != '0' || args[2][0] != '*')
-    // 	return ERR_INVALID;
+	// if (!this->trailing_arg)
+	// 	return ERR_NEEDMOREPARAMS;
     return IRC_OK;
 }
 
