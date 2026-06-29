@@ -5,9 +5,6 @@
 enum e_CLientState
 {
     HANDSHAKE,
-    PASS, // mot de passe
-    NICK, // nickname
-    USER,
     REGISTERED,
     QUIT,
 };
