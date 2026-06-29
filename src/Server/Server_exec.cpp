@@ -7,7 +7,6 @@ void Server::exec_flow(Message &msg, Client &c)
         cmd[i] = toupper(cmd[i]);
     if (cmd.empty())
         return;
-    // std::cout << "[cmd]=[" << cmd << "]" << std::endl;
     if (c.getStatus() != REGISTERED)
     {
         if (cmd != "PASS" && cmd != "NICK" && cmd != "USER")
@@ -16,7 +15,6 @@ void Server::exec_flow(Message &msg, Client &c)
             return;
         }
     }
-
     if (cmd == "PASS")
         handle_pass(msg, c);
     else if (cmd == "NICK")
@@ -37,6 +35,7 @@ void Server::exec_flow(Message &msg, Client &c)
     	const std::string &nick = c.getNickname();
     	send_raw(c, ":irc.server 001 " + nick + " :Welcome to the IRC Network " + nick);
     }
+	debug_client(msg, c);
 }
 
 void Server::handle_nick(Message &msg, Client &c)
