@@ -29,6 +29,10 @@ void Server::exec_flow(Message &msg, Client &c)
         handle_privmsg(msg, c);
     else if (cmd == "JOIN")
         handle_join(msg, c);
+    else if (cmd == "MODE")
+        handle_mode(msg, c);
+    else if (cmd == "KICK")
+        handle_mode(msg, c);
     if (c.getBoolPass() && c.getBoolNick() && c.getBoolUser() && c.getStatus() != REGISTERED)
     {
         c.setStatus(REGISTERED);
