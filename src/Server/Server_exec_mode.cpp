@@ -6,7 +6,7 @@
 /*   By: bkaras-g <bkaras-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/27 17:52:49 by bkaras-g          #+#    #+#             */
-/*   Updated: 2026/06/27 17:53:54 by bkaras-g         ###   ########.fr       */
+/*   Updated: 2026/06/29 13:50:39 by bkaras-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,17 @@ void identify_and_exec_mode(Channel &chan, Client &c, char sign, char mode_lette
 static bool modeNeedsParam(char sign, char letter);
 
 /*
-Erreurs de parsing: ERR_NEEDMOREPARAMS, ERR_UNKNOWNMODE
+Traitement de l'exec de MODE. Format : `<target> [<modestring> [<mode arguments>...]]` 
+Exemple : `MODE #chan +itk-l+o secretkey alice`
+
+Le besoin en <mode arguments> dépend des modes demandés. Voir sur Figma
+les besoins en <mode arguments> et le diagramme d'exec flow suivi par cette fonction.
+ 
+Après check des numeric replies, extractions des paramètres <modestring>
+et <mode arguments> avec msg.get_args() 
+Puis on parcourt <modestring> et <mode arguments> pour traiter l'exec de chaque mode
+@param &msg Le Message de MODE
+@param &c Le Client émetteur du Message
 */
 void Server::handle_mode(Message &msg, Client &c)
 {
@@ -31,6 +41,12 @@ void Server::handle_mode(Message &msg, Client &c)
     }
     */
 
+    //A partir de ce point, on considère que <modestring> est au bon format et que
+    //<mode arguments> contient le bon nombre d'arguments pour chaque mode demandé
+    //dans <modestring> (Voir sur Figma)
+    //Attention au mode -k qui nécessite un <mode argument> même s'il n'est pas utile
+    
+    //Check des numeric replies
     Channel *chan = findChannelByName(msg.get_args()[0]);
     if (!chan)
     {
@@ -54,6 +70,10 @@ void Server::handle_mode(Message &msg, Client &c)
         // send_reply_error "<client> <channel> :You're not channel operator"
         return;
     }
+
+    /*
+    Extraction des paramètres <modestring> et <mode arguments> avec msg.get_args() 
+    */
     std::string modestring = msg.get_args()[1];
     std::vector<std::string> mode_args;
     const std::vector<std::string> &args = msg.get_args();
@@ -61,6 +81,10 @@ void Server::handle_mode(Message &msg, Client &c)
     for (size_t i = 2; i < args.size(); i++)
         mode_args.push_back(args[i]);
 
+    /*
+    On parcourt <modestring> et <mode arguments> pour traiter l'exec de chaque mode
+    Identification du mode avec l'itérateur it sur modestring
+    */
     std::string::iterator it = modestring.begin();
     char sign;
     size_t args_idx = 0;
@@ -71,7 +95,7 @@ void Server::handle_mode(Message &msg, Client &c)
             sign = *it;
             it++;
         }
-        if (*it == 'o')
+        if (*it == 'o') //check num reply : si le client à ajouter en ChanOps est dans le channel
         {
             if (findClientByNickname(mode_args[args_idx]) == NULL)
             {
@@ -83,7 +107,7 @@ void Server::handle_mode(Message &msg, Client &c)
             }
         }
         std::string param;
-        if (modeNeedsParam(sign, *it))
+        if (modeNeedsParam(sign, *it)) //check si le mode identifié nécessite un <mode argument>
             param = mode_args[args_idx++]; // pas de check si mode_args contient bien des args car fait au parsing
         identify_and_exec_mode(*chan, c, sign, *it, param);
         it++;
@@ -131,7 +155,9 @@ void identify_and_exec_mode(Channel &chan, Client &c, char sign, char mode_lette
     }
 }
 
-// Type B (k, o): param on '+' AND '-'. Type C (l): param only on '+'. Type D (i, t): never.
+// Mode k, o: param on '+' AND '-'. 
+// Mode l: param only on '+'. 
+// Mode i, t: no param.
 static bool modeNeedsParam(char sign, char letter)
 {
     if (letter == 'k' || letter == 'o')
