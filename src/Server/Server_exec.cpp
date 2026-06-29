@@ -127,15 +127,12 @@ void Server::handle_privmsg(Message &msg, Client &c)
         std::string msg_to_send = ":" + c.getNickname() + " PRIVMSG " + args[0] + " :" + args[1] + "\r\n";
         send(dest, msg_to_send.c_str(), msg_to_send.size(), 0);
     }
-    else if (find_channel(args[0]) >= 0)
+    else if (findChannelByName(args[0]))
     {
-        std::vector<Client *> chan_mem = channels[find_channel(args[0])].getMembers();
-        for (size_t i = 0; i < chan_mem.size(); i++)
-        {
+        Channel *Chan_to_send = findChannelByName(args[0]);
             std::string msg_to_send =
-                ":" + chan_mem[i]->getNickname() + " PRIVMSG " + args[0] + " :" + args[1] + "\r\n";
-            send(chan_mem[i]->getFdClient(), msg_to_send.c_str(), msg_to_send.size(), 0);
-        }
+                ":" + c.getNickname() + " PRIVMSG " + args[0] + " :" + args[1];
+            broadcastToChannel(*Chan_to_send, msg_to_send);
     }
     return;
 }
@@ -158,37 +155,37 @@ void Server::handle_Kick(Message &msg, Client &c)
     /*IrcError error = msg.parsing_Kick();
     if (error != IRC_OK)
     {
-		if(error == ERR_NEEDMOREPARAMS)
-			send_reply_error(c, error, " KICK :Not enough parameters");
-		return;
+        if(error == ERR_NEEDMOREPARAMS)
+            send_reply_error(c, error, " KICK :Not enough parameters");
+        return;
     }
     */
 
     std::vector<std::string> channelsRaw = findChannelsInMsg(msg);
 
-    //le cas channelsRaw.size() == 0 est checké dans parsing_Kick()
-    // if channelsRaw.size() > 1 --> pas de numeric reply dédié. Claude: 
-    //La plupart des serveurs IRC renvoient ERR_NOSUCHCHANNEL car ils 
-    //prennent l'ensemble de l'arg des channels comme un nom de channel
-    // unique (par ex #a,&b) 
+    // le cas channelsRaw.size() == 0 est checké dans parsing_Kick()
+    //  if channelsRaw.size() > 1 --> pas de numeric reply dédié. Claude:
+    // La plupart des serveurs IRC renvoient ERR_NOSUCHCHANNEL car ils
+    // prennent l'ensemble de l'arg des channels comme un nom de channel
+    //  unique (par ex #a,&b)
     if (channelsRaw.size() > 1 || checkChannels(channelsRaw) == ERR_NOSUCHCHANNEL)
     {
-        //ERR_NOSUCHCHANNEL (403)
-        //send_reply_error "<client> <channel> :No such channel"
-    	return;
+        // ERR_NOSUCHCHANNEL (403)
+        // send_reply_error "<client> <channel> :No such channel"
+        return;
     }
     Channel *chan = findChannelByName(channelsRaw[0]);
     if (!chan->isMember(c))
     {
-        //ERR_NOTONCHANNEL (442)
-        //send_reply_error "<client> <channel> :You're not on that channel"
-    	return;
+        // ERR_NOTONCHANNEL (442)
+        // send_reply_error "<client> <channel> :You're not on that channel"
+        return;
     }
     if (!chan->isOperator(c))
     {
-        //ERR_CHANOPRIVSNEEDED (482)
-        //send_reply_error "<client> <channel> :You're not channel operator"
-    	return;
+        // ERR_CHANOPRIVSNEEDED (482)
+        // send_reply_error "<client> <channel> :You're not channel operator"
+        return;
     }
 
     std::vector<std::string> clientsRaw = ft_split(',', msg.get_args()[1]);
@@ -204,7 +201,7 @@ void Server::handle_Kick(Message &msg, Client &c)
         Client *target = findClientByNickname(clientsRaw[i]);
         if (target == NULL || !chan->isMember(*target))
         {
-            //ERR_USERNOTINCHANNEL (441) "<client> <nick> <channel> :They aren't on that channel"
+            // ERR_USERNOTINCHANNEL (441) "<client> <nick> <channel> :They aren't on that channel"
             continue;
         }
 
@@ -267,22 +264,19 @@ void Server::remove_client(int fd)
 void Server::handle_quit(Message &msg, Client &c)
 {
     std::vector<std::string> args = msg.get_args();
-    if (!args.empty() && !args[0].empty())
+    std::string reason = (!args.empty() && !args[0].empty()) ? args[0] : "Client Quit";
+    std::string msg_to_send = ":" + c.getNickname() + "!" + c.getUsername()
+                     + "@localhost QUIT :" + reason;
+    PtrVec<Channel> c_channels = c.get_client_channel();
+    for (size_t i = 0; i < c_channels.size(); i++)
     {
-        PtrVec<Channel> c_channels = c.get_client_channel();
-        for (size_t i = 0; i < c_channels.size(); i++)
-        {
-            std::vector<Client *> chan_mem = c_channels.get()[i]->getMembers();
-            for (size_t y = 0; y < chan_mem.size(); y++)
-            {
-                std::string msg_to_send =
-                    ":" + c.getNickname() + "!" + c.getNickname() + "@localhost" + " QUIT " + " :" + args[0] + "\r\n";
-                send(chan_mem[i]->getFdClient(), msg_to_send.c_str(), msg_to_send.size(), 0);
-            }
-        }
+        Channel *chan = c_channels.get()[i];
+        broadcastToChannel(*chan, msg_to_send, &c);
+        chan->removeMember(c);
+        if (chan->isOperator(c))
+            chan->removeOperator(c);
     }
-    else
-        c.setStatus(QUIT);
+    c.setStatus(QUIT);
 }
 
 void Server::handle_join(Message &msg, Client &c)
@@ -291,7 +285,7 @@ void Server::handle_join(Message &msg, Client &c)
     // if (error != IRC_OK)
     // {}
     std::vector<std::string> args = msg.get_args();
-    if (find_channel(args[0]) == -1)
+    if (!findChannelByName(args[0]))
     {
         Channel new_channel;
         new_channel.setName(args[0]);
@@ -303,7 +297,12 @@ void Server::handle_join(Message &msg, Client &c)
     }
     else
     {
-        channels[find_channel(args[0])].addMember(c);
-        std::cout << "member as been added\n";
+        Channel *ChanToJoin = findChannelByName(args[0]);
+        ChanToJoin->addMember(c);
+        c.addChannel(*ChanToJoin);
+        // :nick!user@localhost JOIN #channel
+        std::string msg_to_send = ":" + c.getNickname() + "!" + c.getUsername()
+                     + "@localhost JOIN :" + ChanToJoin->getName();
+        broadcastToChannel(*ChanToJoin, msg_to_send);
     }
 }

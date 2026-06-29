@@ -73,11 +73,10 @@ class Server
     void handle_mode(Message &msg, Client &c);
 
     /*--Fonctions utilitaires*/
-    int find_channel(std::string dest);
     void remove_client(int fd);
     int find_dest(std::string dest);
     Client *find_client(std::vector<pollfd> fds, size_t i);
-    Client* findClientByNickname(const std::string &nickname);
+    Client *findClientByNickname(const std::string &nickname);
     int find_channel_index(std::string dest);
     Channel *findChannelByName(const std::string &name);
     std::vector<std::string> findChannelsInMsg(Message &msg);

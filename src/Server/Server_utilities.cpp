@@ -35,8 +35,8 @@ std::vector<std::string> Server::findChannelsInMsg(Message &msg)
     }
     if (channels_token == "") // si pas de channel trouvé, on renvoie un vecteur vide
         return (channels);
-        
-    //On récupère les noms des channels en retirant les préfixes '#' et '&'
+
+    // On récupère les noms des channels en retirant les préfixes '#' et '&'
     return (ft_split(',', channels_token));
 }
 
@@ -51,7 +51,7 @@ std::vector<std::string> ft_split(char separator, const std::string &str)
     while (sep_idx != std::string::npos)
     {
         result.push_back(str.substr(pos, sep_idx - pos));
-        pos = sep_idx + 1; //skip the separator
+        pos = sep_idx + 1; // skip the separator
         sep_idx = str.find(separator, pos);
     }
     result.push_back(str.substr(pos));
@@ -128,7 +128,7 @@ identifie un Channel à partir de son nom (préfixe inclus)
 Attention ! Le pointeur vers Channel qui est return est valide tant que le vecteur
 des channels n'est pas modifié avec un pushback() par exemple. A utiliser tout de suite.
 */
-Channel* Server::findChannelByName(const std::string &name)
+Channel *Server::findChannelByName(const std::string &name)
 {
     for (size_t j = 0; j < this->channels.size(); j++)
     {
