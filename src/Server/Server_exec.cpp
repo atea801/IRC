@@ -33,6 +33,8 @@ void Server::exec_flow(Message &msg, Client &c)
         handle_mode(msg, c);
     else if (cmd == "KICK")
         handle_mode(msg, c);
+    else if (cmd == "INVITE")
+        handle_invite(msg, c);
     if (c.getBoolPass() && c.getBoolNick() && c.getBoolUser() && c.getStatus() != REGISTERED)
     {
         c.setStatus(REGISTERED);

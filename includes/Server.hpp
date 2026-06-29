@@ -71,6 +71,7 @@ class Server
     void handle_join(Message &msg, Client &c);
     void handle_Kick(Message &msg, Client &c); // K pour distinguer du n de handle_nick()
     void handle_mode(Message &msg, Client &c);
+    void Server::handle_invite(Message &msg, Client &c);
 
     /*--Fonctions utilitaires*/
     void remove_client(int fd);
