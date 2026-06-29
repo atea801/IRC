@@ -58,3 +58,14 @@ IrcError Message::parsing_quit()
 {
     return IRC_OK;
 }
+
+
+IrcError Message::parsing_privmsg()
+{
+	if (this->args.empty() || this->args[0].empty()){
+		return ERR_NORECIPIENT;
+	}
+	if (this->args.size() < 2 || args[1].empty())
+		return ERR_NOTEXTTOSEND;
+	return IRC_OK;
+}

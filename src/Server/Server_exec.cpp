@@ -118,14 +118,16 @@ void Server::handle_pass(Message &msg, Client &c)
 
 void Server::handle_privmsg(Message &msg, Client &c)
 {
-    // IrcError error = msg.parsing_privmsg();
-    // if (error != IRC_OK)
-    // {
-
-    // }
+    IrcError error = msg.parsing_privmsg();
+    if (error != IRC_OK)
+    {
+        if (error == ERR_NORECIPIENT)
+		    send_reply_error(c, error, "No recipient given (PRIVMSG)");
+        else if (error == ERR_NOTEXTTOSEND)
+		    send_reply_error(c, error, "No text to send");
+		return;
+    }
     const std::vector<std::string> args = msg.get_args();
-    if (args.empty() && args[0].empty())
-        return;
     int dest = find_dest(args[0]);
     if (dest >= 0)
     {
