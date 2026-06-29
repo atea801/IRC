@@ -1,6 +1,9 @@
 #pragma once
 
+#include "PtrVec.hpp"
 #include <iostream>
+
+class Channel;
 
 enum e_CLientState
 {
@@ -18,6 +21,7 @@ class Client
     std::string _username;
     std::string _hostname; // adresse ip du client
     std::string _buffer;   // permet de stocker les morceaux envoyer par recv()
+    PtrVec<Channel> _client_channels;
     e_CLientState _status;
     bool _bool_pass;
     bool _bool_nick;
@@ -44,6 +48,7 @@ class Client
     const bool &getBoolPass() const;
     const bool &getBoolNick() const;
     const bool &getBoolUser() const;
+    const PtrVec<Channel> &get_client_channel() const;
 
     /*--Setters--*/
     void setNickname(std::string const nickname_input);
@@ -55,4 +60,5 @@ class Client
     void setBoolPass(bool const pass);
     void setBoolNick(bool const nick);
     void setBoolUser(bool const user);
+    void addChannel(Channel &new_channel);
 };

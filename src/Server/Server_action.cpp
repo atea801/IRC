@@ -103,7 +103,7 @@ int Server::accept_new_client()
         client_p.revents = 0;
         fds.push_back(client_p);
         Client c(client_p.fd);
-        vec_clients.push_back(c);
+        vec_clients.insert(std::make_pair(c.getFdClient(), c));
     }
     return (0);
 }
@@ -156,13 +156,16 @@ int Server::client_actions(size_t i)
     c->setBuffer(c->getBuffer() + std::string(buf, n));
 
     // 4. boucle clean du buffer
-    Message message;
     while (c->getBuffer().find("\r\n") != std::string::npos)
     {
+        Message message;
         // a. extraire la premiere commande + nettoyer
         message.extract_and_clean(*c);
         // b. on parse la lign extraire en focniton de commande parisng 2
         // c. execute
+        const std::vector<std::string> args = message.get_args();
+        std::cout << "[PARSED fd=" << fds[i].fd << "] "
+                  << "CMD=" << message.get_command() << std::endl;
         this->exec_flow(message, *c);
         if (c->getStatus() == QUIT)
             return (1);
@@ -209,6 +212,7 @@ int Server::run()
                         return (-1);
                     if (status > 0)
                     {
+                        remove_client(fds[i].fd);
                         close(fds[i].fd);
                         std::cerr << "Client closed: " << fds[i].fd << "\n";
                         fds.erase(fds.begin() + i);
@@ -218,6 +222,7 @@ int Server::run()
                 }
                 if (fds[i].revents & (POLLHUP | POLLERR | POLLNVAL))
                 {
+                    remove_client(fds[i].fd);
                     close(fds[i].fd);
                     fds.erase(fds.begin() + i);
                     --i;
