@@ -139,6 +139,17 @@ Channel *Server::findChannelByName(const std::string &name)
 }
 
 /*
+Construit le préfixe d'origine d'un message IRC pour un Client: "nick!user@host".
+Utilisé comme source des messages relayés (KICK, INVITE, etc.).
+@param c le Client émetteur
+@return le préfixe sous la forme "nickname!username@hostname"
+*/
+std::string Server::getPrefix(Client &c) const
+{
+    return (c.getNickname() + "!" + c.getUsername() + "@" + c.getHostname());
+}
+
+/*
 Envoie une ligne IRC à tous les membres d'un channel.
 Le \r\n final est ajouté par send_raw(), donc `line` ne doit pas le contenir.
 @param chan     le channel dont les membres reçoivent la ligne

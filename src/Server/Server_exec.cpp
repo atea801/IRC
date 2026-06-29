@@ -198,7 +198,7 @@ void Server::handle_Kick(Message &msg, Client &c)
     //préparation du message KICK à envoyer:
     //on définit le préfixe de l'émetteur (nick!user@host) et le comment s'il a été fourni,
     //sinon comment par défaut: nick du kicker
-    std::string kickerPrefix = c.getNickname() + "!" + c.getUsername() + "@" + c.getHostname();
+    std::string kickerPrefix = getPrefix(c);
     std::string comment;
     if (msg.get_args().size() > 2)
         comment = msg.get_args()[2];
