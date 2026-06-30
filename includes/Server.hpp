@@ -1,5 +1,15 @@
 #pragma once
 
+#define C_RESET  "\033[0m"
+#define C_DIM     "\033[2m"
+#define C_RED     "\033[31m"
+#define C_GREEN   "\033[32m"
+#define C_YELLOW  "\033[33m"
+#define C_BLUE    "\033[34m"
+#define C_MAGENTA "\033[35m"
+#define C_CYAN    "\033[36m"
+#define C_BOLD    "\033[1m"
+
 #include "Channel.hpp"
 #include "Client.hpp"
 #include "Message.hpp"
@@ -83,6 +93,8 @@ class Server
     std::vector<std::string> findChannelsInMsg(Message &msg);
     void broadcastToChannel(Channel &chan, const std::string &line, Client *exclude = NULL);
     std::string getPrefix(Client &c) const;
+    void debug_client(Message &msg, Client &c);
+
 
     /*--Gestion des erreurs (Numeric replies)--*/
     int checkChannels(const std::vector<std::string> &channelsToCheck) const;

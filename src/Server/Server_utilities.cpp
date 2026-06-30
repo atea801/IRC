@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server_utilities.cpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bkaras-g <bkaras-g@student.42.fr>          +#+  +:+       +#+        */
+/*   By: aautret <aautret@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/25 11:15:45 by bkaras-g          #+#    #+#             */
-/*   Updated: 2026/06/26 15:39:57 by bkaras-g         ###   ########.fr       */
+/*   Updated: 2026/06/29 13:55:42 by aautret          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -165,4 +165,59 @@ void Server::broadcastToChannel(Channel &chan, const std::string &line, Client *
             continue;
         send_raw(*members[i], line);
     }
+}
+
+void Server::debug_client(Message &msg, Client &c)
+{
+    const std::vector<std::string> &args = msg.get_args();
+
+    // --- statut en texte + couleur selon l'état ---
+    std::string st_txt;
+    std::string st_col;
+    switch (c.getStatus())
+    {
+        case REGISTERED: st_txt = "REGISTERED"; st_col = C_GREEN;  break;
+        case QUIT:       st_txt = "QUIT";       st_col = C_RED;    break;
+        default:         st_txt = "HANDSHAKE";  st_col = C_YELLOW; break;
+    }
+
+    // --- helper pour ✓ / ✗ coloré ---
+    std::string p = c.getBoolPass() ? std::string(C_GREEN) + "OK " : std::string(C_RED) + "-- ";
+    std::string n = c.getBoolNick() ? std::string(C_GREEN) + "OK " : std::string(C_RED) + "-- ";
+    std::string u = c.getBoolUser() ? std::string(C_GREEN) + "OK " : std::string(C_RED) + "-- ";
+
+    std::cout << C_DIM << "+----------------------------------------------+" << C_RESET << "\n";
+    std::cout << C_DIM << "| " << C_BOLD << C_CYAN << "DEBUG CLIENT" << C_RESET
+              << "  fd=" << C_MAGENTA << c.getFdClient() << C_RESET << "\n";
+    std::cout << C_DIM << "+----------------------------------------------+" << C_RESET << "\n";
+
+    // commande
+    std::cout << C_DIM << "| " << C_RESET << "cmd    : "
+              << C_BOLD << C_CYAN << msg.get_command() << C_RESET << "\n";
+
+    // arguments
+    std::cout << C_DIM << "| " << C_RESET << "args   : ["
+              << C_YELLOW << args.size() << C_RESET << "]\n";
+    for (size_t i = 0; i < args.size(); i++)
+        std::cout << C_DIM << "| " << C_RESET << "  [" << i << "] = "
+                  << C_GREEN << "\"" << args[i] << "\"" << C_RESET << "\n";
+
+    // progression de l'enregistrement
+    std::cout << C_DIM << "| " << C_RESET << "reg    : "
+              << "pass=" << p << C_RESET
+              << "nick=" << n << C_RESET
+              << "user=" << u << C_RESET << "\n";
+
+    // identité (si déjà renseignée)
+    std::cout << C_DIM << "| " << C_RESET << "nick   : "
+              << C_BLUE << (c.getNickname().empty() ? "*" : c.getNickname()) << C_RESET << "\n";
+    std::cout << C_DIM << "| " << C_RESET << "user   : "
+              << C_BLUE << (c.getUsername().empty() ? "-" : c.getUsername()) << C_RESET << "\n";
+
+    // statut global
+    std::cout << C_DIM << "| " << C_RESET << "status : "
+              << C_BOLD << st_col << st_txt << C_RESET
+              << C_DIM << " (" << c.getStatus() << ")" << C_RESET << "\n";
+
+    std::cout << C_DIM << "+----------------------------------------------+" << C_RESET << "\n";
 }

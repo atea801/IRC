@@ -5,26 +5,24 @@ void Server::exec_flow(Message &msg, Client &c)
     std::string cmd = msg.get_command();
     for (size_t i = 0; i < cmd.size(); i++)
         cmd[i] = toupper(cmd[i]);
-    // add accept lower case
+    if (cmd.empty())
+        return;
     if (c.getStatus() != REGISTERED)
     {
         if (cmd != "PASS" && cmd != "NICK" && cmd != "USER")
         {
             send_reply_error(c, ERR_NOTREGISTERED, "You have not registered");
+            return;
         }
     }
-    if (cmd == "CAP")
-        handle_cap(c);
-    else if (cmd == "PING")
-        handle_ping(msg, c);
-    else if (cmd == "PASS")
+    if (cmd == "PASS")
         handle_pass(msg, c);
     else if (cmd == "NICK")
         handle_nick(msg, c);
     else if (cmd == "USER")
         handle_user(msg, c);
-    // else if (cmd == "QUIT")
-    //     handle_quit(msg, c);
+    else if (cmd == "QUIT")
+        c.setStatus(QUIT);
     else if (cmd == "PRIVMSG")
         handle_privmsg(msg, c);
     else if (cmd == "JOIN")
@@ -35,15 +33,15 @@ void Server::exec_flow(Message &msg, Client &c)
         handle_mode(msg, c);
     else if (cmd == "INVITE")
         handle_invite(msg, c);
+	 else
+        send_reply_error(c, ERR_UNKNOWNCOMMAND, cmd, "Unknown command");
     if (c.getBoolPass() && c.getBoolNick() && c.getBoolUser() && c.getStatus() != REGISTERED)
     {
-        c.setStatus(REGISTERED);
-        std::string nick = c.getNickname();
-        std::string reply = ":irc.server 001 " + nick + " :Welcome to the IRC Network " + nick + "\r\n";
-        send(c.getFdClient(), reply.c_str(), reply.size(), 0);
+         c.setStatus(REGISTERED);
+    	const std::string &nick = c.getNickname();
+    	send_raw(c, ":irc.server 001 " + nick + " :Welcome to the IRC Network " + nick);
     }
-    std::cout << "REGCHECK pass=" << c.getBoolPass() << " nick=" << c.getBoolNick() << " user=" << c.getBoolUser()
-              << " status=" << c.getStatus() << std::endl;
+	debug_client(msg, c);
 }
 
 void Server::handle_nick(Message &msg, Client &c)
@@ -53,12 +51,8 @@ void Server::handle_nick(Message &msg, Client &c)
     {
         if (error == ERR_NONICKNAMEGIVEN)
             send_reply_error(c, error, "No nickname given");
-        if (error == ERR_INVALID)
-            send_reply_error(c, error, "No nickname is invalid");
-        // sur ce message d'erreur normalement on met <client><nick> :message
-        // comment faire remonter le <client> ? necessaire ?  detail
-        if (error == ERR_ERRONEUSNICKNAME)
-            send_reply_error(c, error, "Erroneus nickname");
+        else if (error == ERR_ERRONEUSNICKNAME)
+            send_reply_error(c, error, msg.get_args()[0], "Erroneus nickname");
         return;
     }
     // check prealable
@@ -68,11 +62,11 @@ void Server::handle_nick(Message &msg, Client &c)
         if (&vec_clients[i] != &c && vec_clients[i].getNickname() == args[0])
         {
             error = ERR_NICKNAMEINUSE;
-            send_reply_error(c, error, "NICK: Nickname is already in use");
+            send_reply_error(c, error, msg.get_args()[0], "Nickname is already in use");
             return;
         }
     }
-    // execution final
+    // execution finale
     c.setNickname(args[0]);
     c.setBoolNick(true);
 }
@@ -83,26 +77,35 @@ void Server::handle_user(Message &msg, Client &c)
     if (error != IRC_OK)
     {
         if (error == ERR_NEEDMOREPARAMS)
-            send_reply_error(c, error, "USER :Not enough parameters");
+            send_reply_error(c, error, msg.get_command(), "Not enough parameters");
         if (error == ERR_INVALID)
             send_reply_error(c, error, "User is invalid");
         return;
     }
     std::vector<std::string> args = msg.get_args();
+	if (c.getStatus() == REGISTERED)
+    {
+        send_reply_error(c, ERR_ALREADYREGISTERED, "You may not reregister");
+        return;
+    }
     c.setUsername(args[0]);
-    // parsing_user vérifie args.size() != 4 mais si le trailing est dans args[3]
-    // — est-ce que ton parser met bien le realname en args[3] ? Vérifie avec un cerr de debug.
     c.setRealname(args[3]);
     c.setBoolUser(true);
 }
 
 void Server::handle_pass(Message &msg, Client &c)
 {
+	if (c.getStatus() == REGISTERED)
+    {
+        send_reply_error(c, ERR_ALREADYREGISTERED, "You may not reregister");
+        return;
+    }
+
     IrcError error = msg.parsing_pass();
     if (error != IRC_OK)
     {
         if (error == ERR_NEEDMOREPARAMS)
-            send_reply_error(c, error, " PASS :Not enough parameters");
+            send_reply_error(c, error, msg.get_command(), "Not enough parameters");
         return;
     }
     const std::vector<std::string> args = msg.get_args();
@@ -117,14 +120,16 @@ void Server::handle_pass(Message &msg, Client &c)
 
 void Server::handle_privmsg(Message &msg, Client &c)
 {
-    // IrcError error = msg.parsing_privmsg();
-    // if (error != IRC_OK)
-    // {
-
-    // }
+    IrcError error = msg.parsing_privmsg();
+    if (error != IRC_OK)
+    {
+        if (error == ERR_NORECIPIENT)
+		    send_reply_error(c, error, "No recipient given (PRIVMSG)");
+        else if (error == ERR_NOTEXTTOSEND)
+		    send_reply_error(c, error, "No text to send");
+		return;
+    }
     const std::vector<std::string> args = msg.get_args();
-    if (args.empty() && args[0].empty())
-        return;
     int dest = find_dest(args[0]);
     if (dest >= 0)
     {
