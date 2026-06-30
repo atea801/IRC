@@ -129,22 +129,38 @@ void Server::handle_privmsg(Message &msg, Client &c)
             send_reply_error(c, error, "No text to send");
         return;
     }
+
     const std::vector<std::string> args = msg.get_args();
-    int dest = find_dest(args[0]);
-    if (dest >= 0)
+    const std::vector<std::string> destinataires = ft_split(',', args[0]);
+
+    // le texte ne change jamais selon la cible : c'est toujours args[1]
+    const std::string &text = args[1];
+    // prefixe complet nick!user@host, comme dans handle_Kick
+    std::string prefix = c.getNickname() + "!" + c.getUsername() + "@" + c.getHostname();
+
+	// parcour des destinataires qu'il y en ai 1 ou 10 
+    for (size_t i = 0; i < destinataires.size(); i++)
     {
-        for (size_t i = 0; i < args.size(); i++)
-            std::cout << "args[" << i << "] = [" << args[i] << "]" << std::endl;
-        std::string msg_to_send = ":" + c.getNickname() + " PRIVMSG " + args[0] + " :" + args[1] + "\r\n";
-        send(dest, msg_to_send.c_str(), msg_to_send.size(), 0);
+        const std::string &target = destinataires[i]; // LA cible du tour courant
+        int find = find_dest(target);
+
+        if (find >= 0) // c'est un nick connu
+        {
+            std::string msg_to_send = ":" + prefix + " PRIVMSG " + target + " :" + text + "\r\n";
+            send(find, msg_to_send.c_str(), msg_to_send.size(), 0);
+        }
+        else if (findChannelByName(target)) // c'est un channel
+        {
+            Channel *chan = findChannelByName(target);
+            std::string msg_to_send = ":" + prefix + " PRIVMSG " + target + " :" + text;
+            broadcastToChannel(*chan, msg_to_send);
+        }
+        else // ni nick ni channel
+        {
+            send_reply_error(c, ERR_NOSUCHNICK, target, "No such nick/channel");
+            continue;
+        }
     }
-    else if (findChannelByName(args[0]))
-    {
-        Channel *Chan_to_send = findChannelByName(args[0]);
-        std::string msg_to_send = ":" + c.getNickname() + " PRIVMSG " + args[0] + " :" + args[1];
-        broadcastToChannel(*Chan_to_send, msg_to_send);
-    }
-    return;
 }
 
 /*
