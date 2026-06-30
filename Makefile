@@ -2,15 +2,23 @@
 
 NAME =	irc
 SRCS =	src/main.cpp \
+		src/Channel/Channel.cpp \
+		src/Channel/Channel_members.cpp \
+		src/Channel/Channel_ChanOps.cpp \
+		src/Channel/Channel_get_set.cpp \
 		src/Client/Client.cpp \
 		src/Client/Client_get_set.cpp \
 		src/Message/Message_extract.cpp \
 		src/Message/Message_get_set.cpp \
 		src/Message/Message_parser.cpp \
 		src/Message/Message.cpp \
-		src/Server/Server_get_set.cpp \
-		src/Server/Server_exec.cpp \
 		src/Server/Server_action.cpp \
+		src/Server/Server_error.cpp \
+		src/Server/Server_exec.cpp \
+		src/Server/Server_exec_invite.cpp \
+		src/Server/Server_exec_mode.cpp \
+		src/Server/Server_get_set.cpp \
+		src/Server/Server_utilities.cpp \
 		src/Server/Server.cpp
 
 COLOUR_GREEN = $(shell tput setaf 2)

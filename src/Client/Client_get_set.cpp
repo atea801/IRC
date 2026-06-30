@@ -50,6 +50,11 @@ const bool &Client::getBoolUser() const
     return this->_bool_user;
 }
 
+const PtrVec<Channel> &Client::get_client_channel() const
+{
+    return this->_client_channels;
+}
+
 void Client::setNickname(std::string const nickname_input)
 {
     this->_nickname = nickname_input;
@@ -93,4 +98,9 @@ void Client::setBoolUser(bool const user)
 void Client::setBoolNick(bool const nick)
 {
     this->_bool_nick = nick;
+}
+
+void Client::addChannel(Channel &new_channel)
+{
+    this->_client_channels.add(new_channel);
 }

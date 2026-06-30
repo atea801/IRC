@@ -19,8 +19,6 @@ class Message
     Message &operator=(const Message &other);
     void clear();
     void extract_and_clean(Client &c);
-    int parser_arg(Client &c);
-    int handle_quit(std::vector<std::string> args);
     void fill_cmd_and_args(size_t pos, std::string data);
     const std::string &get_command() const;
     const std::vector<std::string> &get_args() const;
@@ -28,4 +26,5 @@ class Message
     IrcError parsing_user();
     IrcError parsing_pass();
     IrcError parsing_quit();
+    IrcError parsing_privmsg();
 };
