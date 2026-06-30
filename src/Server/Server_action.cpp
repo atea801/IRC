@@ -138,10 +138,11 @@ int Server::client_actions(size_t i)
     // 1. recv dépose dans buf temporaire
     char buf[4096];
     ssize_t n = recv(fds[i].fd, buf, sizeof(buf), 0);
-    if (n < 0)
+    if (n <= 0)
     {
-        perror("recv");
-        return (-1);
+        if (n < 0)
+            perror("recv");
+        return (1);
     }
     if (n == 0)
         return (1);

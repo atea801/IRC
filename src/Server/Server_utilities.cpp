@@ -157,7 +157,7 @@ void Server::broadcastToChannel(Channel &chan, const std::string &line, Client *
 
 int Server::find_dest(std::string dest)
 {
-    if (dest[0] != '#')
+    if (dest.empty() || dest[0] != '#')
     {
         for (size_t i = 0; i < vec_clients.size(); i++)
         {
