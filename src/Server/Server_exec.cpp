@@ -33,6 +33,8 @@ void Server::exec_flow(Message &msg, Client &c)
         handle_mode(msg, c);
     else if (cmd == "KICK")
         handle_mode(msg, c);
+    else if (cmd == "INVITE")
+        handle_invite(msg, c);
     if (c.getBoolPass() && c.getBoolNick() && c.getBoolUser() && c.getStatus() != REGISTERED)
     {
         c.setStatus(REGISTERED);
@@ -152,7 +154,11 @@ des users du Channel.
 */
 void Server::handle_Kick(Message &msg, Client &c)
 {
-    /*IrcError error = msg.parsing_Kick();
+    /* Parsing de la syntaxe. A checker entre autres:
+    if (channelsRaw.empty() || msg.get_args().size() < 2)
+        return send_reply_error(c, ERR_NEEDMOREPARAMS, "KICK", "Not enough parameters");
+    
+    IrcError error = msg.parsing_Kick();
     if (error != IRC_OK)
     {
         if(error == ERR_NEEDMOREPARAMS)
@@ -170,28 +176,28 @@ void Server::handle_Kick(Message &msg, Client &c)
     //  unique (par ex #a,&b --> nom de channel #a,&b)
     if (channelsRaw.size() > 1 || checkChannels(channelsRaw) == ERR_NOSUCHCHANNEL)
     {
-        // ERR_NOSUCHCHANNEL (403)
-        // send_reply_error "<client> <channel> :No such channel"
+        // ERR_NOSUCHCHANNEL (403) "<client> <channel> :No such channel"
+        send_reply_error(c, ERR_NOSUCHCHANNEL, channelsRaw[0], "No such channel");
         return;
     }
     Channel *chan = findChannelByName(channelsRaw[0]);
     if (!chan->isMember(c))
     {
-        // ERR_NOTONCHANNEL (442)
-        // send_reply_error "<client> <channel> :You're not on that channel"
+        // ERR_NOTONCHANNEL (442) "<client> <channel> :You're not on that channel"
+        send_reply_error(c, ERR_NOTONCHANNEL, chan->getName(), "You're not on that channel");
         return;
     }
     if (!chan->isOperator(c))
     {
-        // ERR_CHANOPRIVSNEEDED (482)
-        // send_reply_error "<client> <channel> :You're not channel operator"
+        // ERR_CHANOPRIVSNEEDED (482) "<client> <channel> :You're not channel operator"
+        send_reply_error(c, ERR_CHANOPRIVSNEEDED, chan->getName(), "You're not channel operator");
         return;
     }
 
-    // préparation du message KICK à envoyer:
-    // on définit le préfixe de l'émetteur (nick!user@host) et le comment s'il a été fourni,
-    // sinon comment par défaut: nick du kicker
-    std::string kickerPrefix = c.getNickname() + "!" + c.getUsername() + "@" + c.getHostname();
+    //préparation du message KICK à envoyer:
+    //on définit le préfixe de l'émetteur (nick!user@host) et le comment s'il a été fourni,
+    //sinon comment par défaut: nick du kicker
+    std::string kickerPrefix = getPrefix(c);
     std::string comment;
     if (msg.get_args().size() > 2)
         comment = msg.get_args()[2];

@@ -15,6 +15,7 @@ SRCS =	src/main.cpp \
 		src/Server/Server_action.cpp \
 		src/Server/Server_error.cpp \
 		src/Server/Server_exec.cpp \
+		src/Server/Server_exec_invite.cpp \
 		src/Server/Server_exec_mode.cpp \
 		src/Server/Server_get_set.cpp \
 		src/Server/Server_utilities.cpp \

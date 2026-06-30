@@ -6,7 +6,7 @@
 /*   By: bkaras-g <bkaras-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/27 17:52:49 by bkaras-g          #+#    #+#             */
-/*   Updated: 2026/06/29 13:50:39 by bkaras-g         ###   ########.fr       */
+/*   Updated: 2026/06/29 15:53:29 by bkaras-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,22 +52,19 @@ void Server::handle_mode(Message &msg, Client &c)
     {
         // ERR_NOSUCHCHANNEL (403)
         // send_reply_error "<client> <channel> :No such channel"
+        send_reply_error(c, ERR_NOSUCHCHANNEL, msg.get_args()[0], "No such channel");
         return;
     }
     if (msg.get_args().size() == 1) // MODE #general --> demande les modes activés
     {
-        // RPL_CHANNELMODEIS (324)
-        //"<client> <channel> <modestring> <mode arguments>..."
-        // exemple avec tous les modes possibles: ":irc.42.fr 324 dan #music +itkl secret 42"
-        // secret est le password (+k)
-        // 42 est le user limit (+l)
-        // i et t ne donnent pas de mode arguments
-        // Attention: le mode +o est exclu de ce num reply
+        send_reply_channelmodeis(c, *chan);
+        return;
     }
     if (!chan->isOperator(c))
     {
         // ERR_CHANOPRIVSNEEDED (482)
         // send_reply_error "<client> <channel> :You're not channel operator"
+        send_reply_error(c, ERR_CHANOPRIVSNEEDED, chan->getName(), "You're not channel operator");
         return;
     }
 
@@ -97,11 +94,14 @@ void Server::handle_mode(Message &msg, Client &c)
         }
         if (*it == 'o') // check num reply : si le client à ajouter en ChanOps est dans le channel
         {
-            if (findClientByNickname(mode_args[args_idx]) == NULL)
+            Client *target = findClientByNickname(mode_args[args_idx]);
+            if (target == NULL || !chan->isMember(*target))
             {
                 // ERR_USERNOTINCHANNEL (441) "<client> <nick> <channel> :They aren't on that channel"
+                send_reply_error(c, ERR_USERNOTINCHANNEL, mode_args[args_idx], chan->getName(), "They aren't on that channel");
                 args_idx++;
-                // PAS DE return car on continue l'exec des autres modes demandés
+                it++;
+                continue; // PAS DE return car on continue l'exec des autres modes demandés
                 // on peut avoir par ex "MODE +ok-i Bob secret" et meme si Bob ne fait pas partie du channel
                 // on doit continuer à traiter les autres modes
             }
@@ -153,6 +153,38 @@ void identify_and_exec_mode(Channel &chan, Client &c, char sign, char mode_lette
         break;
     }
     }
+}
+
+/*
+Construit et envoie le numeric reply RPL_CHANNELMODEIS (324) qui liste les modes
+actuellement activés sur le channel, suivi de leurs <mode arguments> dans le même ordre.
+Format: ":<server> 324 <client> <channel> <modestring> <mode arguments>..."
+Ordre des modes: i, t, k, l (le mode +o n'apparaît PAS dans ce reply).
+Seuls k (password) et l (user limit) ajoutent un argument.
+Même logique d'envoi que send_reply_error() : reply_head() + send_raw().
+*/
+void Server::send_reply_channelmodeis(Client &c, Channel &chan)
+{
+    std::string modestring = "+";
+    std::string arguments = "";
+
+    if (chan.isInviteOnly())
+        modestring += "i";
+    if (chan.isTopicRestricted())
+        modestring += "t";
+    if (chan.hasPassword())
+    {
+        modestring += "k";
+        arguments += " " + chan.getPassword();
+    }
+    if (chan.hasUserLimit())
+    {
+        modestring += "l";
+        std::ostringstream oss;
+        oss << chan.getUserLimit();
+        arguments += " " + oss.str();
+    }
+    send_raw(c, reply_head(c, RPL_CHANNELMODEIS) + " " + chan.getName() + " " + modestring + arguments);
 }
 
 // Mode k, o: param on '+' AND '-'.

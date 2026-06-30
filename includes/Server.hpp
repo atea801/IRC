@@ -71,6 +71,7 @@ class Server
     void handle_join(Message &msg, Client &c);
     void handle_Kick(Message &msg, Client &c); // K pour distinguer du n de handle_nick()
     void handle_mode(Message &msg, Client &c);
+    void handle_invite(Message &msg, Client &c);
 
     /*--Fonctions utilitaires*/
     void remove_client(int fd);
@@ -81,6 +82,7 @@ class Server
     Channel *findChannelByName(const std::string &name);
     std::vector<std::string> findChannelsInMsg(Message &msg);
     void broadcastToChannel(Channel &chan, const std::string &line, Client *exclude = NULL);
+    std::string getPrefix(Client &c) const;
 
     /*--Gestion des erreurs (Numeric replies)--*/
     int checkChannels(const std::vector<std::string> &channelsToCheck) const;
@@ -90,6 +92,7 @@ class Server
     void send_reply_error(Client &c, IrcError error, const std::string &p1, const std::string &message);
     void send_reply_error(Client &c, IrcError error, const std::string &p1, const std::string &p2,
                           const std::string &message);
+    void send_reply_channelmodeis(Client &c, Channel &chan);
 };
 
 // Fonction utilitaire libre (non-membre) : découpe `str` selon `separator`.
