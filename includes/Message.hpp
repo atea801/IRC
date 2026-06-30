@@ -26,4 +26,5 @@ class Message
     IrcError parsing_user();
     IrcError parsing_pass();
     IrcError parsing_quit();
+    IrcError parsing_privmsg();
 };
