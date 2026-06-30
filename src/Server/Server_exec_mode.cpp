@@ -98,7 +98,8 @@ void Server::handle_mode(Message &msg, Client &c)
             if (target == NULL || !chan->isMember(*target))
             {
                 // ERR_USERNOTINCHANNEL (441) "<client> <nick> <channel> :They aren't on that channel"
-                send_reply_error(c, ERR_USERNOTINCHANNEL, mode_args[args_idx], chan->getName(), "They aren't on that channel");
+                send_reply_error(c, ERR_USERNOTINCHANNEL, mode_args[args_idx], chan->getName(),
+                                 "They aren't on that channel");
                 args_idx++;
                 it++;
                 continue; // PAS DE return car on continue l'exec des autres modes demandés
