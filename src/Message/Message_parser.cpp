@@ -34,8 +34,8 @@ IrcError Message::parsing_user()
         if (special.find(args[0][i]) != std::string::npos)
             return ERR_INVALID;
     }
-	// if (!this->trailing_arg)
-	// 	return ERR_NEEDMOREPARAMS;
+    // if (!this->trailing_arg)
+    // 	return ERR_NEEDMOREPARAMS;
     return IRC_OK;
 }
 
@@ -59,13 +59,13 @@ IrcError Message::parsing_quit()
     return IRC_OK;
 }
 
-
 IrcError Message::parsing_privmsg()
 {
-	if (this->args.empty() || this->args[0].empty()){
-		return ERR_NORECIPIENT;
-	}
-	if (this->args.size() < 2 || args[1].empty())
-		return ERR_NOTEXTTOSEND;
-	return IRC_OK;
+    if (this->args.empty() || this->args[0].empty())
+    {
+        return ERR_NORECIPIENT;
+    }
+    if (this->args.size() < 2 || args[1].empty())
+        return ERR_NOTEXTTOSEND;
+    return IRC_OK;
 }
