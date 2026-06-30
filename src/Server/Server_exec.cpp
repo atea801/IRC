@@ -146,8 +146,8 @@ Exemple : `KICK #chan Alice,Bob byeee`
 
 Voir sur Figma le diagramme d'exec flow suivi par cette fonction.
 
-Après check des numeric replies, un message KICK distinct par user est 
-diffusé à tout le channel, y compris le ou les users KICK, puis suppression du ou 
+Après check des numeric replies, un message KICK distinct par user est
+diffusé à tout le channel, y compris le ou les users KICK, puis suppression du ou
 des users du Channel.
 */
 void Server::handle_Kick(Message &msg, Client &c)
@@ -188,30 +188,30 @@ void Server::handle_Kick(Message &msg, Client &c)
         return;
     }
 
-    //préparation du message KICK à envoyer:
-    //on définit le préfixe de l'émetteur (nick!user@host) et le comment s'il a été fourni,
-    //sinon comment par défaut: nick du kicker
+    // préparation du message KICK à envoyer:
+    // on définit le préfixe de l'émetteur (nick!user@host) et le comment s'il a été fourni,
+    // sinon comment par défaut: nick du kicker
     std::string kickerPrefix = c.getNickname() + "!" + c.getUsername() + "@" + c.getHostname();
     std::string comment;
     if (msg.get_args().size() > 2)
         comment = msg.get_args()[2];
     else
         comment = c.getNickname();
-    
-    //on récupère la liste des clients qu'on stocke dans un vecteur
-    //ca reste des std::string pour l'instant. Le check si ce sont bien des Clients est 
-    //réalisé plus bas
+
+    // on récupère la liste des clients qu'on stocke dans un vecteur
+    // ca reste des std::string pour l'instant. Le check si ce sont bien des Clients est
+    // réalisé plus bas
     std::vector<std::string> clientsRaw = ft_split(',', msg.get_args()[1]);
 
     // Un message KICK distinct par utilisateur, diffusé à tout le channel.
     // Une fois le message envoyé, on supprime le client qui doit être Kick
-    for (size_t i = 0; i < clientsRaw.size(); i++) //boucle sur le nombre de users à Kick
+    for (size_t i = 0; i < clientsRaw.size(); i++) // boucle sur le nombre de users à Kick
     {
         Client *target = findClientByNickname(clientsRaw[i]);
         if (target == NULL || !chan->isMember(*target))
         {
             send_reply_error(c, ERR_USERNOTINCHANNEL, clientsRaw[i], chan->getName(), "They aren't on that channel");
-            continue; //on continue à traiter les autres users à KICK
+            continue; // on continue à traiter les autres users à KICK
         }
         std::string line = ":" + kickerPrefix + " KICK " + chan->getName() + " " + clientsRaw[i] + " :" + comment;
         broadcastToChannel(*chan, line); // envoyé à tous, y compris la cible, AVANT le kick
@@ -220,19 +220,6 @@ void Server::handle_Kick(Message &msg, Client &c)
         if (chan->isOperator(*target))
             chan->removeOperator(*target);
     }
-}
-
-int Server::find_dest(std::string dest)
-{
-    if (dest[0] != '#')
-    {
-        for (size_t i = 0; i < vec_clients.size(); i++)
-        {
-            if (vec_clients[i].getNickname() == dest)
-                return vec_clients[i].getFdClient();
-        }
-    }
-    return (-1);
 }
 
 void Server::handle_cap(Client &c)
@@ -248,11 +235,6 @@ void Server::handle_ping(Message &msg, Client &c)
         return;
     std::string msg_to_send = "PONG :" + args[0] + "\r\n";
     send(c.getFdClient(), msg_to_send.c_str(), msg_to_send.size(), 0);
-}
-
-void Server::remove_client(int fd)
-{
-    vec_clients.erase(fd);
 }
 
 // fonction en cours de creation
@@ -287,15 +269,22 @@ void Server::handle_join(Message &msg, Client &c)
         chan = findChannelByName(args[0]);
         chan->addMember(c);
         chan->addOperator(c);
-    }
-    else
-    {
-        if (chan->isMember(c))
-        {
-            send_reply_error(c, ERR_USERONCHANNEL, "you already joined the server");
-            return;
-        }
-        chan->addMember(c);
         c.addChannel(*chan);
+        return;
     }
+    if (chan->isMember(c))
+        return;
+    if (chan->isInviteOnly() && !chan->isInvited(c))
+        return (send_reply_error(c, ERR_INVITEONLYCHAN, "you are not invited to join this channel"));
+    if (chan->hasPassword())
+    {
+        if (args.size() < 2 || args[1].empty())
+            return (send_reply_error(c, ERR_NEEDMOREPARAMS, "You need to enter the password"));
+        if (args[1] != chan->getPassword())
+            return (send_reply_error(c, ERR_BADCHANNELKEY, "you entered the wrong password for this channel"));
+    }
+    if (chan->hasUserLimit() && chan->NumberOfMembers() >= chan->getUserLimit())
+        return (send_reply_error(c, ERR_CHANNELISFULL, "The channel is full"));
+    chan->addMember(c);
+    c.addChannel(*chan);
 }

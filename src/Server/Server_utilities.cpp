@@ -102,6 +102,7 @@ des clients n'est pas modifié avec un pushback() par exemple. A utiliser tout d
 */
 Client *Server::findClientByNickname(const std::string &nickname)
 {
+
     for (size_t j = 0; j < this->vec_clients.size(); j++)
     {
         if (nickname == this->vec_clients[j].getNickname())
@@ -141,4 +142,22 @@ void Server::broadcastToChannel(Channel &chan, const std::string &line, Client *
             continue;
         send_raw(*members[i], line);
     }
+}
+
+int Server::find_dest(std::string dest)
+{
+    if (dest[0] != '#')
+    {
+        for (size_t i = 0; i < vec_clients.size(); i++)
+        {
+            if (vec_clients[i].getNickname() == dest)
+                return vec_clients[i].getFdClient();
+        }
+    }
+    return (-1);
+}
+
+void Server::remove_client(int fd)
+{
+    vec_clients.erase(fd);
 }

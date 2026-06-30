@@ -16,14 +16,14 @@ void identify_and_exec_mode(Channel &chan, Client &c, char sign, char mode_lette
 static bool modeNeedsParam(char sign, char letter);
 
 /*
-Traitement de l'exec de MODE. Format : `<target> [<modestring> [<mode arguments>...]]` 
+Traitement de l'exec de MODE. Format : `<target> [<modestring> [<mode arguments>...]]`
 Exemple : `MODE #chan +itk-l+o secretkey alice`
 
 Le besoin en <mode arguments> dépend des modes demandés. Voir sur Figma
 les besoins en <mode arguments> et le diagramme d'exec flow suivi par cette fonction.
- 
+
 Après check des numeric replies, extractions des paramètres <modestring>
-et <mode arguments> avec msg.get_args() 
+et <mode arguments> avec msg.get_args()
 Puis on parcourt <modestring> et <mode arguments> pour traiter l'exec de chaque mode
 @param &msg Le Message de MODE
 @param &c Le Client émetteur du Message
@@ -41,12 +41,12 @@ void Server::handle_mode(Message &msg, Client &c)
     }
     */
 
-    //A partir de ce point, on considère que <modestring> est au bon format et que
+    // A partir de ce point, on considère que <modestring> est au bon format et que
     //<mode arguments> contient le bon nombre d'arguments pour chaque mode demandé
-    //dans <modestring> (Voir sur Figma)
-    //Attention au mode -k qui nécessite un <mode argument> même s'il n'est pas utile
-    
-    //Check des numeric replies
+    // dans <modestring> (Voir sur Figma)
+    // Attention au mode -k qui nécessite un <mode argument> même s'il n'est pas utile
+
+    // Check des numeric replies
     Channel *chan = findChannelByName(msg.get_args()[0]);
     if (!chan)
     {
@@ -72,7 +72,7 @@ void Server::handle_mode(Message &msg, Client &c)
     }
 
     /*
-    Extraction des paramètres <modestring> et <mode arguments> avec msg.get_args() 
+    Extraction des paramètres <modestring> et <mode arguments> avec msg.get_args()
     */
     std::string modestring = msg.get_args()[1];
     std::vector<std::string> mode_args;
@@ -95,7 +95,7 @@ void Server::handle_mode(Message &msg, Client &c)
             sign = *it;
             it++;
         }
-        if (*it == 'o') //check num reply : si le client à ajouter en ChanOps est dans le channel
+        if (*it == 'o') // check num reply : si le client à ajouter en ChanOps est dans le channel
         {
             if (findClientByNickname(mode_args[args_idx]) == NULL)
             {
@@ -107,7 +107,7 @@ void Server::handle_mode(Message &msg, Client &c)
             }
         }
         std::string param;
-        if (modeNeedsParam(sign, *it)) //check si le mode identifié nécessite un <mode argument>
+        if (modeNeedsParam(sign, *it))     // check si le mode identifié nécessite un <mode argument>
             param = mode_args[args_idx++]; // pas de check si mode_args contient bien des args car fait au parsing
         identify_and_exec_mode(*chan, c, sign, *it, param);
         it++;
@@ -155,8 +155,8 @@ void identify_and_exec_mode(Channel &chan, Client &c, char sign, char mode_lette
     }
 }
 
-// Mode k, o: param on '+' AND '-'. 
-// Mode l: param only on '+'. 
+// Mode k, o: param on '+' AND '-'.
+// Mode l: param only on '+'.
 // Mode i, t: no param.
 static bool modeNeedsParam(char sign, char letter)
 {
