@@ -33,15 +33,15 @@ void Server::exec_flow(Message &msg, Client &c)
         handle_mode(msg, c);
     else if (cmd == "INVITE")
         handle_invite(msg, c);
-	 else
+    else
         send_reply_error(c, ERR_UNKNOWNCOMMAND, cmd, "Unknown command");
     if (c.getBoolPass() && c.getBoolNick() && c.getBoolUser() && c.getStatus() != REGISTERED)
     {
-         c.setStatus(REGISTERED);
-    	const std::string &nick = c.getNickname();
-    	send_raw(c, ":irc.server 001 " + nick + " :Welcome to the IRC Network " + nick);
+        c.setStatus(REGISTERED);
+        const std::string &nick = c.getNickname();
+        send_raw(c, ":irc.server 001 " + nick + " :Welcome to the IRC Network " + nick);
     }
-	debug_client(msg, c);
+    // debug_client(msg, c);
 }
 
 void Server::handle_nick(Message &msg, Client &c)
@@ -83,7 +83,7 @@ void Server::handle_user(Message &msg, Client &c)
         return;
     }
     std::vector<std::string> args = msg.get_args();
-	if (c.getStatus() == REGISTERED)
+    if (c.getStatus() == REGISTERED)
     {
         send_reply_error(c, ERR_ALREADYREGISTERED, "You may not reregister");
         return;
@@ -95,7 +95,7 @@ void Server::handle_user(Message &msg, Client &c)
 
 void Server::handle_pass(Message &msg, Client &c)
 {
-	if (c.getStatus() == REGISTERED)
+    if (c.getStatus() == REGISTERED)
     {
         send_reply_error(c, ERR_ALREADYREGISTERED, "You may not reregister");
         return;
@@ -124,10 +124,10 @@ void Server::handle_privmsg(Message &msg, Client &c)
     if (error != IRC_OK)
     {
         if (error == ERR_NORECIPIENT)
-		    send_reply_error(c, error, "No recipient given (PRIVMSG)");
+            send_reply_error(c, error, "No recipient given (PRIVMSG)");
         else if (error == ERR_NOTEXTTOSEND)
-		    send_reply_error(c, error, "No text to send");
-		return;
+            send_reply_error(c, error, "No text to send");
+        return;
     }
     const std::vector<std::string> args = msg.get_args();
     int dest = find_dest(args[0]);
@@ -162,7 +162,7 @@ void Server::handle_Kick(Message &msg, Client &c)
     /* Parsing de la syntaxe. A checker entre autres:
     if (channelsRaw.empty() || msg.get_args().size() < 2)
         return send_reply_error(c, ERR_NEEDMOREPARAMS, "KICK", "Not enough parameters");
-    
+
     IrcError error = msg.parsing_Kick();
     if (error != IRC_OK)
     {
@@ -199,9 +199,9 @@ void Server::handle_Kick(Message &msg, Client &c)
         return;
     }
 
-    //préparation du message KICK à envoyer:
-    //on définit le préfixe de l'émetteur (nick!user@host) et le comment s'il a été fourni,
-    //sinon comment par défaut: nick du kicker
+    // préparation du message KICK à envoyer:
+    // on définit le préfixe de l'émetteur (nick!user@host) et le comment s'il a été fourni,
+    // sinon comment par défaut: nick du kicker
     std::string kickerPrefix = getPrefix(c);
     std::string comment;
     if (msg.get_args().size() > 2)

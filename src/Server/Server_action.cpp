@@ -103,7 +103,9 @@ int Server::accept_new_client()
         client_p.revents = 0;
         fds.push_back(client_p);
         Client c(client_p.fd);
-        vec_clients.insert(std::make_pair(c.getFdClient(), c));
+        vec_clients.erase(client_fd);
+        std::pair<std::map<int, Client>::iterator, bool> ret = vec_clients.insert(std::make_pair(client_fd, c));
+        std::cout << "insert success = " << ret.second << std::endl;
     }
     return (0);
 }
@@ -116,14 +118,12 @@ int Server::accept_new_client()
  * @param i
  * @return Client*
  */
-Client *Server::find_client(std::vector<pollfd> fds, size_t i)
+Client *Server::find_client(int fd)
 {
-    for (size_t j = 0; j < vec_clients.size(); j++)
-    {
-        if (vec_clients[j].getFdClient() == fds[i].fd)
-            return &vec_clients[j];
-    }
-    return NULL;
+    std::map<int, Client>::iterator it = vec_clients.find(fd);
+    if (it == vec_clients.end())
+        return NULL;
+    return &it->second;
 }
 
 /**
@@ -138,15 +138,16 @@ int Server::client_actions(size_t i)
     // 1. recv dépose dans buf temporaire
     char buf[4096];
     ssize_t n = recv(fds[i].fd, buf, sizeof(buf), 0);
-    if (n < 0)
+    if (n <= 0)
     {
-        perror("recv");
-        return (-1);
+        if (n < 0)
+            perror("recv");
+        return (1);
     }
     if (n == 0)
         return (1);
     // 2. trouve le bon client par fd
-    Client *c = find_client(fds, i);
+    Client *c = find_client(fds[i].fd);
     if (!c)
     {
         perror("find client");
@@ -164,8 +165,6 @@ int Server::client_actions(size_t i)
         // b. on parse la lign extraire en focniton de commande parisng 2
         // c. execute
         const std::vector<std::string> args = message.get_args();
-        std::cout << "[PARSED fd=" << fds[i].fd << "] "
-                  << "CMD=" << message.get_command() << std::endl;
         this->exec_flow(message, *c);
         if (c->getStatus() == QUIT)
             return (1);

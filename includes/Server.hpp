@@ -1,14 +1,14 @@
 #pragma once
 
-#define C_RESET  "\033[0m"
-#define C_DIM     "\033[2m"
-#define C_RED     "\033[31m"
-#define C_GREEN   "\033[32m"
-#define C_YELLOW  "\033[33m"
-#define C_BLUE    "\033[34m"
+#define C_RESET "\033[0m"
+#define C_DIM "\033[2m"
+#define C_RED "\033[31m"
+#define C_GREEN "\033[32m"
+#define C_YELLOW "\033[33m"
+#define C_BLUE "\033[34m"
 #define C_MAGENTA "\033[35m"
-#define C_CYAN    "\033[36m"
-#define C_BOLD    "\033[1m"
+#define C_CYAN "\033[36m"
+#define C_BOLD "\033[1m"
 
 #include "Channel.hpp"
 #include "Client.hpp"
@@ -86,7 +86,7 @@ class Server
     /*--Fonctions utilitaires*/
     void remove_client(int fd);
     int find_dest(std::string dest);
-    Client *find_client(std::vector<pollfd> fds, size_t i);
+    Client *find_client(int fd);
     Client *findClientByNickname(const std::string &nickname);
     int find_channel_index(std::string dest);
     Channel *findChannelByName(const std::string &name);
@@ -94,7 +94,6 @@ class Server
     void broadcastToChannel(Channel &chan, const std::string &line, Client *exclude = NULL);
     std::string getPrefix(Client &c) const;
     void debug_client(Message &msg, Client &c);
-
 
     /*--Gestion des erreurs (Numeric replies)--*/
     int checkChannels(const std::vector<std::string> &channelsToCheck) const;

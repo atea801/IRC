@@ -34,6 +34,9 @@ Client &Client::operator=(const Client &copy)
         this->_hostname = copy.getHostname();
         this->_buffer = copy.getBuffer();
         this->_status = copy.getStatus();
+        this->_bool_nick = copy.getBoolNick();
+        this->_bool_user = copy.getBoolUser();
+        this->_bool_pass = copy.getBoolPass();
     }
     return *this;
 }
