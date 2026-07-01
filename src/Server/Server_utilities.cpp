@@ -6,7 +6,7 @@
 /*   By: aautret <aautret@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/25 11:15:45 by bkaras-g          #+#    #+#             */
-/*   Updated: 2026/06/29 13:55:42 by aautret          ###   ########.fr       */
+/*   Updated: 2026/07/01 11:13:41 by aautret          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,24 +38,6 @@ std::vector<std::string> Server::findChannelsInMsg(Message &msg)
 
     // On récupère les noms des channels en retirant les préfixes '#' et '&'
     return (ft_split(',', channels_token));
-}
-
-std::vector<std::string> ft_split(char separator, const std::string &str)
-{
-    size_t sep_idx;
-    size_t pos;
-    std::vector<std::string> result;
-
-    pos = 0;
-    sep_idx = str.find(separator, pos);
-    while (sep_idx != std::string::npos)
-    {
-        result.push_back(str.substr(pos, sep_idx - pos));
-        pos = sep_idx + 1; // skip the separator
-        sep_idx = str.find(separator, pos);
-    }
-    result.push_back(str.substr(pos));
-    return (result);
 }
 
 // Vérifie que chaque channel de channelsToCheck existe sur le serveur.

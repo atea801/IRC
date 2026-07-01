@@ -69,3 +69,31 @@ IrcError Message::parsing_privmsg()
         return ERR_NOTEXTTOSEND;
     return IRC_OK;
 }
+
+IrcError Message::parsing_kick()
+{
+    // KICK doit avoir au moins <channel> et <user>
+    if (this->args.size() < 2)
+        return ERR_NEEDMOREPARAMS;
+    if (this->args[0].empty())
+        return ERR_NEEDMOREPARAMS;
+    if (this->args[1].empty())
+        return ERR_NEEDMOREPARAMS;
+
+    // On vérifie qu'après split sur les virgules, il reste au moins
+    // une cible non vide (rejette "KICK #chan ," ou "KICK #chan ,,")
+    std::vector<std::string> targets = ft_split(',', this->args[1]);
+    bool hasValidTarget = false;
+    for (size_t i = 0; i < targets.size(); i++)
+    {
+        if (!targets[i].empty())
+        {
+            hasValidTarget = true;
+            break;
+        }
+    }
+    if (!hasValidTarget)
+        return ERR_NEEDMOREPARAMS;
+
+    return IRC_OK;
+}

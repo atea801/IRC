@@ -2,6 +2,8 @@
 
 #include "Client.hpp"
 #include "irc_error.hpp"
+#include "Channel.hpp"
+#include "utils.hpp"
 #include <string>
 #include <vector>
 
@@ -27,4 +29,5 @@ class Message
     IrcError parsing_pass();
     IrcError parsing_quit();
     IrcError parsing_privmsg();
+	IrcError parsing_kick();
 };

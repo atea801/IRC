@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PtrVec.hpp"
+#include "utils.hpp"
 #include <iostream>
 
 class Channel;

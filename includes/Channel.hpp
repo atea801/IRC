@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bkaras-g <bkaras-g@student.42.fr>          +#+  +:+       +#+        */
+/*   By: aautret <aautret@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/16 14:57:26 by bkaras-g          #+#    #+#             */
-/*   Updated: 2026/06/24 11:53:14 by bkaras-g         ###   ########.fr       */
+/*   Updated: 2026/07/01 11:15:02 by aautret          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 #include "Client.hpp"
 #include "PtrVec.hpp"
+#include "utils.hpp"
 #include <algorithm>
 #include <string>
 #include <vector>

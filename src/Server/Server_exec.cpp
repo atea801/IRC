@@ -30,7 +30,7 @@ void Server::exec_flow(Message &msg, Client &c)
     else if (cmd == "MODE")
         handle_mode(msg, c);
     else if (cmd == "KICK")
-        handle_mode(msg, c);
+        handle_kick(msg, c);
     else if (cmd == "INVITE")
         handle_invite(msg, c);
     else
@@ -173,44 +173,55 @@ Après check des numeric replies, un message KICK distinct par user est
 diffusé à tout le channel, y compris le ou les users KICK, puis suppression du ou
 des users du Channel.
 */
-void Server::handle_Kick(Message &msg, Client &c)
-{
-    /* Parsing de la syntaxe. A checker entre autres:
-    if (channelsRaw.empty() || msg.get_args().size() < 2)
-        return send_reply_error(c, ERR_NEEDMOREPARAMS, "KICK", "Not enough parameters");
 
-    IrcError error = msg.parsing_Kick();
+void Server::handle_kick(Message &msg, Client &c)
+{
+    IrcError error = msg.parsing_kick();
     if (error != IRC_OK)
     {
-        if(error == ERR_NEEDMOREPARAMS)
-            send_reply_error(c, error, " KICK :Not enough parameters");
+        send_reply_error(c, error, "KICK", "Not enough parameters");
         return;
     }
-    */
 
     std::vector<std::string> channelsRaw = findChannelsInMsg(msg);
-
-    // le cas channelsRaw.size() == 0 est checké dans parsing_Kick()
-    //  if channelsRaw.size() > 1 --> pas de numeric reply dédié. Claude:
-    // La plupart des serveurs IRC renvoient ERR_NOSUCHCHANNEL car ils
-    // prennent l'ensemble de l'arg des channels comme un nom de channel
-    //  unique (par ex #a,&b --> nom de channel #a,&b)
+    if (channelsRaw.empty())
+    {
+        send_reply_error(c, ERR_NEEDMOREPARAMS, "KICK", "Not enough parameters");
+        return;
+    }
     if (channelsRaw.size() > 1 || checkChannels(channelsRaw) == ERR_NOSUCHCHANNEL)
     {
-        // ERR_NOSUCHCHANNEL (403) "<client> <channel> :No such channel"
         send_reply_error(c, ERR_NOSUCHCHANNEL, channelsRaw[0], "No such channel");
         return;
     }
+
+    std::vector<std::string> clientsRaw = ft_split(',', msg.get_args()[1]);
+    for (size_t i = 0; i < clientsRaw.size(); )
+    {
+        if (clientsRaw[i].empty())
+            clientsRaw.erase(clientsRaw.begin() + i);
+        else
+            i++;
+    }
+    if (clientsRaw.empty())
+    {
+        send_reply_error(c, ERR_NEEDMOREPARAMS, "KICK", "Not enough parameters");
+        return;
+    }
+
     Channel *chan = findChannelByName(channelsRaw[0]);
+    if (!chan)
+    {
+        send_reply_error(c, ERR_NOSUCHCHANNEL, channelsRaw[0], "No such channel");
+        return;
+    }
     if (!chan->isMember(c))
     {
-        // ERR_NOTONCHANNEL (442) "<client> <channel> :You're not on that channel"
         send_reply_error(c, ERR_NOTONCHANNEL, chan->getName(), "You're not on that channel");
         return;
     }
     if (!chan->isOperator(c))
     {
-        // ERR_CHANOPRIVSNEEDED (482) "<client> <channel> :You're not channel operator"
         send_reply_error(c, ERR_CHANOPRIVSNEEDED, chan->getName(), "You're not channel operator");
         return;
     }
@@ -220,15 +231,10 @@ void Server::handle_Kick(Message &msg, Client &c)
     // sinon comment par défaut: nick du kicker
     std::string kickerPrefix = getPrefix(c);
     std::string comment;
-    if (msg.get_args().size() > 2)
+    if (msg.get_args().size() > 2 && !msg.get_args()[2].empty())
         comment = msg.get_args()[2];
     else
         comment = c.getNickname();
-
-    // on récupère la liste des clients qu'on stocke dans un vecteur
-    // ca reste des std::string pour l'instant. Le check si ce sont bien des Clients est
-    // réalisé plus bas
-    std::vector<std::string> clientsRaw = ft_split(',', msg.get_args()[1]);
 
     // Un message KICK distinct par utilisateur, diffusé à tout le channel.
     // Une fois le message envoyé, on supprime le client qui doit être Kick
@@ -242,10 +248,9 @@ void Server::handle_Kick(Message &msg, Client &c)
         }
         std::string line = ":" + kickerPrefix + " KICK " + chan->getName() + " " + clientsRaw[i] + " :" + comment;
         broadcastToChannel(*chan, line); // envoyé à tous, y compris la cible, AVANT le kick
-
-        chan->removeMember(*target);
         if (chan->isOperator(*target))
-            chan->removeOperator(*target);
+            chan->removeOperator(*target); // retiré AVANT removeMember
+        chan->removeMember(*target);
     }
 }
 
