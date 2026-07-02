@@ -153,7 +153,7 @@ void Server::handle_privmsg(Message &msg, Client &c)
         {
             Channel *chan = findChannelByName(target);
             std::string msg_to_send = ":" + prefix + " PRIVMSG " + target + " :" + text;
-            broadcastToChannel(*chan, msg_to_send);
+            broadcastToChannel(*chan, msg_to_send, &c);
         }
         else // ni nick ni channel
         {
@@ -302,6 +302,8 @@ void Server::handle_join(Message &msg, Client &c)
         chan->addMember(c);
         chan->addOperator(c);
         c.addChannel(*chan);
+        std::string msg_to_send = ":" + c.getNickname() + "!" + c.getUsername() + "@localhost JOIN " + args[0];
+        broadcastToChannel(*chan, msg_to_send);
         return;
     }
     if (chan->isMember(c))
@@ -319,4 +321,6 @@ void Server::handle_join(Message &msg, Client &c)
         return (send_reply_error(c, ERR_CHANNELISFULL, "The channel is full"));
     chan->addMember(c);
     c.addChannel(*chan);
+    std::string msg_to_send = ":" + c.getNickname() + "!" + c.getUsername() + "@localhost JOIN " + args[0];
+    broadcastToChannel(*chan, msg_to_send);
 }

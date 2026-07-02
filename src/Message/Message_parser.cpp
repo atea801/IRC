@@ -8,7 +8,7 @@ IrcError Message::parsing_nick()
     // Les autres args sont ignore
     const std::string &nick = this->args[0];
     // 2 check de la longueur
-    if (nick.size() > 9)
+    if (nick.size() > 10)
         return ERR_ERRONEUSNICKNAME;
     // 3 check premier caractere
     std::string special = "-_[]{}\\|";

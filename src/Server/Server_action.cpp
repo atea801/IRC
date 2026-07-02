@@ -105,7 +105,6 @@ int Server::accept_new_client()
         Client c(client_p.fd);
         vec_clients.erase(client_fd);
         std::pair<std::map<int, Client>::iterator, bool> ret = vec_clients.insert(std::make_pair(client_fd, c));
-        std::cout << "insert success = " << ret.second << std::endl;
     }
     return (0);
 }
