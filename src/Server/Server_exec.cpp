@@ -33,6 +33,8 @@ void Server::exec_flow(Message &msg, Client &c)
         handle_kick(msg, c);
     else if (cmd == "INVITE")
         handle_invite(msg, c);
+    else if (cmd == "PART")
+        handle_part(msg, c);
     else
         send_reply_error(c, ERR_UNKNOWNCOMMAND, cmd, "Unknown command");
     if (c.getBoolPass() && c.getBoolNick() && c.getBoolUser() && c.getStatus() != REGISTERED)
@@ -138,7 +140,7 @@ void Server::handle_privmsg(Message &msg, Client &c)
     // prefixe complet nick!user@host, comme dans handle_Kick
     std::string prefix = c.getNickname() + "!" + c.getUsername() + "@" + c.getHostname();
 
-	// parcour des destinataires qu'il y en ai 1 ou 10 
+    // parcour des destinataires qu'il y en ai 1 ou 10
     for (size_t i = 0; i < destinataires.size(); i++)
     {
         const std::string &target = destinataires[i]; // LA cible du tour courant
@@ -182,7 +184,6 @@ void Server::handle_kick(Message &msg, Client &c)
         send_reply_error(c, error, "KICK", "Not enough parameters");
         return;
     }
-
     std::vector<std::string> channelsRaw = findChannelsInMsg(msg);
     if (channelsRaw.empty())
     {
@@ -196,7 +197,7 @@ void Server::handle_kick(Message &msg, Client &c)
     }
 
     std::vector<std::string> clientsRaw = ft_split(',', msg.get_args()[1]);
-    for (size_t i = 0; i < clientsRaw.size(); )
+    for (size_t i = 0; i < clientsRaw.size();)
     {
         if (clientsRaw[i].empty())
             clientsRaw.erase(clientsRaw.begin() + i);
@@ -323,4 +324,47 @@ void Server::handle_join(Message &msg, Client &c)
     c.addChannel(*chan);
     std::string msg_to_send = ":" + c.getNickname() + "!" + c.getUsername() + "@localhost JOIN " + args[0];
     broadcastToChannel(*chan, msg_to_send);
+}
+
+void Server::handle_part(Message &msg, Client &c)
+{
+    std::vector<std::string> args = msg.get_args();
+    if (args.empty() || args[0].empty())
+    {
+        send_reply_error(c, ERR_NEEDMOREPARAMS, "PART", "Not enough parameters");
+        return;
+    }
+    std::vector<std::string> channelsRaw = findChannelsInMsg(msg);
+    if (channelsRaw.empty())
+    {
+        send_reply_error(c, ERR_NEEDMOREPARAMS, "PART", "Not enough parameters");
+        return;
+    }
+    for (size_t i = 0; i < channelsRaw.size();)
+    {
+        if (channelsRaw[i].empty())
+            channelsRaw.erase(channelsRaw.begin() + i);
+        Channel *chan = findChannelByName(channelsRaw[i]);
+        if (!chan)
+        {
+            send_reply_error(c, ERR_NOSUCHCHANNEL, channelsRaw[i], "No such channel");
+            return;
+        }
+        if (!chan->isMember(c))
+        {
+            send_reply_error(c, ERR_NOTONCHANNEL, chan->getName(), "You're not on that channel");
+            return;
+        }
+        else
+        {
+            std::string msg_to_send =
+                ":" + c.getNickname() + "!" + c.getUsername() + "@localhost PART " + chan->getName();
+            broadcastToChannel(*chan, msg_to_send);
+            chan->removeMember(c);
+            c.removeChannel(*chan);
+            if (chan->NumberOfMembers() == 0)
+                channels.erase(chan->getName());
+            i++;
+        }
+    }
 }

@@ -62,4 +62,5 @@ class Client
     void setBoolNick(bool const nick);
     void setBoolUser(bool const user);
     void addChannel(Channel &new_channel);
+    void removeChannel(Channel &old_channel);
 };

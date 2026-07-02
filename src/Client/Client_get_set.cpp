@@ -104,3 +104,8 @@ void Client::addChannel(Channel &new_channel)
 {
     this->_client_channels.add(new_channel);
 }
+
+void Client::removeChannel(Channel &old_channel)
+{
+    this->_client_channels.remove(old_channel);
+}
