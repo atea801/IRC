@@ -6,9 +6,26 @@
 #include <iostream>
 #include <netinet/in.h>
 #include <string>
+#include <cctype>
+#include <vector>
 #include <sys/socket.h>
 #include <unistd.h>
 
+
+// =========================================================================================
+// =========================================================================================
+//
+// MISE EN PLACE DE BOT
+//
+// =========================================================================================
+// =========================================================================================
+
+/**
+ * @brief Ouvre une socket TCP et se connecte au serveur IRC
+ * @param ip 127.0.0.1
+ * @param port 
+ * @return int 
+ */
 int connect_to_server(const std::string &ip, int port)
 {
     int fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -35,12 +52,22 @@ int connect_to_server(const std::string &ip, int port)
     return fd;
 }
 
+/**
+ * @brief Envoi une ligne IRC complete sur la socket, rajout automatiquement "\r\n"
+ * @param fd 
+ * @param line 
+ */
 void send_line(int fd, const std::string &line)
 {
     std::string msg = line + "\r\n";
     send(fd, msg.c_str(), msg.size(), 0);
 }
 
+/**
+ * @brief Enregistre le bot aupres du serveur
+ * @param fd 
+ * @param pass 
+ */
 void bot_register(int fd, std::string pass)
 {
     send_line(fd, "NICK bot");
@@ -53,6 +80,15 @@ void join_channel(int fd)
     send_line(fd, "JOIN #bot");
 }
 
+/**
+ * @brief Extrait la cible et le texte d'une ligne privmsg, pour recuperer (channel ou nick) + 
+ * le message
+ * @param line ligne IRC complete sans le "\r\n"
+ * @param target cible du message (ex: #bot ou nickname)
+ * @param text contenu du message apres le ":"
+ * @return true 
+ * @return false 
+ */
 bool parse_privmsg(const std::string &line, std::string &target, std::string &text)
 {
     size_t privmsg_pos = line.find("PRIVMSG");
@@ -72,6 +108,67 @@ bool parse_privmsg(const std::string &line, std::string &target, std::string &te
     return true;
 }
 
+/**
+ * @brief Traite une ligne complete recue du serveur
+ * 
+ * Parse la ligne comme un PRIVMSG. Si l'emetteur (autre que le bot) ecrit un
+ * mot interdit dans un channel, il est kicke. Sinon, les commandes !time et
+ * !help sont traitees.
+ * @param fd 
+ * @param line 
+ * @param words 
+ */
+void handle_line(int fd, const std::string &line, const std::vector<std::string> &words)
+{
+    std::string target, text;
+    if (!parse_privmsg(line, target, text))
+        return;
+
+    std::string sender;
+    parse_sender_nick(line, sender);
+
+    if (sender == "bot" || sender.empty())
+        return;
+
+    if (!target.empty() && (target[0] == '#' || target[0] == '&'))
+    {
+        if (has_forbidden_word(text, words))
+        {
+            kick_user(fd, target, sender);
+            return;
+        }
+    }
+
+    if (target == "#bot" && text == "!time")
+        send_line(fd, "PRIVMSG #bot :Il est " + get_current_time());
+    else if (target == "#bot" && text == "!help")
+        send_line(fd, "PRIVMSG #bot :Commandes disponibles: !time !help");
+}
+
+
+
+// =========================================================================================
+// =========================================================================================
+//
+// FONCTIONNALITE DU BOT
+//
+// =========================================================================================
+// =========================================================================================
+std::vector<std::string> forbidden_words()
+{
+	std::vector<std::string> w;
+	w.push_back("idiot");
+	w.push_back("stupid");
+	w.push_back("noob");
+	w.push_back("connard");
+	return w;
+}
+
+/**
+ * @brief Fonctionalite !TIME qui renvoie l'heure
+ * 
+ * @return std::string 
+ */
 std::string get_current_time()
 {
     std::time_t now = std::time(NULL);
@@ -80,6 +177,88 @@ std::string get_current_time()
     return std::string(buf);
 }
 
+/**
+ * @brief Convertit une chaine en minuscule
+ * @param s 
+ * @return std::string 
+ */
+std::string to_lower(const std::string &s)
+{
+    std::string r = s;
+    for (size_t i = 0; i < r.size(); ++i)
+        r[i] = static_cast<char>(std::tolower(static_cast<unsigned char>(r[i])));
+    return r;
+}
+
+/**
+ * @brief Indiaue si un texte contient au moins un mot interdit
+ * @param text 
+ * @param words 
+ * @return true 
+ * @return false 
+ */
+bool has_forbidden_word(const std::string &text, const std::vector<std::string> &words)
+{
+    std::string low = to_lower(text);
+    for (size_t i = 0; i < words.size(); ++i)
+    {
+        if (!words[i].empty() && low.find(to_lower(words[i])) != std::string::npos)
+            return true;
+    }
+    return false;
+}
+
+/**
+ * @brief Extrait le nick de l'emetteur
+ * 
+ * Le prefixe a la forme ":nick!user@host ...". Le nick se situe entre le ':'
+ * initial et le '!'.
+ * @param line 
+ * @param nick 
+ * @return true 
+ * @return false 
+ */
+bool parse_sender_nick(const std::string &line, std::string &nick)
+{
+    if (line.empty() || line[0] != ':')
+        return false;
+    size_t excl = line.find('!');
+    size_t space = line.find(' ');
+    if (excl == std::string::npos || space == std::string::npos || excl > space)
+        return false;
+    nick = line.substr(1, excl - 1);
+    return true;
+}
+/**
+ * @brief Envoi la commande KICK au serveur
+ * @param fd 
+ * @param channel 
+ * @param nick 
+ */
+void kick_user(int fd, const std::string &channel, const std::string &nick)
+{
+    send_line(fd, "KICK " + channel + " " + nick + " :Mot interdit detecte");
+}
+
+
+
+// =========================================================================================
+// =========================================================================================
+//
+// POINT D'ENTREE DU BOT
+//
+// =========================================================================================
+// =========================================================================================
+
+/**
+ * @brief Se connecte au serveur, s'enregistre, rejoint #bot, puis boucle : lit la
+ * socket, reconstitue les lignes completes terminees par "\r\n" (gestion des
+ * paquets partiels ou groupes) et delegue chacune a handle_line().
+ * 
+ * @param argc 
+ * @param argv 
+ * @return int 
+ */
 int main(int argc, char **argv)
 {
     if (argc != 4)
@@ -93,6 +272,10 @@ int main(int argc, char **argv)
         return 1;
     bot_register(fd, argv[3]);
     join_channel(fd);
+
+    std::vector<std::string> words = forbidden_words();
+    std::string buffer;
+
     while (true)
     {
         char buf[4096];
@@ -101,21 +284,16 @@ int main(int argc, char **argv)
         {
             if (n < 0)
                 perror("recv");
-            return (1);
+            return 1;
         }
-        std::string target, text;
-        if (parse_privmsg(std::string(buf, n), target, text))
+
+        buffer += std::string(buf, n);
+        size_t pos;
+        while ((pos = buffer.find("\r\n")) != std::string::npos)
         {
-            if (target == "#bot" && text == "!time\r\n")
-            {
-                std::string reply = "PRIVMSG #bot :Il est " + get_current_time();
-                send_line(fd, reply);
-            }
-            else if (target == "#bot" && text == "!help\r\n")
-            {
-                std::string reply = "PRIVMSG #bot :Commandes disponibles: !time !help";
-                send_line(fd, reply);
-            }
+            std::string line = buffer.substr(0, pos);
+            buffer.erase(0, pos + 2);
+            handle_line(fd, line, words);
         }
     }
     return 0;
