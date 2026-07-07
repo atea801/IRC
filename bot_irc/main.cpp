@@ -1,15 +1,4 @@
-#include <arpa/inet.h>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <ctime>
-#include <iostream>
-#include <netinet/in.h>
-#include <string>
-#include <cctype>
-#include <vector>
-#include <sys/socket.h>
-#include <unistd.h>
+#include "bot_irc.hpp"
 
 
 // =========================================================================================
@@ -196,9 +185,9 @@ bool parse_sender_nick(const std::string &line, std::string &nick)
  * @param channel 
  * @param nick 
  */
-void kick_user(int fd, const std::string &channel, const std::string &nick)
+void kick_user(int fd, const std::string &channel, const std::string &nick, const std::string &reason)
 {
-    send_line(fd, "KICK " + channel + " " + nick + " :Mot interdit detecte");
+    send_line(fd, "KICK " + channel + " " + nick + " :" + reason);
 }
 
 
@@ -212,6 +201,43 @@ void kick_user(int fd, const std::string &channel, const std::string &nick)
 // =========================================================================================
 
 /**
+ * @brief Decide a chaque message recu si un user spamme
+ * 
+ * - combien de message on ete send recement => msg_count
+ * - a quel moment ca a commence => window_start
+ * - check le nombre d'avertissement => warning
+ * 
+ * @param nick 
+ * @param states map qui permet d'associer le nick a son etat
+ * @return SpamAction 
+ */
+SpamAction register_message(const std::string &nick, std::map<std::string, UserState> &states)
+{
+    std::time_t now = std::time(NULL);
+    UserState &st = states[nick];
+
+    //check si la fenetre de comptage est expirer -> reset
+	// tout premier message ou plus de SPAM_WINDOW s ce sont ecoule
+    if (st.window_start == 0 || now - st.window_start >= SPAM_WINDOW){
+        st.window_start = now;
+        st.msg_count = 0;
+    }
+    st.msg_count++;
+    //check si trop de message
+    if (st.msg_count > SPAM_THRESHOLD){
+		// on repart pour la prochaine rafale
+        st.msg_count = 0;
+        st.window_start = now;
+        st.warnings++;
+        if (st.warnings >= 2)
+            return SPAM_KICK;
+        return SPAM_WARN;
+    }
+    return SPAM_NONE;
+}
+
+
+/**
  * @brief Traite une ligne complete recue du serveur
  * 
  * Parse la ligne comme un PRIVMSG. Si l'emetteur (autre que le bot) ecrit un
@@ -221,7 +247,8 @@ void kick_user(int fd, const std::string &channel, const std::string &nick)
  * @param line 
  * @param words 
  */
-void handle_line(int fd, const std::string &line, const std::vector<std::string> &words)
+void handle_line(int fd, const std::string &line, const std::vector<std::string> &words,
+                 std::map<std::string, UserState> &states)
 {
     std::string target, text;
     if (!parse_privmsg(line, target, text))
@@ -235,9 +262,25 @@ void handle_line(int fd, const std::string &line, const std::vector<std::string>
 
     if (!target.empty() && (target[0] == '#' || target[0] == '&'))
     {
+        // 1) Gros mot -> kick immediat
         if (has_forbidden_word(text, words))
         {
-            kick_user(fd, target, sender);
+            kick_user(fd, target, sender, "Mot interdit detecte");
+            states.erase(sender);
+            return;
+        }
+        // 2) Anti-spam
+        SpamAction act = register_message(sender, states);
+        if (act == SPAM_WARN)
+        {
+            send_line(fd, "PRIVMSG " + target + " :" + sender +
+                          " arrete de spam ! (avertissement 1/2)");
+            return;
+        }
+        if (act == SPAM_KICK)
+        {
+            kick_user(fd, target, sender, "Spam repete");
+            states.erase(sender);
             return;
         }
     }
@@ -259,8 +302,7 @@ void handle_line(int fd, const std::string &line, const std::vector<std::string>
  */
 int main(int argc, char **argv)
 {
-    if (argc != 4)
-    {
+    if (argc != 4){
         std::cerr << "Usage: " << argv[0] << " <ip> <port> <password>" << std::endl;
         return 1;
     }
@@ -272,6 +314,7 @@ int main(int argc, char **argv)
     join_channel(fd);
 
     std::vector<std::string> words = forbidden_words();
+    std::map<std::string, UserState> states;
     std::string buffer;
 
     while (true)
@@ -291,7 +334,7 @@ int main(int argc, char **argv)
         {
             std::string line = buffer.substr(0, pos);
             buffer.erase(0, pos + 2);
-            handle_line(fd, line, words);
+            handle_line(fd, line, words, states);
         }
     }
     return 0;
