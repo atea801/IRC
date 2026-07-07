@@ -9,7 +9,7 @@ void Server::exec_flow(Message &msg, Client &c)
         return;
     if (c.getStatus() != REGISTERED)
     {
-        if (cmd != "PASS" && cmd != "NICK" && cmd != "USER")
+        if (cmd != "PASS" && cmd != "NICK" && cmd != "USER" && cmd != "CAP")
         {
             send_reply_error(c, ERR_NOTREGISTERED, "You have not registered");
             return;
@@ -35,6 +35,10 @@ void Server::exec_flow(Message &msg, Client &c)
         handle_invite(msg, c);
     else if (cmd == "PART")
         handle_part(msg, c);
+    else if (cmd == "PING")
+        handle_ping(msg, c);
+    else if (cmd == "CAP")
+        handle_cap(c);
     else
         send_reply_error(c, ERR_UNKNOWNCOMMAND, cmd, "Unknown command");
     if (c.getBoolPass() && c.getBoolNick() && c.getBoolUser() && c.getStatus() != REGISTERED)
@@ -155,7 +159,7 @@ void Server::handle_privmsg(Message &msg, Client &c)
         {
             Channel *chan = findChannelByName(target);
             std::string msg_to_send = ":" + prefix + " PRIVMSG " + target + " :" + text;
-            broadcastToChannel(*chan, msg_to_send, &c);
+            broadcastToChannel(*chan, msg_to_send);
         }
         else // ni nick ni channel
         {
@@ -292,7 +296,15 @@ void Server::handle_join(Message &msg, Client &c)
 {
     std::vector<std::string> args = msg.get_args();
     if (args.empty() || args[0].empty())
+    {
+        send_reply_error(c, ERR_NEEDMOREPARAMS, "You need a channel name");
         return;
+    }
+    if (args[0][0] != '#' && args[0][0] != '&')
+    {
+        send_reply_error(c, ERR_BADCHANMASK, "the chan name format is wrong");
+        return;
+    }
     Channel *chan = findChannelByName(args[0]);
     if (!chan)
     {
@@ -314,7 +326,7 @@ void Server::handle_join(Message &msg, Client &c)
     if (chan->hasPassword())
     {
         if (args.size() < 2 || args[1].empty())
-            return (send_reply_error(c, ERR_NEEDMOREPARAMS, "You need to enter the password"));
+            return (send_reply_error(c, ERR_BADCHANNELKEY, "You need to enter the password"));
         if (args[1] != chan->getPassword())
             return (send_reply_error(c, ERR_BADCHANNELKEY, "you entered the wrong password for this channel"));
     }
@@ -357,9 +369,18 @@ void Server::handle_part(Message &msg, Client &c)
         }
         else
         {
-            std::string msg_to_send =
-                ":" + c.getNickname() + "!" + c.getUsername() + "@localhost PART " + chan->getName();
-            broadcastToChannel(*chan, msg_to_send);
+            if (args.size() > 1 && !args[1].empty())
+            {
+                std::string msg_to_send = ":" + c.getNickname() + "!" + c.getUsername() + "@localhost PART " +
+                                          chan->getName() + ' ' + args[1];
+                broadcastToChannel(*chan, msg_to_send);
+            }
+            else
+            {
+                std::string msg_to_send =
+                    ":" + c.getNickname() + "!" + c.getUsername() + "@localhost PART " + chan->getName();
+                broadcastToChannel(*chan, msg_to_send);
+            }
             chan->removeMember(c);
             c.removeChannel(*chan);
             if (chan->NumberOfMembers() == 0)

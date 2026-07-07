@@ -79,16 +79,16 @@ bool Server::checkSingleClientOnServer(std::string nickname)
 identifie un Client à partir de son nickname
 @param nickname le nickname à identifier
 @return Client* si trouvé; NULL si pas trouvé
-Attention ! Le pointeur vers Client qui est return est valide tant que le vecteur
-des clients n'est pas modifié avec un pushback() par exemple. A utiliser tout de suite.
+Attention ! Le pointeur vers Client qui est return est valide tant que la map
+des clients n'est pas modifiée par suppression de l'entrée correspondante.
 */
 Client *Server::findClientByNickname(const std::string &nickname)
 {
 
-    for (size_t j = 0; j < this->vec_clients.size(); j++)
+    for (std::map<int, Client>::iterator it = this->vec_clients.begin(); it != this->vec_clients.end(); ++it)
     {
-        if (nickname == this->vec_clients[j].getNickname())
-            return (&this->vec_clients[j]);
+        if (nickname == it->second.getNickname())
+            return (&it->second);
     }
     return (NULL);
 }
@@ -141,10 +141,10 @@ int Server::find_dest(std::string dest)
 {
     if (dest.empty() || dest[0] != '#')
     {
-        for (size_t i = 0; i < vec_clients.size(); i++)
+        for (std::map<int, Client>::iterator it = vec_clients.begin(); it != vec_clients.end(); ++it)
         {
-            if (vec_clients[i].getNickname() == dest)
-                return vec_clients[i].getFdClient();
+            if (it->second.getNickname() == dest)
+                return it->second.getFdClient();
         }
     }
     return (-1);
