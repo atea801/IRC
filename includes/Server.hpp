@@ -20,6 +20,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <ctime>
 #include <fcntl.h>
 #include <iostream>
 #include <map>
@@ -95,6 +96,7 @@ class Server
     void broadcastToChannel(Channel &chan, const std::string &line, Client *exclude = NULL);
     std::string getPrefix(Client &c) const;
     void debug_client(Message &msg, Client &c);
+    bool find_bot_cmd(std::string arg);
 
     /*--Gestion des erreurs (Numeric replies)--*/
     int checkChannels(const std::vector<std::string> &channelsToCheck) const;

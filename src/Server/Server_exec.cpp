@@ -143,7 +143,6 @@ void Server::handle_privmsg(Message &msg, Client &c)
     const std::string &text = args[1];
     // prefixe complet nick!user@host, comme dans handle_Kick
     std::string prefix = c.getNickname() + "!" + c.getUsername() + "@" + c.getHostname();
-
     // parcour des destinataires qu'il y en ai 1 ou 10
     for (size_t i = 0; i < destinataires.size(); i++)
     {
@@ -158,8 +157,13 @@ void Server::handle_privmsg(Message &msg, Client &c)
         else if (findChannelByName(target)) // c'est un channel
         {
             Channel *chan = findChannelByName(target);
-            std::string msg_to_send = ":" + prefix + " PRIVMSG " + target + " :" + text;
-            broadcastToChannel(*chan, msg_to_send);
+            if (chan->isMember(c) == true)
+            {
+                std::string msg_to_send = ":" + prefix + " PRIVMSG " + target + " :" + text;
+                broadcastToChannel(*chan, msg_to_send, &c);
+            }
+            else
+                send_reply_error(c, ERR_NOTONCHANNEL, "You are not a member of this channel");
         }
         else // ni nick ni channel
         {
@@ -336,6 +340,12 @@ void Server::handle_join(Message &msg, Client &c)
     c.addChannel(*chan);
     std::string msg_to_send = ":" + c.getNickname() + "!" + c.getUsername() + "@localhost JOIN " + args[0];
     broadcastToChannel(*chan, msg_to_send);
+    msg_to_send = "Welcome to " + c.getNickname() + " who has just join the channel *cheers*";
+    broadcastToChannel(*chan, msg_to_send, &c);
+    msg_to_send = "welcome " + c.getNickname() + " to this chanel have fun and please follow the rules :\n" +
+                  "1- no cursed words\n" + "2-no spamming\n" +
+                  "if you dont follow those rules you will be punished\r\n";
+    send(c.getFdClient(), msg_to_send.c_str(), msg_to_send.size(), 0);
 }
 
 void Server::handle_part(Message &msg, Client &c)
