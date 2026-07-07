@@ -108,45 +108,6 @@ bool parse_privmsg(const std::string &line, std::string &target, std::string &te
     return true;
 }
 
-/**
- * @brief Traite une ligne complete recue du serveur
- * 
- * Parse la ligne comme un PRIVMSG. Si l'emetteur (autre que le bot) ecrit un
- * mot interdit dans un channel, il est kicke. Sinon, les commandes !time et
- * !help sont traitees.
- * @param fd 
- * @param line 
- * @param words 
- */
-void handle_line(int fd, const std::string &line, const std::vector<std::string> &words)
-{
-    std::string target, text;
-    if (!parse_privmsg(line, target, text))
-        return;
-
-    std::string sender;
-    parse_sender_nick(line, sender);
-
-    if (sender == "bot" || sender.empty())
-        return;
-
-    if (!target.empty() && (target[0] == '#' || target[0] == '&'))
-    {
-        if (has_forbidden_word(text, words))
-        {
-            kick_user(fd, target, sender);
-            return;
-        }
-    }
-
-    if (target == "#bot" && text == "!time")
-        send_line(fd, "PRIVMSG #bot :Il est " + get_current_time());
-    else if (target == "#bot" && text == "!help")
-        send_line(fd, "PRIVMSG #bot :Commandes disponibles: !time !help");
-}
-
-
-
 // =========================================================================================
 // =========================================================================================
 //
@@ -249,6 +210,43 @@ void kick_user(int fd, const std::string &channel, const std::string &nick)
 //
 // =========================================================================================
 // =========================================================================================
+
+/**
+ * @brief Traite une ligne complete recue du serveur
+ * 
+ * Parse la ligne comme un PRIVMSG. Si l'emetteur (autre que le bot) ecrit un
+ * mot interdit dans un channel, il est kicke. Sinon, les commandes !time et
+ * !help sont traitees.
+ * @param fd 
+ * @param line 
+ * @param words 
+ */
+void handle_line(int fd, const std::string &line, const std::vector<std::string> &words)
+{
+    std::string target, text;
+    if (!parse_privmsg(line, target, text))
+        return;
+
+    std::string sender;
+    parse_sender_nick(line, sender);
+
+    if (sender == "bot" || sender.empty())
+        return;
+
+    if (!target.empty() && (target[0] == '#' || target[0] == '&'))
+    {
+        if (has_forbidden_word(text, words))
+        {
+            kick_user(fd, target, sender);
+            return;
+        }
+    }
+
+    if (target == "#bot" && text == "!time")
+        send_line(fd, "PRIVMSG #bot :Il est " + get_current_time());
+    else if (target == "#bot" && text == "!help")
+        send_line(fd, "PRIVMSG #bot :Commandes disponibles: !time !help");
+}
 
 /**
  * @brief Se connecte au serveur, s'enregistre, rejoint #bot, puis boucle : lit la
