@@ -1,5 +1,17 @@
 #include "Server.hpp"
 
+void Server::flush_client(int fd)
+{
+    Client *c = find_client(fd);
+    if (!c || c->getOut().empty())
+        return;
+    const std::string &out = c->getOut();
+    ssize_t n = send(fd, out.c_str(), out.size(), 0);
+    if (n > 0)
+        c->consumeOut(static_cast<size_t>(n));
+    // si n <= 0 : on ne touche pas au buffer, on réessaiera au prochain POLLOUT
+}
+
 /**
  * @brief fonction de parsing du format du port
  *
@@ -186,48 +198,67 @@ int Server::run()
         return (-1);
     while (true)
     {
-        if (!fds.empty())
+        if (fds.empty())
+            continue;
+
+        // (A) AVANT poll : on demande POLLOUT seulement si le client a
+        //     quelque chose à envoyer. Sinon poll nous réveillerait en boucle.
+        for (size_t i = 0; i < fds.size(); i++)
         {
-            int ready = poll(&fds[0], static_cast<int>(fds.size()), -1);
-            if (fcntl(server_fd, F_SETFL, O_NONBLOCK) < 0)
-                return (-1);
-            if (ready < 0)
+            if (fds[i].fd == server_fd)
+                continue;
+            Client *c = find_client(fds[i].fd);
+			// on dit a poll surveille cd fd a la fois pour la lecture ET pour l'ecriture
+            if (c && !c->getOut().empty())
+                fds[i].events = POLLIN | POLLOUT;
+            else
+                fds[i].events = POLLIN;
+        }
+
+        int ready = poll(&fds[0], static_cast<int>(fds.size()), -1);
+        if (ready < 0)
+        {
+            perror("poll");
+            return -1;
+        }
+
+        for (size_t i = 0; i < fds.size() && ready > 0; i++)
+        {
+            if (fds[i].revents == 0)
+                continue;
+
+            if (fds[i].revents & POLLIN)
             {
-                perror("poll");
-                return -1;
-            }
-            for (size_t i = 0; i < fds.size() && ready > 0; i++)
-            {
-                if (fds[i].revents == 0)
-                    continue;
-                if (fds[i].revents & POLLIN)
+                if (fds[i].fd == server_fd)
                 {
-                    if (fds[i].fd == server_fd)
-                    {
-                        if (accept_new_client() < 0)
-                            return (-1);
-                        continue;
-                    }
-                    int status = client_actions(i);
-                    if (status < 0)
+                    if (accept_new_client() < 0)
                         return (-1);
-                    if (status > 0)
-                    {
-                        remove_client(fds[i].fd);
-                        close(fds[i].fd);
-                        std::cerr << "Client closed: " << fds[i].fd << "\n";
-                        fds.erase(fds.begin() + i);
-                        --i;
-                        continue;
-                    }
+                    continue;
                 }
-                if (fds[i].revents & (POLLHUP | POLLERR | POLLNVAL))
+                int status = client_actions(i);
+                if (status < 0)
+                    return (-1);
+                if (status > 0)
                 {
                     remove_client(fds[i].fd);
                     close(fds[i].fd);
+                    std::cerr << "Client closed: " << fds[i].fd << "\n";
                     fds.erase(fds.begin() + i);
                     --i;
+                    continue;
                 }
+            }
+
+            // (B) APRÈS lecture : si le socket est prêt en écriture, on vide le buffer
+            if (fds[i].revents & POLLOUT)
+                flush_client(fds[i].fd);
+
+            if (fds[i].revents & (POLLHUP | POLLERR | POLLNVAL))
+            {
+                remove_client(fds[i].fd);
+                close(fds[i].fd);
+                fds.erase(fds.begin() + i);
+                --i;
             }
         }
     }

@@ -22,11 +22,13 @@ class Client
     std::string _username;
     std::string _hostname; // adresse ip du client
     std::string _buffer;   // permet de stocker les morceaux envoyer par recv()
+	std::string _outBuffer; // stock ce que le serveur veut envoyer en attendant que le noyau l'ecrive
     PtrVec<Channel> _client_channels;
     e_CLientState _status;
     bool _bool_pass;
     bool _bool_nick;
     bool _bool_user;
+
 
   public:
     /*--Constructeurs-Destructeur--*/
@@ -63,4 +65,9 @@ class Client
     void setBoolUser(bool const user);
     void addChannel(Channel &new_channel);
     void removeChannel(Channel &old_channel);
+
+    /*-outBuffer--*/
+	void appendOut(const std::string &str);
+	const std::string &getOut() const;
+	void consumeOut(size_t n);
 };

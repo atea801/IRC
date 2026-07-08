@@ -110,6 +110,7 @@ class Server
     int accept_new_client();
     int create_socket();
     int client_actions(size_t i);
+	void flush_client(int fd);
 
     /*--Gestion des commandes IRC--*/
     void exec_flow(Message &msg, Client &c);

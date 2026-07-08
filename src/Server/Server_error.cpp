@@ -24,8 +24,7 @@
  */
 void Server::send_raw(Client &c, const std::string &line)
 {
-    std::string mess = line + "\r\n";
-    send(c.getFdClient(), mess.c_str(), mess.size(), 0);
+    c.appendOut(line + "\r\n");
 }
 
 /**
