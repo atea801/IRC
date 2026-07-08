@@ -394,6 +394,8 @@ void Server::handle_part(Message &msg, Client &c)
                     ":" + c.getNickname() + "!" + c.getUsername() + "@localhost PART " + chan->getName();
                 broadcastToChannel(*chan, msg_to_send);
             }
+            if (chan->isOperator(c))
+                chan->removeOperator(c);
             chan->removeMember(c);
             c.removeChannel(*chan);
             if (chan->NumberOfMembers() == 0)
