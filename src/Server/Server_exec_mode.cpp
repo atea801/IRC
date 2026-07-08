@@ -30,16 +30,15 @@ Puis on parcourt <modestring> et <mode arguments> pour traiter l'exec de chaque 
 */
 void Server::handle_mode(Message &msg, Client &c)
 {
-    /*IrcError error = msg.parsing_mode();
+    IrcError error = msg.parsing_mode();
     if (error != IRC_OK)
     {
         if(error == ERR_NEEDMOREPARAMS)
             send_reply_error(c, error, " MODE :Not enough parameters");
         if(error == ERR_UNKNOWNMODE)
-            send_reply_error "<client> <modechar> :is unknown mode char to me"
+            send_reply_error (c, error, "your selected mode is unknown to me");
         return;
     }
-    */
 
     // A partir de ce point, on considère que <modestring> est au bon format et que
     //<mode arguments> contient le bon nombre d'arguments pour chaque mode demandé
