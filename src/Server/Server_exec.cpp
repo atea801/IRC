@@ -289,7 +289,6 @@ void Server::handle_ping(Message &msg, Client &c)
     send(c.getFdClient(), msg_to_send.c_str(), msg_to_send.size(), 0);
 }
 
-// fonction en cours de creation
 void Server::handle_quit(Message &msg, Client &c)
 {
     std::vector<std::string> args = msg.get_args();

@@ -97,3 +97,10 @@ IrcError Message::parsing_kick()
 
     return IRC_OK;
 }
+
+IrcError Message::parsing_invite()
+{
+	if (this->args.size() < 2)
+        return ERR_NEEDMOREPARAMS;
+    return IRC_OK;
+}

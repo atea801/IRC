@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server_exec_invite.cpp                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bkaras-g <bkaras-g@student.42.fr>          +#+  +:+       +#+        */
+/*   By: aautret <aautret@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 15:56:29 by bkaras-g          #+#    #+#             */
-/*   Updated: 2026/06/29 16:15:38 by bkaras-g         ###   ########.fr       */
+/*   Updated: 2026/07/08 11:37:44 by aautret          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,14 +14,13 @@
 
 void Server::handle_invite(Message &msg, Client &c)
 {
-    /*IrcError error = msg.parsing_invite();
+    IrcError error = msg.parsing_invite();
     if (error != IRC_OK)
     {
         if(error == ERR_NEEDMOREPARAMS)
-            send_reply_error(c, error, " MODE :Not enough parameters");
+            send_reply_error(c, error, msg.get_args()[0], ":Not enough parameters");
         return;
     }
-    */
 
     Channel *chan = findChannelByName(msg.get_args()[1]);
     if (!chan)

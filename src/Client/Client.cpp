@@ -49,3 +49,16 @@ bool Client::operator==(const Client &other)
 Client::~Client()
 {
 }
+
+
+void Client::appendOut(const std::string &str){
+	_outBuffer += str;
+}
+
+const std::string &Client::getOut() const {
+    return _outBuffer;
+}
+
+void Client::consumeOut(size_t n){
+	_outBuffer.erase(0, n);
+}
