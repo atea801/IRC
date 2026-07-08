@@ -31,4 +31,5 @@ class Message
     IrcError parsing_privmsg();
     IrcError parsing_kick();
 	IrcError parsing_invite();
+	IrcError parsing_join();
 };

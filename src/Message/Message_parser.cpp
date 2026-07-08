@@ -104,3 +104,17 @@ IrcError Message::parsing_invite()
         return ERR_NEEDMOREPARAMS;
     return IRC_OK;
 }
+
+IrcError Message::parsing_join()
+{
+	if (this->args.empty() || this->args[0].empty())
+    {
+        // send_reply_error(c, ERR_NEEDMOREPARAMS, "You need a channel name");
+        return ERR_NEEDMOREPARAMS;
+    }
+    if (this->args[0][0] != '#' && this->args[0][0] != '&')
+    {
+        // send_reply_error(c, ERR_BADCHANMASK, "the chan name format is wrong");
+        return ERR_BADCHANMASK;
+    }
+}
