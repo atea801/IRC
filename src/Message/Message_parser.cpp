@@ -105,45 +105,63 @@ IrcError Message::parsing_invite()
     return IRC_OK;
 }
 
+IrcError Message::parsing_join()
+{
+	if (this->args.empty() || this->args[0].empty())
+    {
+        // send_reply_error(c, ERR_NEEDMOREPARAMS, "You need a channel name");
+        return ERR_NEEDMOREPARAMS;
+    }
+    if (this->args[0][0] != '#' && this->args[0][0] != '&')
+    {
+        // send_reply_error(c, ERR_BADCHANMASK, "the chan name format is wrong");
+        return ERR_BADCHANMASK;
+    }
+}
+
 IrcError Message::parsing_mode()
 {
-    // 1. Il faut au moins la cible (le channel)
+    // Au minimum: MODE #channel
     if (this->args.empty() || this->args[0].empty())
         return ERR_NEEDMOREPARAMS;
 
-    // 2. "MODE #chan" seul = requête des modes actifs -> valide,
-    //    handle_mode s'en occupe via send_reply_channelmodeis
+    // Si pas de modestring, c'est juste une demande RPL_CHANNELMODEIS -> OK
     if (this->args.size() == 1)
         return IRC_OK;
 
-    const std::string &modestring = this->args[1];
+    std::string modestring = this->args[1];
     if (modestring.empty())
         return ERR_NEEDMOREPARAMS;
 
-    // 3. On parcourt le modestring : on valide chaque lettre
-    //    et on compte les <mode arguments> requis.
-    //    Meme logique que modeNeedsParam : k,o -> toujours ; l -> seulement '+'.
-    char sign = '+'; // signe courant, '+' par defaut si aucun signe explicite
-    size_t needed = 0;
-    for (size_t i = 0; i < modestring.size(); i++)
+    // La modestring doit commencer par + ou -
+    if (modestring[0] != '+' && modestring[0] != '-')
+        return ERR_UNKNOWNMODE;
+
+    // Vérification que chaque lettre de mode est connue
+    // et comptage du nombre de params attendus
+    char sign = modestring[0];
+    size_t params_needed = 0;
+
+    for (size_t i = 1; i < modestring.size(); i++)
     {
-        char ch = modestring[i];
-        if (ch == '+' || ch == '-')
+        char c = modestring[i];
+        if (c == '+' || c == '-')
         {
-            sign = ch;
+            sign = c;
             continue;
         }
-        if (ch != 'i' && ch != 't' && ch != 'k' && ch != 'o' && ch != 'l')
+        if (c != 'i' && c != 't' && c != 'k' && c != 'o' && c != 'l')
             return ERR_UNKNOWNMODE;
-        if (ch == 'k' || ch == 'o')
-            needed++;
-        else if (ch == 'l' && sign == '+')
-            needed++;
+        // Compter les params nécessaires
+        if (c == 'k' || c == 'o')
+            params_needed++;
+        else if (c == 'l' && sign == '+')
+            params_needed++;
     }
 
-    // 4. Les <mode arguments> sont args[2..]. Il en faut au moins `needed`.
-    size_t available = (this->args.size() > 2) ? this->args.size() - 2 : 0;
-    if (available < needed)
+    // Vérifier qu'on a assez de mode arguments
+    size_t params_provided = this->args.size() - 2; // args[0]=channel, args[1]=modestring
+    if (params_provided < params_needed)
         return ERR_NEEDMOREPARAMS;
 
     return IRC_OK;

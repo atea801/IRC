@@ -185,7 +185,6 @@ Après check des numeric replies, un message KICK distinct par user est
 diffusé à tout le channel, y compris le ou les users KICK, puis suppression du ou
 des users du Channel.
 */
-
 void Server::handle_kick(Message &msg, Client &c)
 {
     IrcError error = msg.parsing_kick();
@@ -308,17 +307,15 @@ void Server::handle_quit(Message &msg, Client &c)
 
 void Server::handle_join(Message &msg, Client &c)
 {
-    std::vector<std::string> args = msg.get_args();
-    if (args.empty() || args[0].empty())
-    {
-        send_reply_error(c, ERR_NEEDMOREPARAMS, "You need a channel name");
-        return;
-    }
-    if (args[0][0] != '#' && args[0][0] != '&')
-    {
-        send_reply_error(c, ERR_BADCHANMASK, "the chan name format is wrong");
-        return;
-    }
+	IrcError error = msg.parsing_join();
+	std::vector<std::string> args = msg.get_args();
+	if (error != IRC_OK){
+        if (error == ERR_NEEDMOREPARAMS)
+            return (send_reply_error(c, error, msg.get_command(), "Not enough parameters"));
+		else if (error == ERR_BADCHANMASK)
+            return (send_reply_error(c, error, args[0], "Not enough parameters"));
+	}
+
     Channel *chan = findChannelByName(args[0]);
     if (!chan)
     {
@@ -336,16 +333,16 @@ void Server::handle_join(Message &msg, Client &c)
     if (chan->isMember(c))
         return;
     if (chan->isInviteOnly() && !chan->isInvited(c))
-        return (send_reply_error(c, ERR_INVITEONLYCHAN, "you are not invited to join this channel"));
+        return (send_reply_error(c, ERR_INVITEONLYCHAN, args[0],"Cannot join channel (+i)"));
     if (chan->hasPassword())
     {
         if (args.size() < 2 || args[1].empty())
-            return (send_reply_error(c, ERR_BADCHANNELKEY, "You need to enter the password"));
+            return (send_reply_error(c, ERR_BADCHANNELKEY, args[0], "Cannot join channel (+k)"));
         if (args[1] != chan->getPassword())
-            return (send_reply_error(c, ERR_BADCHANNELKEY, "you entered the wrong password for this channel"));
+            return (send_reply_error(c, ERR_BADCHANNELKEY, args[0], "Cannot join channel (+k)"));
     }
     if (chan->hasUserLimit() && chan->NumberOfMembers() >= chan->getUserLimit())
-        return (send_reply_error(c, ERR_CHANNELISFULL, "The channel is full"));
+        return (send_reply_error(c, ERR_CHANNELISFULL, args[0], "Cannot join channel (+l)"));
     chan->addMember(c);
     c.addChannel(*chan);
     std::string msg_to_send = ":" + c.getNickname() + "!" + c.getUsername() + "@localhost JOIN " + args[0];
