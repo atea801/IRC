@@ -1,6 +1,5 @@
 #include "bot_irc.hpp"
 
-
 // =========================================================================================
 // =========================================================================================
 //
@@ -12,8 +11,8 @@
 /**
  * @brief Ouvre une socket TCP et se connecte au serveur IRC
  * @param ip 127.0.0.1
- * @param port 
- * @return int 
+ * @param port
+ * @return int
  */
 int connect_to_server(const std::string &ip, int port)
 {
@@ -43,8 +42,8 @@ int connect_to_server(const std::string &ip, int port)
 
 /**
  * @brief Envoi une ligne IRC complete sur la socket, rajout automatiquement "\r\n"
- * @param fd 
- * @param line 
+ * @param fd
+ * @param line
  */
 void send_line(int fd, const std::string &line)
 {
@@ -54,8 +53,8 @@ void send_line(int fd, const std::string &line)
 
 /**
  * @brief Enregistre le bot aupres du serveur
- * @param fd 
- * @param pass 
+ * @param fd
+ * @param pass
  */
 void bot_register(int fd, std::string pass)
 {
@@ -70,13 +69,13 @@ void join_channel(int fd)
 }
 
 /**
- * @brief Extrait la cible et le texte d'une ligne privmsg, pour recuperer (channel ou nick) + 
+ * @brief Extrait la cible et le texte d'une ligne privmsg, pour recuperer (channel ou nick) +
  * le message
  * @param line ligne IRC complete sans le "\r\n"
  * @param target cible du message (ex: #bot ou nickname)
  * @param text contenu du message apres le ":"
- * @return true 
- * @return false 
+ * @return true
+ * @return false
  */
 bool parse_privmsg(const std::string &line, std::string &target, std::string &text)
 {
@@ -106,18 +105,18 @@ bool parse_privmsg(const std::string &line, std::string &target, std::string &te
 // =========================================================================================
 std::vector<std::string> forbidden_words()
 {
-	std::vector<std::string> w;
-	w.push_back("idiot");
-	w.push_back("stupid");
-	w.push_back("noob");
-	w.push_back("connard");
-	return w;
+    std::vector<std::string> w;
+    w.push_back("idiot");
+    w.push_back("stupid");
+    w.push_back("noob");
+    w.push_back("connard");
+    return w;
 }
 
 /**
  * @brief Fonctionalite !TIME qui renvoie l'heure
- * 
- * @return std::string 
+ *
+ * @return std::string
  */
 std::string get_current_time()
 {
@@ -129,8 +128,8 @@ std::string get_current_time()
 
 /**
  * @brief Convertit une chaine en minuscule
- * @param s 
- * @return std::string 
+ * @param s
+ * @return std::string
  */
 std::string to_lower(const std::string &s)
 {
@@ -142,10 +141,10 @@ std::string to_lower(const std::string &s)
 
 /**
  * @brief Indiaue si un texte contient au moins un mot interdit
- * @param text 
- * @param words 
- * @return true 
- * @return false 
+ * @param text
+ * @param words
+ * @return true
+ * @return false
  */
 bool has_forbidden_word(const std::string &text, const std::vector<std::string> &words)
 {
@@ -160,13 +159,13 @@ bool has_forbidden_word(const std::string &text, const std::vector<std::string> 
 
 /**
  * @brief Extrait le nick de l'emetteur
- * 
+ *
  * Le prefixe a la forme ":nick!user@host ...". Le nick se situe entre le ':'
  * initial et le '!'.
- * @param line 
- * @param nick 
- * @return true 
- * @return false 
+ * @param line
+ * @param nick
+ * @return true
+ * @return false
  */
 bool parse_sender_nick(const std::string &line, std::string &nick)
 {
@@ -181,16 +180,14 @@ bool parse_sender_nick(const std::string &line, std::string &nick)
 }
 /**
  * @brief Envoi la commande KICK au serveur
- * @param fd 
- * @param channel 
- * @param nick 
+ * @param fd
+ * @param channel
+ * @param nick
  */
 void kick_user(int fd, const std::string &channel, const std::string &nick, const std::string &reason)
 {
     send_line(fd, "KICK " + channel + " " + nick + " :" + reason);
 }
-
-
 
 // =========================================================================================
 // =========================================================================================
@@ -202,30 +199,32 @@ void kick_user(int fd, const std::string &channel, const std::string &nick, cons
 
 /**
  * @brief Decide a chaque message recu si un user spamme
- * 
+ *
  * - combien de message on ete send recement => msg_count
  * - a quel moment ca a commence => window_start
  * - check le nombre d'avertissement => warning
- * 
- * @param nick 
+ *
+ * @param nick
  * @param states map qui permet d'associer le nick a son etat
- * @return SpamAction 
+ * @return SpamAction
  */
 SpamAction register_message(const std::string &nick, std::map<std::string, UserState> &states)
 {
     std::time_t now = std::time(NULL);
     UserState &st = states[nick];
 
-    //check si la fenetre de comptage est expirer -> reset
-	// tout premier message ou plus de SPAM_WINDOW s ce sont ecoule
-    if (st.window_start == 0 || now - st.window_start >= SPAM_WINDOW){
+    // check si la fenetre de comptage est expirer -> reset
+    //  tout premier message ou plus de SPAM_WINDOW s ce sont ecoule
+    if (st.window_start == 0 || now - st.window_start >= SPAM_WINDOW)
+    {
         st.window_start = now;
         st.msg_count = 0;
     }
     st.msg_count++;
-    //check si trop de message
-    if (st.msg_count > SPAM_THRESHOLD){
-		// on repart pour la prochaine rafale
+    // check si trop de message
+    if (st.msg_count > SPAM_THRESHOLD)
+    {
+        // on repart pour la prochaine rafale
         st.msg_count = 0;
         st.window_start = now;
         st.warnings++;
@@ -236,16 +235,15 @@ SpamAction register_message(const std::string &nick, std::map<std::string, UserS
     return SPAM_NONE;
 }
 
-
 /**
  * @brief Traite une ligne complete recue du serveur
- * 
+ *
  * Parse la ligne comme un PRIVMSG. Si l'emetteur (autre que le bot) ecrit un
  * mot interdit dans un channel, il est kicke. Sinon, les commandes !time et
  * !help sont traitees.
- * @param fd 
- * @param line 
- * @param words 
+ * @param fd
+ * @param line
+ * @param words
  */
 void handle_line(int fd, const std::string &line, const std::vector<std::string> &words,
                  std::map<std::string, UserState> &states)
@@ -273,8 +271,7 @@ void handle_line(int fd, const std::string &line, const std::vector<std::string>
         SpamAction act = register_message(sender, states);
         if (act == SPAM_WARN)
         {
-            send_line(fd, "PRIVMSG " + target + " :" + sender +
-                          " arrete de spam ! (avertissement 1/2)");
+            send_line(fd, "PRIVMSG " + target + " :" + sender + " arrete de spam ! (avertissement 1/2)");
             return;
         }
         if (act == SPAM_KICK)
@@ -295,14 +292,15 @@ void handle_line(int fd, const std::string &line, const std::vector<std::string>
  * @brief Se connecte au serveur, s'enregistre, rejoint #bot, puis boucle : lit la
  * socket, reconstitue les lignes completes terminees par "\r\n" (gestion des
  * paquets partiels ou groupes) et delegue chacune a handle_line().
- * 
- * @param argc 
- * @param argv 
- * @return int 
+ *
+ * @param argc
+ * @param argv
+ * @return int
  */
 int main(int argc, char **argv)
 {
-    if (argc != 4){
+    if (argc != 4)
+    {
         std::cerr << "Usage: " << argv[0] << " <ip> <port> <password>" << std::endl;
         return 1;
     }

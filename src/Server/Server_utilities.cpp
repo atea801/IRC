@@ -155,61 +155,58 @@ void Server::remove_client(int fd)
     vec_clients.erase(fd);
 }
 
-void Server::debug_client(Message &msg, Client &c)
+// Affiché dès la connexion au socket, AVANT tout enregistrement.
+// On utilise NOTICE (et non le MOTD) car le client n'a pas encore de nick.
+void Server::sendConnectBanner(Client &c)
 {
-    const std::vector<std::string> &args = msg.get_args();
+    static const char *header[] = {"╔════════════════════════════════════════════════════════════╗",
+                                   "║                                                            ║",
+                                   "║           ███████╗████████╗   ██╗██████╗  ██████╗          ║",
+                                   "║           ██╔════╝╚══██╔══╝   ██║██╔══██╗██╔════╝          ║",
+                                   "║           █████╗     ██║      ██║██████╔╝██║               ║",
+                                   "║           ██╔══╝     ██║      ██║██╔══██╗██║               ║",
+                                   "║           ██║        ██║      ██║██║  ██║╚██████╗          ║",
+                                   "║           ╚═╝        ╚═╝      ╚═╝╚═╝  ╚═╝ ╚═════╝          ║",
+                                   "║                                                            ║",
+                                   "║              Internet Relay Chat — 42 Project              ║",
+                                   "║                                                            ║",
+                                   "╟────────────────────────────────────────────────────────────╢",
+                                   "║                                                            ║",
+                                   "║  This server lets IRC clients connect over TCP/IP to chat  ║",
+                                   "║ in real time. Authenticate with the password, pick a nick, ║",
+                                   "║ join channels, and talk. Operators can moderate channels.  ║",
+                                   "║                                                            ║",
+                                   "╟────────────────────────────────────────────────────────────╢",
+                                   "║                                                            ║",
+                                   "║                   ─── Basic commands ───                   ║",
+                                   "║                                                            ║",
+                                   "║   PASS <password>         authenticate to the server       ║",
+                                   "║   NICK <nickname>         choose / change your nickname    ║",
+                                   "║   USER <user> 0 * :name   register your username           ║",
+                                   "║   JOIN #channel [key]     join (or create) a channel       ║",
+                                   "║   PRIVMSG <target> :msg   message a user or a channel      ║",
+                                   "║   TOPIC #channel [:txt]   view or set the channel topic    ║",
+                                   "║   KICK #channel <nick>    eject a user      (operator)     ║",
+                                   "║   INVITE <nick> #channel  invite a user     (operator)     ║",
+                                   "║   MODE #channel +itkol    set channel modes (operator)     ║",
+                                   "║   PART #channel           leave a channel                  ║",
+                                   "║   QUIT :message           disconnect from the server       ║",
+                                   "║                                                            ║",
+                                   "╚════════════════════════════════════════════════════════════╝"};
+    const size_t n = sizeof(header) / sizeof(header[0]);
 
-    // --- statut en texte + couleur selon l'état ---
-    std::string st_txt;
-    std::string st_col;
-    switch (c.getStatus())
+    for (size_t i = 0; i < n; ++i)
     {
-    case REGISTERED:
-        st_txt = "REGISTERED";
-        st_col = C_GREEN;
-        break;
-    case QUIT:
-        st_txt = "QUIT";
-        st_col = C_RED;
-        break;
-    default:
-        st_txt = "HANDSHAKE";
-        st_col = C_YELLOW;
-        break;
+        std::string color = IC_CYAN; // cadre par défaut
+        if (i >= 2 && i <= 7)        // le logo FT IRC
+            color = std::string(I_BOLD) + IC_LCYAN;
+        else if (i == 9) // le sous-titre
+            color = IC_YELLOW;
+        else if (i == 19) // "Basic commands"
+            color = std::string(I_BOLD) + IC_YELLOW;
+
+        // send_raw ajoute déjà le \r\n. Les codes couleur sont "largeur zéro"
+        // dans irssi → l'alignement du cadre reste intact.
+        send_raw(c, ":" + _server_name + " NOTICE * :" + color + header[i] + I_RESET);
     }
-
-    // --- helper pour ✓ / ✗ coloré ---
-    std::string p = c.getBoolPass() ? std::string(C_GREEN) + "OK " : std::string(C_RED) + "-- ";
-    std::string n = c.getBoolNick() ? std::string(C_GREEN) + "OK " : std::string(C_RED) + "-- ";
-    std::string u = c.getBoolUser() ? std::string(C_GREEN) + "OK " : std::string(C_RED) + "-- ";
-
-    std::cout << C_DIM << "+----------------------------------------------+" << C_RESET << "\n";
-    std::cout << C_DIM << "| " << C_BOLD << C_CYAN << "DEBUG CLIENT" << C_RESET << "  fd=" << C_MAGENTA
-              << c.getFdClient() << C_RESET << "\n";
-    std::cout << C_DIM << "+----------------------------------------------+" << C_RESET << "\n";
-
-    // commande
-    std::cout << C_DIM << "| " << C_RESET << "cmd    : " << C_BOLD << C_CYAN << msg.get_command() << C_RESET << "\n";
-
-    // arguments
-    std::cout << C_DIM << "| " << C_RESET << "args   : [" << C_YELLOW << args.size() << C_RESET << "]\n";
-    for (size_t i = 0; i < args.size(); i++)
-        std::cout << C_DIM << "| " << C_RESET << "  [" << i << "] = " << C_GREEN << "\"" << args[i] << "\"" << C_RESET
-                  << "\n";
-
-    // progression de l'enregistrement
-    std::cout << C_DIM << "| " << C_RESET << "reg    : "
-              << "pass=" << p << C_RESET << "nick=" << n << C_RESET << "user=" << u << C_RESET << "\n";
-
-    // identité (si déjà renseignée)
-    std::cout << C_DIM << "| " << C_RESET << "nick   : " << C_BLUE << (c.getNickname().empty() ? "*" : c.getNickname())
-              << C_RESET << "\n";
-    std::cout << C_DIM << "| " << C_RESET << "user   : " << C_BLUE << (c.getUsername().empty() ? "-" : c.getUsername())
-              << C_RESET << "\n";
-
-    // statut global
-    std::cout << C_DIM << "| " << C_RESET << "status : " << C_BOLD << st_col << st_txt << C_RESET << C_DIM << " ("
-              << c.getStatus() << ")" << C_RESET << "\n";
-
-    std::cout << C_DIM << "+----------------------------------------------+" << C_RESET << "\n";
 }

@@ -46,8 +46,10 @@ void Server::exec_flow(Message &msg, Client &c)
         c.setStatus(REGISTERED);
         const std::string &nick = c.getNickname();
         send_raw(c, ":irc.server 001 " + nick + " :Welcome to the IRC Network " + nick);
+        send_raw(c, ":" + _server_name + " 002 " + nick + " :Your host is " + _server_name + ", running version 1.0");
+        send_raw(c, ":" + _server_name + " 003 " + nick + " :This server was created recently");
+        send_raw(c, ":" + _server_name + " 004 " + nick + " " + _server_name + " 1.0 * itkol");
     }
-    // debug_client(msg, c);
 }
 
 void Server::handle_nick(Message &msg, Client &c)
@@ -342,10 +344,6 @@ void Server::handle_join(Message &msg, Client &c)
     broadcastToChannel(*chan, msg_to_send);
     msg_to_send = "Welcome to " + c.getNickname() + " who has just join the channel *cheers*";
     broadcastToChannel(*chan, msg_to_send, &c);
-    msg_to_send = "welcome " + c.getNickname() + " to this chanel have fun and please follow the rules :\n" +
-                  "1- no cursed words\n" + "2-no spamming\n" +
-                  "if you dont follow those rules you will be punished\r\n";
-    send(c.getFdClient(), msg_to_send.c_str(), msg_to_send.size(), 0);
 }
 
 void Server::handle_part(Message &msg, Client &c)

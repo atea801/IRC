@@ -105,6 +105,9 @@ int Server::accept_new_client()
         Client c(client_p.fd);
         vec_clients.erase(client_fd);
         vec_clients.insert(std::make_pair(client_fd, c));
+        Client *newc = find_client(client_fd);
+        if (newc)
+            sendConnectBanner(*newc);
     }
     return (0);
 }

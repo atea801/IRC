@@ -1,14 +1,55 @@
 #pragma once
 
-#define C_RESET "\033[0m"
-#define C_DIM "\033[2m"
-#define C_RED "\033[31m"
-#define C_GREEN "\033[32m"
-#define C_YELLOW "\033[33m"
-#define C_BLUE "\033[34m"
-#define C_MAGENTA "\033[35m"
-#define C_CYAN "\033[36m"
-#define C_BOLD "\033[1m"
+#define I_RESET "\x0F"
+#define I_BOLD "\x02"
+#define IC_WHITE                                                                                                       \
+    "\x03"                                                                                                             \
+    "00"
+#define IC_BLACK                                                                                                       \
+    "\x03"                                                                                                             \
+    "01"
+#define IC_BLUE                                                                                                        \
+    "\x03"                                                                                                             \
+    "02"
+#define IC_GREEN                                                                                                       \
+    "\x03"                                                                                                             \
+    "03"
+#define IC_RED                                                                                                         \
+    "\x03"                                                                                                             \
+    "04"
+#define IC_BROWN                                                                                                       \
+    "\x03"                                                                                                             \
+    "05"
+#define IC_PURPLE                                                                                                      \
+    "\x03"                                                                                                             \
+    "06"
+#define IC_ORANGE                                                                                                      \
+    "\x03"                                                                                                             \
+    "07"
+#define IC_YELLOW                                                                                                      \
+    "\x03"                                                                                                             \
+    "08"
+#define IC_LGREEN                                                                                                      \
+    "\x03"                                                                                                             \
+    "09"
+#define IC_CYAN                                                                                                        \
+    "\x03"                                                                                                             \
+    "10"
+#define IC_LCYAN                                                                                                       \
+    "\x03"                                                                                                             \
+    "11"
+#define IC_LBLUE                                                                                                       \
+    "\x03"                                                                                                             \
+    "12"
+#define IC_PINK                                                                                                        \
+    "\x03"                                                                                                             \
+    "13"
+#define IC_GREY                                                                                                        \
+    "\x03"                                                                                                             \
+    "14"
+#define IC_LGREY                                                                                                       \
+    "\x03"                                                                                                             \
+    "15"
 
 #include "Channel.hpp"
 #include "Client.hpp"
@@ -96,7 +137,7 @@ class Server
     void broadcastToChannel(Channel &chan, const std::string &line, Client *exclude = NULL);
     std::string getPrefix(Client &c) const;
     void debug_client(Message &msg, Client &c);
-    bool find_bot_cmd(std::string arg);
+    void sendConnectBanner(Client &client);
 
     /*--Gestion des erreurs (Numeric replies)--*/
     int checkChannels(const std::vector<std::string> &channelsToCheck) const;
