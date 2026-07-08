@@ -117,7 +117,7 @@ class Server
     void handle_user(Message &msg, Client &c);
     void handle_pass(Message &msg, Client &c);
     void handle_privmsg(Message &msg, Client &c);
-    void handle_cap(Client &c);
+    void handle_cap(Message &msg, Client &c);
     void handle_ping(Message &msg, Client &c);
     void handle_quit(Message &msg, Client &c);
     void handle_join(Message &msg, Client &c);

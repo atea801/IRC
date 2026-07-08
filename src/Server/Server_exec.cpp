@@ -38,7 +38,7 @@ void Server::exec_flow(Message &msg, Client &c)
     else if (cmd == "PING")
         handle_ping(msg, c);
     else if (cmd == "CAP")
-        handle_cap(c);
+        handle_cap(msg, c);
     else
         send_reply_error(c, ERR_UNKNOWNCOMMAND, cmd, "Unknown command");
     if (c.getBoolPass() && c.getBoolNick() && c.getBoolUser() && c.getStatus() != REGISTERED)
@@ -144,7 +144,7 @@ void Server::handle_privmsg(Message &msg, Client &c)
     // le texte ne change jamais selon la cible : c'est toujours args[1]
     const std::string &text = args[1];
     // prefixe complet nick!user@host, comme dans handle_Kick
-    std::string prefix = c.getNickname() + "!" + c.getUsername() + "@" + c.getHostname();
+    std::string prefix = c.getNickname() + "!" + c.getUsername() + "@localhost" + c.getHostname();
     // parcour des destinataires qu'il y en ai 1 ou 10
     for (size_t i = 0; i < destinataires.size(); i++)
     {
@@ -265,10 +265,19 @@ void Server::handle_kick(Message &msg, Client &c)
     }
 }
 
-void Server::handle_cap(Client &c)
+void Server::handle_cap(Message &msg, Client &c)
 {
-    std::string reply = "CAP * LS :\r\n";
-    send(c.getFdClient(), reply.c_str(), reply.size(), 0);
+    if (msg.get_args().empty())
+        return;
+    const std::string &sub = msg.get_args()[0];
+
+    if (sub == "LS" || sub == "LIST")
+        send_raw(c, ":" + _server_name + " CAP * LS :");
+    else if (sub == "REQ")
+        send_raw(c, ":" + _server_name + " CAP * NAK :" + // on refuse tout
+                        (msg.get_args().size() > 1 ? msg.get_args()[1] : ""));
+    else if (sub == "END")
+        return;
 }
 
 void Server::handle_ping(Message &msg, Client &c)
