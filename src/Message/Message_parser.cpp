@@ -117,6 +117,7 @@ IrcError Message::parsing_join()
         // send_reply_error(c, ERR_BADCHANMASK, "the chan name format is wrong");
         return ERR_BADCHANMASK;
     }
+    return IRC_OK;
 }
 
 IrcError Message::parsing_mode()
