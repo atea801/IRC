@@ -6,7 +6,7 @@
 /*   By: bkaras-g <bkaras-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 00:00:00 by bkaras-g          #+#    #+#             */
-/*   Updated: 2026/06/24 11:53:47 by bkaras-g         ###   ########.fr       */
+/*   Updated: 2026/07/08 15:59:40 by bkaras-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 void Channel::addOperator(Client &c)
 {
     this->_chanOps.add(c);
+    c.setNickname("@" + c.getNickname());
 }
 
 void Channel::removeOperator(Client &c)
