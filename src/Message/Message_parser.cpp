@@ -118,3 +118,51 @@ IrcError Message::parsing_join()
         return ERR_BADCHANMASK;
     }
 }
+
+IrcError Message::parsing_mode()
+{
+    // Au minimum: MODE #channel
+    if (this->args.empty() || this->args[0].empty())
+        return ERR_NEEDMOREPARAMS;
+
+    // Si pas de modestring, c'est juste une demande RPL_CHANNELMODEIS -> OK
+    if (this->args.size() == 1)
+        return IRC_OK;
+
+    std::string modestring = this->args[1];
+    if (modestring.empty())
+        return ERR_NEEDMOREPARAMS;
+
+    // La modestring doit commencer par + ou -
+    if (modestring[0] != '+' && modestring[0] != '-')
+        return ERR_UNKNOWNMODE;
+
+    // Vérification que chaque lettre de mode est connue
+    // et comptage du nombre de params attendus
+    char sign = modestring[0];
+    size_t params_needed = 0;
+
+    for (size_t i = 1; i < modestring.size(); i++)
+    {
+        char c = modestring[i];
+        if (c == '+' || c == '-')
+        {
+            sign = c;
+            continue;
+        }
+        if (c != 'i' && c != 't' && c != 'k' && c != 'o' && c != 'l')
+            return ERR_UNKNOWNMODE;
+        // Compter les params nécessaires
+        if (c == 'k' || c == 'o')
+            params_needed++;
+        else if (c == 'l' && sign == '+')
+            params_needed++;
+    }
+
+    // Vérifier qu'on a assez de mode arguments
+    size_t params_provided = this->args.size() - 2; // args[0]=channel, args[1]=modestring
+    if (params_provided < params_needed)
+        return ERR_NEEDMOREPARAMS;
+
+    return IRC_OK;
+}

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server_exec_mode.cpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bkaras-g <bkaras-g@student.42.fr>          +#+  +:+       +#+        */
+/*   By: aautret <aautret@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/27 17:52:49 by bkaras-g          #+#    #+#             */
-/*   Updated: 2026/06/29 15:53:29 by bkaras-g         ###   ########.fr       */
+/*   Updated: 2026/07/08 13:35:15 by aautret          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,16 +30,14 @@ Puis on parcourt <modestring> et <mode arguments> pour traiter l'exec de chaque 
 */
 void Server::handle_mode(Message &msg, Client &c)
 {
-    /*IrcError error = msg.parsing_mode();
+    IrcError error = msg.parsing_mode();
     if (error != IRC_OK)
     {
         if(error == ERR_NEEDMOREPARAMS)
-            send_reply_error(c, error, " MODE :Not enough parameters");
-        if(error == ERR_UNKNOWNMODE)
-            send_reply_error "<client> <modechar> :is unknown mode char to me"
-        return;
+            return (send_reply_error(c, error, msg.get_command(), "Not enough parameters"));
+        else if(error == ERR_UNKNOWNMODE)
+        	return(send_reply_error(c, error, msg.get_args()[1], "is unknown mode char to me"));
     }
-    */
 
     // A partir de ce point, on considère que <modestring> est au bon format et que
     //<mode arguments> contient le bon nombre d'arguments pour chaque mode demandé
@@ -49,25 +47,11 @@ void Server::handle_mode(Message &msg, Client &c)
     // Check des numeric replies
     Channel *chan = findChannelByName(msg.get_args()[0]);
     if (!chan)
-    {
-        // ERR_NOSUCHCHANNEL (403)
-        // send_reply_error "<client> <channel> :No such channel"
-        send_reply_error(c, ERR_NOSUCHCHANNEL, msg.get_args()[0], "No such channel");
-        return;
-    }
+        return (send_reply_error(c, ERR_NOSUCHCHANNEL, msg.get_args()[0], "No such channel"));
     if (msg.get_args().size() == 1) // MODE #general --> demande les modes activés
-    {
-        send_reply_channelmodeis(c, *chan);
-        return;
-    }
+       return(send_reply_channelmodeis(c, *chan));
     if (!chan->isOperator(c))
-    {
-        // ERR_CHANOPRIVSNEEDED (482)
-        // send_reply_error "<client> <channel> :You're not channel operator"
-        send_reply_error(c, ERR_CHANOPRIVSNEEDED, chan->getName(), "You're not channel operator");
-        return;
-    }
-
+        return(send_reply_error(c, ERR_CHANOPRIVSNEEDED, chan->getName(), "You're not channel operator"));
     /*
     Extraction des paramètres <modestring> et <mode arguments> avec msg.get_args()
     */
