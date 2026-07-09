@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server_utilities.cpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aautret <aautret@student.42.fr>            +#+  +:+       +#+        */
+/*   By: bkaras-g <bkaras-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/25 11:15:45 by bkaras-g          #+#    #+#             */
-/*   Updated: 2026/07/01 11:13:41 by aautret          ###   ########.fr       */
+/*   Updated: 2026/07/09 17:00:24 by bkaras-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,7 +116,7 @@ Utilisé comme source des messages relayés (KICK, INVITE, etc.).
 */
 std::string Server::getPrefix(Client &c) const
 {
-    return (c.getNickname() + "!" + c.getUsername() + "@" + c.getHostname());
+    return (c.getNickname() + "!" + c.getUsername() + "@localhost");
 }
 
 /*
