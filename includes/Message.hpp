@@ -30,6 +30,7 @@ class Message
     IrcError parsing_quit();
     IrcError parsing_privmsg();
     IrcError parsing_kick();
+    IrcError parsing_topic();
 	IrcError parsing_invite();
 	IrcError parsing_join();
 	IrcError parsing_mode();

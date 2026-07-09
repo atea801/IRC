@@ -31,6 +31,8 @@ void Server::exec_flow(Message &msg, Client &c)
         handle_mode(msg, c);
     else if (cmd == "KICK")
         handle_kick(msg, c);
+    else if (cmd == "TOPIC")
+        handle_topic(msg, c);
     else if (cmd == "INVITE")
         handle_invite(msg, c);
     else if (cmd == "PART")
@@ -261,6 +263,16 @@ void Server::handle_kick(Message &msg, Client &c)
         if (chan->isOperator(*target))
             chan->removeOperator(*target); // retiré AVANT removeMember
         chan->removeMember(*target);
+    }
+}
+
+void Server::handle_topic(Message &msg, Client &c)
+{
+    IrcError error = msg.parsing_topic();
+    if (error != IRC_OK)
+    {
+        send_reply_error(c, error, "KICK", "Not enough parameters");
+        return;
     }
 }
 

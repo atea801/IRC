@@ -98,6 +98,20 @@ IrcError Message::parsing_kick()
     return IRC_OK;
 }
 
+IrcError Message::parsing_topic()
+{
+    //TOPIC doit avoir au moins <channel>
+    if (this->args.size() < 1)
+        return ERR_NEEDMOREPARAMS;
+    if (this->args[0].empty())
+        return ERR_NEEDMOREPARAMS;
+        
+    //TOPIC peut avoir <topic> en 2eme argument
+    if (this->args.size() >= 2 && this->args[1].empty())
+        return ERR_NEEDMOREPARAMS;
+    return IRC_OK;
+}
+
 IrcError Message::parsing_invite()
 {
 	if (this->args.size() < 2)

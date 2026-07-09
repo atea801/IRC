@@ -122,7 +122,8 @@ class Server
     void handle_ping(Message &msg, Client &c);
     void handle_quit(Message &msg, Client &c);
     void handle_join(Message &msg, Client &c);
-    void handle_kick(Message &msg, Client &c); // K pour distinguer du n de handle_nick()
+    void handle_kick(Message &msg, Client &c);
+    void handle_topic(Message &msg, Client &c);
     void handle_mode(Message &msg, Client &c);
     void handle_invite(Message &msg, Client &c);
     void handle_part(Message &msg, Client &c);
