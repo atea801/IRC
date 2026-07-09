@@ -301,6 +301,7 @@ void Server::handle_topic(Message &msg, Client &c)
             //send RPL_TOPIC
             //"<client> <channel> :<topic>"
             send_reply_error(c, RPL_TOPIC, chan->getName(), chan->getTopic());
+            return;
         }
     }
     if (chan->isTopicRestricted() && !chan->isOperator(c))
@@ -309,7 +310,7 @@ void Server::handle_topic(Message &msg, Client &c)
         return;
     }
     std::string msg_to_send;
-    if (msg.get_args()[1] == ":") //dans ce cas on efface le topic
+    if (msg.get_args()[1].empty()) //dans ce cas on efface le topic
     {
         chan->setTopic("");
         msg_to_send = "TOPIC " + chan->getName() + " :";

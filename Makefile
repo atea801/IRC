@@ -32,6 +32,8 @@ CXX = c++
 CXXFLAGS = -Wall  -Wextra -g -std=c++98
 INCLUDES = -I./includes
 
+CXXFLAGS += $(DEBUG_FLAGS)
+
 all:
 	@if $(MAKE) --no-print-directory -q $(NAME); then \
 		echo "$(COLOUR_GREEN)$(NAME) is already up to date$(COLOUR_END)"; \
