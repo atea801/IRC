@@ -1,6 +1,6 @@
 .SILENT:
 
-NAME =	irc
+NAME =	ircserv
 SRCS =	src/main.cpp \
 		src/Channel/Channel.cpp \
 		src/Channel/Channel_members.cpp \
