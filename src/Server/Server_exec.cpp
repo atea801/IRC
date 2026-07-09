@@ -287,7 +287,7 @@ void Server::handle_topic(Message &msg, Client &c)
         send_reply_error(c, ERR_NOSUCHCHANNEL, msg.get_args()[0], "No such channel");
         return;
     }
-    if (msg.get_args().size() == 1) // <topic> n'est pas fourni
+    if (msg.get_args().size() == 1) // <topic> n'est pas fourni dans le Message
     {
         if (chan->getTopic() == "")
         {
@@ -303,6 +303,23 @@ void Server::handle_topic(Message &msg, Client &c)
             send_reply_error(c, RPL_TOPIC, chan->getName(), chan->getTopic());
         }
     }
+    if (chan->isTopicRestricted() && !chan->isOperator(c))
+    {
+        send_reply_error(c, ERR_CHANOPRIVSNEEDED, chan->getName(), "You're not channel operator");
+        return;
+    }
+    std::string msg_to_send;
+    if (msg.get_args()[1] == ":") //dans ce cas on efface le topic
+    {
+        chan->setTopic("");
+        msg_to_send = "TOPIC " + chan->getName() + " :";
+    }
+    else
+    {
+        chan->setTopic(msg.get_args()[1]);
+        msg_to_send = "TOPIC " + chan->getName() + " " + msg.get_args()[1];
+    }
+    broadcastToChannel(*chan, msg_to_send, NULL); 
 }
 
 void Server::handle_cap(Message &msg, Client &c)
