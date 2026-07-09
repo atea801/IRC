@@ -266,13 +266,42 @@ void Server::handle_kick(Message &msg, Client &c)
     }
 }
 
+/*
+Traitement de la commande TOPIC
+Voir le diagramme d'exec flow sur Figma
+Parameters: <channel> [<topic>]
+*/
 void Server::handle_topic(Message &msg, Client &c)
 {
     IrcError error = msg.parsing_topic();
     if (error != IRC_OK)
     {
-        send_reply_error(c, error, "KICK", "Not enough parameters");
+        send_reply_error(c, error, "TOPIC", "Not enough parameters");
         return;
+    }
+
+    Channel *chan = findChannelByName(msg.get_args()[0]);
+    if (!chan)
+    {
+        //  "<client> <channel> :No such channel"
+        send_reply_error(c, ERR_NOSUCHCHANNEL, msg.get_args()[0], "No such channel");
+        return;
+    }
+    if (msg.get_args().size() == 1) // <topic> n'est pas fourni
+    {
+        if (chan->getTopic() == "")
+        {
+            //send RPL_NOTOPIC
+            //"<client> <channel> :No topic is set"
+            send_reply_error(c, RPL_NOTOPIC, chan->getName(), "No topic is set");
+            return;
+        }
+        else
+        {
+            //send RPL_TOPIC
+            //"<client> <channel> :<topic>"
+            send_reply_error(c, RPL_TOPIC, chan->getName(), chan->getTopic());
+        }
     }
 }
 
