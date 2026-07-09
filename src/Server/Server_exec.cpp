@@ -309,16 +309,17 @@ void Server::handle_topic(Message &msg, Client &c)
         send_reply_error(c, ERR_CHANOPRIVSNEEDED, chan->getName(), "You're not channel operator");
         return;
     }
-    std::string msg_to_send;
+    std::string prefix = getPrefix(c);
+    std::string msg_to_send = ":" + prefix + " ";
     if (msg.get_args()[1].empty()) //dans ce cas on efface le topic
     {
         chan->setTopic("");
-        msg_to_send = "TOPIC " + chan->getName() + " :";
+        msg_to_send += "TOPIC " + chan->getName() + " :";
     }
     else
     {
         chan->setTopic(msg.get_args()[1]);
-        msg_to_send = "TOPIC " + chan->getName() + " " + msg.get_args()[1];
+        msg_to_send += "TOPIC " + chan->getName() + " :" + msg.get_args()[1];
     }
     broadcastToChannel(*chan, msg_to_send, NULL); 
 }
