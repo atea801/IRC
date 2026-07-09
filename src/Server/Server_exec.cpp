@@ -409,6 +409,8 @@ void Server::handle_join(Message &msg, Client &c)
     broadcastToChannel(*chan, msg_to_send);
     msg_to_send = "Welcome to " + c.getNickname() + " who has just join the channel *cheers*";
     broadcastToChannel(*chan, msg_to_send, &c);
+    if (chan->getTopic() != "") //si le channel a un topic on envoie un RPL_TOPIC
+        send_reply_error(c, RPL_TOPIC, chan->getName(), chan->getTopic());
 }
 
 void Server::handle_part(Message &msg, Client &c)
