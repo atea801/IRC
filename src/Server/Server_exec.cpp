@@ -77,8 +77,15 @@ void Server::handle_nick(Message &msg, Client &c)
         }
     }
     // execution finale
+    std::string old_prefix = getPrefix(c);
     c.setNickname(args[0]);
     c.setBoolNick(true);
+    //NICK <nick>
+    std::string message = ":" + old_prefix + " NICK :" + args[0];
+    send_raw(c, message);
+    PtrVec<Channel> channels_list = c.get_client_channel();
+    for (size_t i = 0; i < channels_list.size(); i++)
+        broadcastToChannel(*channels_list.get()[i], message, &c); 
 }
 
 void Server::handle_user(Message &msg, Client &c)
