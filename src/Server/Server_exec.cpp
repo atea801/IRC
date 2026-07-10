@@ -405,13 +405,20 @@ void Server::handle_join(Message &msg, Client &c)
         return (send_reply_error(c, ERR_CHANNELISFULL, args[0], "Cannot join channel (+l)"));
     chan->addMember(c);
     c.addChannel(*chan);
+
+    //envoi du message JOIN à tous les membres du channel
     std::string msg_to_send = ":" + c.getNickname() + "!" + c.getUsername() + "@localhost JOIN " + args[0];
     broadcastToChannel(*chan, msg_to_send);
-    msg_to_send = "Welcome to " + c.getNickname() + " who has just join the channel *cheers*";
+    
+    // msg_to_send = "Welcome to " + c.getNickname() + " who has just join the channel *cheers*"; 
+    //mis en comment car peut perturber le gestionnaire de client IRC
+
+    //envoi du topic au nouveau membre si le topic est défini
     broadcastToChannel(*chan, msg_to_send, &c);
-    if (chan->getTopic() != "") //si le channel a un topic on envoie un RPL_TOPIC
+    if (chan->getTopic() != "")
         send_reply_error(c, RPL_TOPIC, chan->getName(), chan->getTopic());
     
+    //envoi de la liste des membres du channel au nouveau membre (la liste inclut le nouveau membre)
     const std::vector<Client *> channelMembers = chan->getMembers();
     std::string membersList;
     for (size_t i = 0; i < channelMembers.size(); i++)
@@ -422,7 +429,7 @@ void Server::handle_join(Message &msg, Client &c)
         if (i + 1 != channelMembers.size())
             membersList += " ";
     }
-    send_reply_error(c, RPL_NAMREPLY, "=" + chan->getName(), membersList);
+    send_reply_error(c, RPL_NAMREPLY, "= " + chan->getName(), membersList);
     send_reply_error(c, RPL_ENDOFNAMES, chan->getName(), "End of /NAMES list");
     // msg_to_send
     /*
