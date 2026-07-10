@@ -140,6 +140,7 @@ class Server
     std::string getPrefix(Client &c) const;
     void debug_client(Message &msg, Client &c);
     void sendConnectBanner(Client &client);
+    void identify_and_exec_mode(Channel &chan, char sign, char mode_letter, const std::string &param);
 
     /*--Gestion des erreurs (Numeric replies)--*/
     int checkChannels(const std::vector<std::string> &channelsToCheck) const;

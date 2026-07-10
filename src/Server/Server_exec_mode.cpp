@@ -3,16 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   Server_exec_mode.cpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aautret <aautret@student.42.fr>            +#+  +:+       +#+        */
+/*   By: bkaras-g <bkaras-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/27 17:52:49 by bkaras-g          #+#    #+#             */
-/*   Updated: 2026/07/08 13:35:15 by aautret          ###   ########.fr       */
+/*   Updated: 2026/07/10 12:25:27 by bkaras-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
 
-void identify_and_exec_mode(Channel &chan, Client &c, char sign, char mode_letter, const std::string &param);
 static bool modeNeedsParam(char sign, char letter);
 
 /*
@@ -94,12 +93,12 @@ void Server::handle_mode(Message &msg, Client &c)
         std::string param;
         if (modeNeedsParam(sign, *it))     // check si le mode identifié nécessite un <mode argument>
             param = mode_args[args_idx++]; // pas de check si mode_args contient bien des args car fait au parsing
-        identify_and_exec_mode(*chan, c, sign, *it, param);
+        identify_and_exec_mode(*chan, sign, *it, param);
         it++;
     }
 }
 
-void identify_and_exec_mode(Channel &chan, Client &c, char sign, char mode_letter, const std::string &param)
+void Server::identify_and_exec_mode(Channel &chan, char sign, char mode_letter, const std::string &param)
 {
     bool set;
     if (sign == '+')
@@ -125,9 +124,9 @@ void identify_and_exec_mode(Channel &chan, Client &c, char sign, char mode_lette
     }
     case 'o': {
         if (set == true)
-            chan.addOperator(c);
+            chan.addOperator(*findClientByNickname(param));
         else
-            chan.removeOperator(c);
+            chan.removeOperator(*findClientByNickname(param));
         break;
     }
     case 'l': {
