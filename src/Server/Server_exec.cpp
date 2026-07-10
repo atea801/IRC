@@ -411,6 +411,32 @@ void Server::handle_join(Message &msg, Client &c)
     broadcastToChannel(*chan, msg_to_send, &c);
     if (chan->getTopic() != "") //si le channel a un topic on envoie un RPL_TOPIC
         send_reply_error(c, RPL_TOPIC, chan->getName(), chan->getTopic());
+    
+    const std::vector<Client *> channelMembers = chan->getMembers();
+    std::string membersList;
+    for (size_t i = 0; i < channelMembers.size(); i++)
+    {
+        if (chan->isOperator(*channelMembers[i]))
+            membersList += "@";
+        membersList += channelMembers[i]->getNickname();
+        if (i + 1 != channelMembers.size())
+            membersList += " ";
+    }
+    send_reply_error(c, RPL_NAMREPLY, "=" + chan->getName(), membersList);
+    send_reply_error(c, RPL_ENDOFNAMES, chan->getName(), "End of /NAMES list");
+    // msg_to_send
+    /*
+    A list of users currently joined to the channel (with one or more RPL_NAMREPLY (353) numerics 
+    followed by a single RPL_ENDOFNAMES (366) numeric). These RPL_NAMREPLY messages sent by the server 
+    MUST include the requesting client that has just joined the channel.
+
+    RPL_NAMREPLY
+      "<client> <symbol> <channel> :[prefix]<nick>{ [prefix]<nick>}"
+      <symbol> == "="
+
+    RPL_ENDOFNAMES
+        "<client> <channel> :End of /NAMES list"
+    */
 }
 
 void Server::handle_part(Message &msg, Client &c)
