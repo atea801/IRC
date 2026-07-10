@@ -151,6 +151,7 @@ class Server
     void send_reply_error(Client &c, IrcError error, const std::string &p1, const std::string &p2,
                           const std::string &message);
     void send_reply_channelmodeis(Client &c, Channel &chan);
+    void send_mode_message(Client &c, Channel &chan, char sign, char mode_letter, const std::string &param);
 };
 
 // Fonction utilitaire libre (non-membre) : découpe `str` selon `separator`.

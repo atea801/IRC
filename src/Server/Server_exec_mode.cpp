@@ -6,7 +6,7 @@
 /*   By: bkaras-g <bkaras-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/27 17:52:49 by bkaras-g          #+#    #+#             */
-/*   Updated: 2026/07/10 12:25:27 by bkaras-g         ###   ########.fr       */
+/*   Updated: 2026/07/10 14:38:01 by bkaras-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,10 +90,11 @@ void Server::handle_mode(Message &msg, Client &c)
                 // on doit continuer à traiter les autres modes
             }
         }
-        std::string param;
+        std::string param = "";
         if (modeNeedsParam(sign, *it))     // check si le mode identifié nécessite un <mode argument>
             param = mode_args[args_idx++]; // pas de check si mode_args contient bien des args car fait au parsing
         identify_and_exec_mode(*chan, sign, *it, param);
+        send_mode_message(c, *chan, sign, *it, param);
         it++;
     }
 }
@@ -169,6 +170,17 @@ void Server::send_reply_channelmodeis(Client &c, Channel &chan)
         arguments += " " + oss.str();
     }
     send_raw(c, reply_head(c, RPL_CHANNELMODEIS) + " " + chan.getName() + " " + modestring + arguments);
+}
+
+void Server::send_mode_message(Client &c, Channel &chan, char sign, char mode_letter, const std::string &param)
+{
+    std::string prefix = getPrefix(c);
+    std::string message = ":" + prefix;
+    if (param != "")
+        message += " MODE " + chan.getName() + " " + sign + mode_letter + " " + param;
+    else
+        message += " MODE " + chan.getName() + " " + sign + mode_letter;
+    broadcastToChannel(chan, message, NULL);
 }
 
 // Mode k, o: param on '+' AND '-'.
