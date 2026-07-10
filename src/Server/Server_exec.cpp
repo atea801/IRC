@@ -146,7 +146,7 @@ void Server::handle_privmsg(Message &msg, Client &c)
     // le texte ne change jamais selon la cible : c'est toujours args[1]
     const std::string &text = args[1];
     // prefixe complet nick!user@host, comme dans handle_Kick
-    std::string prefix = c.getNickname() + "!" + c.getUsername() + "@localhost" + c.getHostname();
+    std::string prefix = getPrefix(c);
     // parcour des destinataires qu'il y en ai 1 ou 10
     for (size_t i = 0; i < destinataires.size(); i++)
     {
