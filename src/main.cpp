@@ -17,6 +17,7 @@ int main(int argc, char **argv)
     }
 
     std::cout << "Server initialized. Port: " << srv.getPort() << ", Password: " << srv.getPassword() << "\n";
+    setup_signal_handlers();
     srv.run();
     return 0;
 }

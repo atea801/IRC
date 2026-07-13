@@ -20,6 +20,7 @@ SRCS =	src/main.cpp \
 		src/Server/Server_get_set.cpp \
 		src/Server/Server_utilities.cpp \
 		src/Server/Server.cpp \
+		src/Signals/Signals_handling.cpp \
 		src/utils/Utils.cpp
 
 COLOUR_GREEN = $(shell tput setaf 2)

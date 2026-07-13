@@ -73,6 +73,9 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <vector>
+#include <signal.h>
+
+extern volatile sig_atomic_t g_stop;
 
 class Server
 {
@@ -156,3 +159,7 @@ class Server
 
 // Fonction utilitaire libre (non-membre) : découpe `str` selon `separator`.
 std::vector<std::string> ft_split(char separator, const std::string &str);
+
+//Gestion des signaux pour arreter le serveur proprement
+void ft_signal_handler(int signum);
+void setup_signal_handlers();

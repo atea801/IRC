@@ -218,6 +218,13 @@ int Server::run()
         int ready = poll(&fds[0], static_cast<int>(fds.size()), -1);
         if (ready < 0)
         {
+            if (errno == EINTR) //check si un signal a été détecté.
+            {
+                if (g_stop == 1) //si le signal nécessite l'arrêt du serveur, on break
+                    break;
+                else
+                    continue; //sinon, on retente le poll
+            }
             perror("poll");
             return -1;
         }
@@ -262,4 +269,9 @@ int Server::run()
             }
         }
     }
+    //si un signal a été détecté, fermeture des sockets. Les vecteurs et maps s'auto-nettoient.
+    close(server_fd);
+    for (size_t i = 0; i < fds.size(); i++)
+        close(fds[i].fd);
+    return (-1);
 }
