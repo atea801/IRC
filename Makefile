@@ -53,6 +53,7 @@ $(OBJ_DIR):
 	mkdir -p $(OBJ_DIR)
 clean:
 	@/usr/bin/rm -rf $(OBJ_DIR)
+	@/usr/bin/rm -rf htmlcov .coverage coverage.xml
 	@echo "$(COLOUR_GREEN)clean obj files done$(COLOUR_END)"
 
 fclean: clean
@@ -62,3 +63,32 @@ fclean: clean
 re: fclean all
 
 .PHONY: all clean fclean re
+
+PYTHON ?= python3
+PIP ?= $(PYTHON) -m pip
+TEST_DIR ?= tests
+
+.PHONY: test test-quick coverage install-deps
+
+install-deps:
+	$(PIP) install -r requirements.txt
+
+test: install-deps
+	$(PYTHON) -m pytest $(TEST_DIR)/ -v --cov=src --cov-report=html:htmlcov --cov-report=term-missing
+
+test-quick:
+	$(PYTHON) -m pytest $(TEST_DIR)/ -v
+
+coverage:
+	$(PYTHON) -m coverage run -m pytest $(TEST_DIR)/
+	$(PYTHON) -m coverage html
+	xdg-open htmlcov/index.html >/dev/null 2>&1 || true
+
+help:
+	@echo "Available targets:"
+	@echo "  all         - Build the server"
+	@echo "  clean       - Remove built binaries and artifacts"
+	@echo "  test        - Run full test suite with coverage"
+	@echo "  test-quick  - Run tests without coverage overhead"
+	@echo "  coverage    - Generate HTML coverage report"
+	@echo "  install-deps - Install Python dependencies"

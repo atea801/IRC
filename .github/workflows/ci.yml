@@ -1,0 +1,57 @@
+name: IRC Server Tests
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y irssi netcat-openbsd
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Build server
+        run: make
+
+      - name: Run tests
+        run: |
+          python -m pytest tests/ -v --junitxml=junit/test-results.xml
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.python-version }}
+          path: junit/
+
+      - name: Generate coverage
+        if: ${{ matrix.python-version == '3.11' }}
+        run: |
+          python -m pytest tests/ --cov=src --cov-report=xml --cov-report=html
+
+      - name: Upload coverage reports
+        if: ${{ matrix.python-version == '3.11' }}
+        uses: codecov/codecov-action@v4
+        with:
+          files: coverage.xml
+          flags: unittests
+          env_vars: PYTHON_VERSION
