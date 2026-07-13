@@ -83,6 +83,13 @@ int Server::create_socket()
     listen_p.events = POLLIN;
     listen_p.revents = 0;
     fds.push_back(listen_p);
+
+    pollfd stdin_p;
+    stdin_p.fd = STDIN_FILENO;
+    stdin_p.events = POLLIN;
+    stdin_p.revents = 0;
+    fds.push_back(stdin_p);
+
     return 0;
 }
 
@@ -196,7 +203,7 @@ int Server::run()
 {
     if (create_socket() < 0)
         return (-1);
-    while (true)
+    while (!g_stop)
     {
         if (fds.empty())
             continue;
@@ -205,7 +212,7 @@ int Server::run()
         //     quelque chose à envoyer. Sinon poll nous réveillerait en boucle.
         for (size_t i = 0; i < fds.size(); i++)
         {
-            if (fds[i].fd == server_fd)
+            if (fds[i].fd == server_fd || fds[i].fd == STDIN_FILENO)
                 continue;
             Client *c = find_client(fds[i].fd);
 			// on dit a poll surveille cd fd a la fois pour la lecture ET pour l'ecriture
@@ -234,6 +241,18 @@ int Server::run()
             if (fds[i].revents == 0)
                 continue;
 
+            if (fds[i].fd == STDIN_FILENO && (fds[i].revents & POLLIN))
+            {
+                char buf[64];
+                ssize_t n = read(STDIN_FILENO, buf, sizeof(buf));
+                if (n == 0)
+                {
+                    g_stop = 1;
+                    break;
+                }
+                continue;
+            }
+            
             if (fds[i].revents & POLLIN)
             {
                 if (fds[i].fd == server_fd)
@@ -272,6 +291,12 @@ int Server::run()
     //si un signal a été détecté, fermeture des sockets. Les vecteurs et maps s'auto-nettoient.
     close(server_fd);
     for (size_t i = 0; i < fds.size(); i++)
-        close(fds[i].fd);
-    return (-1);
+    {
+        if (fds[i].fd != STDIN_FILENO)
+            close(fds[i].fd);
+    }
+    fds.clear();
+    vec_clients.clear();
+    channels.clear();
+    return (0);
 }
