@@ -368,8 +368,18 @@ void Server::handle_quit(Message &msg, Client &c)
         chan->removeMember(c);
         if (chan->isOperator(c))
             chan->removeOperator(c);
-        if (chan->getMembers().empty())
+        if (chan->getMembers().empty()) //si channel vide on le supprime
             remove_channel(chan->getName());
+    }
+
+    //on supprime le client de toutes les listes d'invités aux channels
+    std::map<std::string, Channel> server_channels = getChannels();
+    for (std::map<std::string, Channel>::iterator it = server_channels.begin();
+     it != server_channels.end(); ++it)
+    {
+        Channel& chan = it->second;
+        if (chan.isInvited(c))
+            chan.removeInvited(c);
     }
     c.setStatus(QUIT);
 }
