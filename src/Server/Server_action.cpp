@@ -1,12 +1,18 @@
 #include "Server.hpp"
 
+/*
+Note sur l'ajour de `MSG_NOSIGNAL` à `send()` : Sous Linux, écrire dans une socket dont le pair
+(l'autre extrémité) s'est déconnecté déclenche le signal `SIGPIPE`, dont l'action par défaut
+est de terminer votre processus. Un client qui se déconnecte au mauvais moment tuerait 
+ainsi le serveur tout entier. `MSG_NOSIGNAL` permet d'ignorer `SIGPIPE`
+*/
 void Server::flush_client(int fd)
 {
     Client *c = find_client(fd);
     if (!c || c->getOut().empty())
         return;
     const std::string &out = c->getOut();
-    ssize_t n = send(fd, out.c_str(), out.size(), 0);
+    ssize_t n = send(fd, out.c_str(), out.size(), MSG_NOSIGNAL);
     if (n > 0)
         c->consumeOut(static_cast<size_t>(n));
     // si n <= 0 : on ne touche pas au buffer, on réessaiera au prochain POLLOUT
@@ -165,8 +171,6 @@ int Server::client_actions(size_t i)
             perror("recv");
         return (1);
     }
-    if (n == 0)
-        return (1);
     // 2. trouve le bon client par fd
     Client *c = find_client(fds[i].fd);
     if (!c)
@@ -188,7 +192,7 @@ int Server::client_actions(size_t i)
         const std::vector<std::string> args = message.get_args();
         this->exec_flow(message, *c);
         if (c->getStatus() == QUIT)
-            return (1);
+            return (2);
     }
     return (0);
 }
@@ -264,6 +268,13 @@ int Server::run()
                 int status = client_actions(i);
                 if (status < 0)
                     return (-1);
+                if (status == 1) //déconnection non prévue (ex kill PID du client ) --> besoin de générer un QUIT
+                {
+                    Message msg;
+                    msg.fill_cmd_and_args(4, "QUIT\r\n");
+                    Client *c = find_client(fds[i].fd);
+                    handle_quit(msg, *c);
+                }
                 if (status > 0)
                 {
                     remove_client(fds[i].fd);
@@ -279,17 +290,23 @@ int Server::run()
             if (fds[i].revents & POLLOUT)
                 flush_client(fds[i].fd);
 
-            if (fds[i].revents & (POLLHUP | POLLERR | POLLNVAL))
+            if (fds[i].fd != server_fd && fds[i].fd != STDIN_FILENO && 
+                (fds[i].revents & (POLLHUP | POLLERR | POLLNVAL)))
             {
+                Message msg;
+                msg.fill_cmd_and_args(4, "QUIT\r\n");
+                Client *c = find_client(fds[i].fd);
+                if (c)
+                    handle_quit(msg, *c);
                 remove_client(fds[i].fd);
                 close(fds[i].fd);
                 fds.erase(fds.begin() + i);
                 --i;
+                continue;
             }
         }
     }
     //si un signal a été détecté, fermeture des sockets. Les vecteurs et maps s'auto-nettoient.
-    close(server_fd);
     for (size_t i = 0; i < fds.size(); i++)
     {
         if (fds[i].fd != STDIN_FILENO)
