@@ -133,6 +133,7 @@ class Server
 
     /*--Fonctions utilitaires*/
     void remove_client(int fd);
+    void remove_channel(std::string name);
     int find_dest(std::string dest);
     Client *find_client(int fd);
     Client *findClientByNickname(const std::string &nickname);

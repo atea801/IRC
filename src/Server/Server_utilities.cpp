@@ -6,7 +6,7 @@
 /*   By: bkaras-g <bkaras-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/25 11:15:45 by bkaras-g          #+#    #+#             */
-/*   Updated: 2026/07/09 17:00:24 by bkaras-g         ###   ########.fr       */
+/*   Updated: 2026/07/14 12:52:10 by bkaras-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -153,6 +153,11 @@ int Server::find_dest(std::string dest)
 void Server::remove_client(int fd)
 {
     vec_clients.erase(fd);
+}
+
+void Server::remove_channel(std::string name)
+{
+    channels.erase(name);
 }
 
 // Affiché dès la connexion au socket, AVANT tout enregistrement.
