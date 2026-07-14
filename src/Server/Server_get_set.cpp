@@ -19,3 +19,8 @@ const std::string &Server::getPassword() const
 {
     return this->password;
 }
+
+const std::map<std::string, Channel> &Server::getChannels() const
+{
+    return (this->channels);
+}

@@ -101,6 +101,7 @@ class Server
     /*--Getters--*/
     const std::string &getPort() const;
     const std::string &getPassword() const;
+    const std::map<std::string, Channel> &getChannels() const;
 
     /*--Setters--*/
     void setPort(const std::string &port);

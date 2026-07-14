@@ -368,7 +368,13 @@ void Server::handle_quit(Message &msg, Client &c)
         chan->removeMember(c);
         if (chan->isOperator(c))
             chan->removeOperator(c);
+        if (chan->getMembers().empty())
+        {
+            remove_channel(chan->getName());
+            chan->~Channel();
+        }
     }
+    
     c.setStatus(QUIT);
 }
 
