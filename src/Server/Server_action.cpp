@@ -182,7 +182,7 @@ int Server::client_actions(size_t i)
     c->setBuffer(c->getBuffer() + std::string(buf, n));
 
     // 4. boucle clean du buffer
-    while (c->getBuffer().find("\r\n") != std::string::npos || c->getBuffer().find("\n") != std::string::npos)
+    while (c->getBuffer().find("\r\n") != std::string::npos)
     {
         Message message;
         // a. extraire la premiere commande + nettoyer
