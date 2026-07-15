@@ -207,7 +207,7 @@ int Server::run()
 {
     if (create_socket() < 0)
         return (-1);
-    while (!g_stop)
+    while (!g_stop) //check si un signal demande l'arrêt du serveur
     {
         if (fds.empty())
             continue;
@@ -230,12 +230,7 @@ int Server::run()
         if (ready < 0)
         {
             if (errno == EINTR) //check si un signal a été détecté.
-            {
-                if (g_stop == 1) //si le signal nécessite l'arrêt du serveur, on break
-                    break;
-                else
-                    continue; //sinon, on retente le poll
-            }
+                continue; // on revient au début du while
             perror("poll");
             return -1;
         }
